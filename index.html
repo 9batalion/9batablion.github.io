@@ -1,0 +1,1218 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AquaCulture">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" sizes="192x192" href="./icons/icon-192.png">
+<title>AquaCulture Manager Mobile</title>
+<style>
+:root{
+ --bg:#07111f;--panel:#0d1a2b;--panel2:#13243a;--panel3:#18304d;--text:#eef6ff;--muted:#91a4bb;
+ --line:#263d5b;--accent:#32d6ad;--blue:#6bb8ff;--danger:#ff7474;--warn:#ffc65c;--ok:#59e08d;
+ --shadow:0 12px 34px rgba(0,0,0,.25)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit} button{cursor:pointer}
+.app{display:grid;grid-template-columns:278px 1fr;min-height:100vh}
+aside{background:#091526;border-right:1px solid var(--line);padding:16px 13px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{padding:8px 10px 16px}.brand h1{font-size:19px;margin:0}.brand p{font-size:11px;color:var(--muted);margin:5px 0 0}
+.version{display:inline-block;margin-top:7px;padding:3px 7px;border:1px solid var(--line);border-radius:999px;font-size:10px;color:#bcd6ef}
+.group-title{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#60768f;margin:15px 10px 5px}
+nav button{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:10px 11px;border-radius:10px;margin:1px 0}
+nav button:hover,nav button.active{background:var(--panel2);color:var(--text)}
+main{padding:23px;overflow:auto}.topbar{display:flex;justify-content:space-between;align-items:flex-start;gap:15px;margin-bottom:19px}
+h2{font-size:25px;margin:0}.sub{font-size:12px;color:var(--muted);margin-top:5px}
+.actions,.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:8px 11px;border-radius:9px}
+.btn:hover{background:var(--panel3)}.btn.primary{background:var(--accent);border-color:var(--accent);color:#05231b;font-weight:800}
+.btn.secondary{border-color:#37658f;color:#c1e1ff}.btn.danger{background:#2c1920;border-color:#70323c;color:#ffc1c7}
+.btn.tiny{padding:5px 7px;font-size:11px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px}.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.two{display:grid;grid-template-columns:1.4fr 1fr;gap:13px}.equal2{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px;box-shadow:var(--shadow)}
+.card h3{font-size:15px;margin:0 0 10px}.card h4{font-size:13px;margin:0 0 7px;color:#c8d9ea}
+.kpi .l{font-size:11px;color:var(--muted)}.kpi .v{font-size:27px;font-weight:850;margin:6px 0}.kpi .hint{font-size:10px;color:#7f94ac}
+.section{margin-top:17px}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:9px 7px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{color:#a8bad0;font-weight:700;background:rgba(255,255,255,.012)}td{color:#e8f0fa}.link{color:#84c7ff;cursor:pointer;text-decoration:none}.link:hover{text-decoration:underline}
+.badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;background:#22354f;color:#d7e7fb;white-space:nowrap}
+.badge.ok{background:#123a22;color:#a7f8bf}.badge.warn{background:#3d3012;color:#ffe18b}.badge.bad{background:#441f28;color:#ffbbc3}.badge.info{background:#143553;color:#add8ff}
+.small{font-size:11px;color:var(--muted)}.mini{font-size:10px;color:var(--muted)}.empty{padding:23px;text-align:center;color:var(--muted)}
+input,select,textarea{background:#0a1728;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+input:focus,select:focus,textarea:focus{outline:2px solid rgba(107,184,255,.22);border-color:#4d84ba} textarea{min-height:83px;resize:vertical}
+.toolbar{margin-bottom:11px}.toolbar input,.toolbar select{min-width:185px}
+.form-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}.field label{display:block;color:#a9bbcf;font-size:11px;margin:0 0 5px}
+.field.wide{grid-column:1/-1}.field.span2{grid-column:span 2}.help{font-size:9px;color:#71849b;margin-top:4px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.74);align-items:center;justify-content:center;padding:17px;z-index:50}
+.modal.open{display:flex}.modal-box{width:min(980px,100%);max-height:94vh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:17px}
+.modal-box.wide{width:min(1220px,100%)}.modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}.modal-head h3{margin:0}
+.x{background:transparent;border:0;color:var(--muted);font-size:23px}
+.statline{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line);padding:7px 0;font-size:12px}.statline span:first-child{color:var(--muted)}
+.alert{padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:#0c192b;margin:6px 0}.alert strong{display:block;margin:2px 0}
+.timeline{position:relative;padding-left:17px}.timeline:before{content:"";position:absolute;left:5px;top:5px;bottom:5px;width:2px;background:var(--line)}
+.timeline-item{position:relative;margin:0 0 12px;padding-left:9px}.timeline-item:before{content:"";position:absolute;left:-16px;top:5px;width:8px;height:8px;border-radius:50%;background:var(--blue);box-shadow:0 0 0 3px var(--panel)}
+.timeline-item .date{font-size:9px;color:var(--muted)}.timeline-item .name{font-size:12px;font-weight:700;margin:2px 0}.timeline-item .desc{font-size:11px;color:#b5c6da}
+.profile{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profilebox{background:#0a1728;border:1px solid var(--line);border-radius:9px;padding:10px}
+.profilebox .label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}.profilebox .value{font-size:12px;margin-top:4px;word-break:break-word}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:13px}.tabs button{border:1px solid var(--line);background:#0c192b;color:var(--muted);padding:7px 9px;border-radius:8px}
+.tabs button.active{background:var(--panel3);color:#fff;border-color:#466b91}
+.pipeline{display:grid;grid-template-columns:repeat(6,minmax(160px,1fr));gap:9px;overflow:auto;padding-bottom:6px}.pipe-col{background:#0b1829;border:1px solid var(--line);border-radius:11px;min-height:170px;padding:8px}
+.pipe-col h4{font-size:11px;margin:2px 0 8px}.order-card{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:7px;font-size:11px}
+.order-card strong{display:block}
+.callout{border-left:3px solid var(--blue);background:#0c1a2f;padding:10px 11px;border-radius:0 8px 8px 0;font-size:11px;color:#bdd1e8}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}.photo{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#091626}
+.photo img{display:block;width:100%;height:130px;object-fit:cover;background:#050b13}.photo .meta{padding:7px}.photo .meta strong{font-size:11px;display:block}.photo .meta span{font-size:9px;color:var(--muted)}
+.recipe-row{display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:7px;align-items:end;margin:7px 0}.recipe-row .btn{height:36px}
+.species-panel{margin-top:11px;border:1px solid #34577d;border-radius:11px;padding:12px;background:#0b1a2e}.species-panel h4{color:#bfe0ff;margin:0 0 9px}
+.storage{height:8px;background:#08111d;border:1px solid var(--line);border-radius:999px;overflow:hidden}.storage div{height:100%;background:linear-gradient(90deg,var(--blue),var(--accent))}.growth-chart{width:100%;min-height:280px}.growth-chart svg{width:100%;height:auto;display:block}.reserve-ok{color:var(--ok)}.reserve-warn{color:var(--warn)}
+.loading{position:fixed;inset:0;z-index:100;background:#07111f;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px}.spinner{width:34px;height:34px;border:3px solid #243b56;border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}footer{font-size:10px;color:var(--muted);margin:23px 0 5px}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.grid3{grid-template-columns:1fr 1fr}.two,.equal2{grid-template-columns:1fr}.form-grid{grid-template-columns:1fr 1fr}.pipeline{grid-template-columns:repeat(6,220px)}}
+@media(max-width:820px){.app{grid-template-columns:1fr}aside{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line)}nav{display:flex;overflow:auto;gap:3px}.group-title{display:none}nav button{white-space:nowrap;width:auto}.topbar{flex-direction:column}.form-grid{grid-template-columns:1fr}.field.span2{grid-column:1}.profile{grid-template-columns:1fr}.grid3{grid-template-columns:1fr}.recipe-row{grid-template-columns:1fr}}
+@media(max-width:520px){main{padding:13px}.grid{grid-template-columns:1fr}}
+@media print{aside,.actions,.toolbar,.no-print,.tabs{display:none!important}.app{display:block}main{padding:0}.card{box-shadow:none;border-color:#bbb;background:#fff;color:#000}body{background:#fff;color:#000}table,th,td{color:#000;border-color:#ccc}.small,.mini,.sub,.kpi .l{color:#555}}
+
+/* iPhone / PWA */
+html{background:var(--bg);overscroll-behavior-y:none}
+body{
+ min-height:100dvh;
+ padding-top:env(safe-area-inset-top);
+ padding-left:env(safe-area-inset-left);
+ padding-right:env(safe-area-inset-right);
+ -webkit-tap-highlight-color:transparent;
+ -webkit-touch-callout:none;
+}
+button,.btn,nav button{touch-action:manipulation}
+input,select,textarea{font-size:16px}
+@media(max-width:820px){
+ body{padding-bottom:env(safe-area-inset-bottom)}
+ .app{display:block;min-height:100dvh}
+ aside{
+   position:sticky;top:0;z-index:30;height:auto;
+   padding:7px 8px 6px;background:rgba(9,21,38,.96);
+   backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+   border-right:0;border-bottom:1px solid var(--line)
+ }
+ .brand{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 5px 7px}
+ .brand h1{font-size:15px}.brand p{display:none}.brand .version{margin:0;font-size:9px}
+ nav{display:flex;overflow-x:auto;gap:5px;padding-bottom:2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+ nav::-webkit-scrollbar{display:none}
+ nav button{
+   min-height:42px;padding:8px 11px;border:1px solid transparent;
+   background:#0c1a2c;border-radius:10px
+ }
+ nav button.active{border-color:#355a80}
+ main{
+   padding:14px 12px calc(24px + env(safe-area-inset-bottom));
+   overflow:visible
+ }
+ .topbar{
+   position:relative;display:block;margin-bottom:13px
+ }
+ .topbar h2{font-size:22px}.topbar .actions{margin-top:10px}
+ .btn{min-height:44px;padding:10px 12px}
+ .btn.tiny{min-height:36px}
+ .card{border-radius:13px;padding:13px}
+ .modal{padding:0;align-items:flex-end}
+ .modal-box,.modal-box.wide{
+   width:100%;max-width:none;max-height:calc(100dvh - env(safe-area-inset-top));
+   border-radius:18px 18px 0 0;
+   padding:15px 12px calc(18px + env(safe-area-inset-bottom))
+ }
+ .modal-head{position:sticky;top:-15px;z-index:5;background:var(--panel);padding:13px 0 9px}
+ .x{min-width:44px;min-height:44px}
+ .photo img{height:155px}
+ table{font-size:12px}
+ th,td{white-space:nowrap}
+ .profilebox .value{font-size:13px}
+}
+@media(display-mode:standalone){
+ body{user-select:none;-webkit-user-select:none}
+ input,textarea{user-select:text;-webkit-user-select:text}
+}
+
+</style>
+</head>
+<body>
+<div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
+
+<div class="app">
+<aside>
+ <div class="brand"><h1>AquaCulture Manager Mobile</h1><p>produkcja • LIMS • CRM • identyfikowalność</p><span class="version">v4.1 • IndexedDB • VERIFIED</span></div>
+ <nav id="nav">
+  <div class="group-title">Produkcja</div>
+  <button class="active" data-view="dashboard">Pulpit</button>
+  <button data-view="cultures">Kultury / linie</button>
+  <button data-view="events">Dziennik czynności</button>
+  <button data-view="measurements">Pomiary / mikroskop</button>
+  <button data-view="sanitation">Dezynfekcja</button>
+  <button data-view="harvests">Partie / rozlewy</button>
+  <button data-view="recipes">Receptury</button>
+  <button data-view="planner">Plan produkcji</button>
+
+  <div class="group-title">Sprzedaż</div>
+  <button data-view="clients">Klienci CRM</button>
+  <button data-view="orders">Zamówienia</button>
+  <button data-view="inventory">Magazyn</button>
+  <button data-view="finance">Finanse</button>
+
+  <div class="group-title">Dokumentacja</div>
+  <button data-view="prints">Etykiety / wydruki</button>
+  <button data-view="reports">Raporty / PDF</button>
+  <button data-view="tasks">Zadania / alerty</button>
+  <button data-view="backup">Baza / kopie</button>
+ </nav>
+</aside>
+
+<main>
+ <div class="topbar">
+  <div><h2 id="viewTitle">Pulpit</h2><div id="viewSub" class="sub">System hodowli.</div></div>
+  <div class="actions"><button class="btn" onclick="window.print()">Drukuj widok</button><button class="btn primary" id="quickAdd">+ Dodaj</button></div>
+ </div>
+ <div id="content"></div>
+ <footer>Dane są przechowywane lokalnie w IndexedDB. Zdjęcia nie opuszczają komputera. Nadal wykonuj regularne kopie zapasowe.</footer>
+</main>
+</div>
+
+<div class="modal" id="modal"><div class="modal-box" id="modalBox"><div class="modal-head"><h3 id="modalTitle">Formularz</h3><button class="x" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
+<script>
+const DB_NAME='AquaCultureManagerLAB';
+const DB_VERSION=4;
+const STORES=['cultures','events','measurements','sanitation','harvests','recipes','clients','orders','inventory','stockMoves','finance','tasks','media','meta'];
+const DATA_STORES=STORES.filter(x=>!['media','meta'].includes(x));
+const OLD_KEYS=['aquaculture_manager_pro_v2','aquaculture_manager_v1'];
+let idb=null;
+let db={};
+let currentView='dashboard';
+let cultureTab='overview';
+let orderMode='pipeline';
+let mediaURLs=new Map();
+
+const defaultSettings={
+ currency:'PLN',defaultBottleMl:500,defaultBottleCost:1.20,defaultCapCost:0.25,defaultLabelCost:0.35,
+ companyName:'AquaCulture',companySubtitle:'Żywe kultury akwarystyczne',labelFooter:'Przechowywać zgodnie z instrukcją produktu.',
+ operator:'',measurementAlertDays:3,batchPrefixYear:true,autoConsumeCulture:true,qrPrefix:'ACM'
+};
+
+const titles={
+ dashboard:['Pulpit','Produkcja, jakość, sprzedaż i alerty.'],cultures:['Kultury / linie','Pełne karty kultur i profile gatunkowe.'],
+ events:['Dziennik czynności','Operacje wykonywane na kulturach.'],measurements:['Pomiary / mikroskop','Pomiary jakości i dokumentacja fotograficzna.'],
+ sanitation:['Dezynfekcja','Mycie i dezynfekcja sprzętu.'],harvests:['Partie / rozlewy','Partie handlowe i pełna identyfikowalność.'],
+ recipes:['Receptury','Automatyczne zużycie surowców podczas produkcji.'],planner:['Plan produkcji','Zapotrzebowanie, koszt i marża.'],
+ clients:['Klienci CRM','Historia klientów i zakupów.'],orders:['Zamówienia','Pipeline sprzedaży, wysyłka i płatności.'],
+ inventory:['Magazyn','Stany i ruchy magazynowe.'],finance:['Finanse','Przychody, koszty i rentowność.'],
+ prints:['Etykiety / wydruki','Etykiety produktu, próbki i identyfikatory naczyń.'],reports:['Raporty / PDF','Raporty produkcyjne przygotowane do druku lub zapisu jako PDF.'],
+ tasks:['Zadania / alerty','Zadania ręczne i alerty automatyczne.'],backup:['Baza / kopie','Kopie danych, migracja, trwałość i użycie miejsca.']
+};
+
+function reqP(req){return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+function txDone(tx){return new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
+
+async function openDatabase(){
+ return new Promise((resolve,reject)=>{
+  const r=indexedDB.open(DB_NAME,DB_VERSION);
+  r.onupgradeneeded=e=>{
+   const d=e.target.result;
+   STORES.forEach(s=>{if(!d.objectStoreNames.contains(s)) d.createObjectStore(s,{keyPath:'id'})});
+  };
+  r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);
+ });
+}
+async function getAll(store){return reqP(idb.transaction(store,'readonly').objectStore(store).getAll())}
+async function put(store,obj){
+ const tx=idb.transaction(store,'readwrite');tx.objectStore(store).put(obj);await txDone(tx);
+}
+async function delStoreRecord(store,id){
+ const tx=idb.transaction(store,'readwrite');tx.objectStore(store).delete(id);await txDone(tx);
+}
+async function clearStore(store){
+ const tx=idb.transaction(store,'readwrite');tx.objectStore(store).clear();await txDone(tx);
+}
+async function loadMemory(){
+ for(const s of DATA_STORES) db[s]=await getAll(s);
+ db.media=await getAll('media');
+ const settings=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('settings'));
+ db.settings={...defaultSettings,...(settings?.value||{})};
+ refreshMediaURLs();
+}
+async function saveSettings(){await put('meta',{id:'settings',value:db.settings})}
+function refreshMediaURLs(){
+ for(const u of mediaURLs.values()) URL.revokeObjectURL(u);
+ mediaURLs.clear();
+ db.media.forEach(m=>{if(m.thumbBlob||m.blob) mediaURLs.set(m.id,URL.createObjectURL(m.thumbBlob||m.blob))});
+}
+async function migrateLocalStorage(){
+ const count=DATA_STORES.reduce((a,s)=>a+(db[s]?.length||0),0);
+ if(count>0)return;
+ let storage=null;
+ try{storage=window.localStorage}catch(e){console.warn('localStorage niedostępny — pomijam migrację starszej wersji.',e);return}
+ for(const key of OLD_KEYS){
+  let raw=null;
+  try{raw=storage.getItem(key)}catch(e){console.warn('Nie można odczytać localStorage — pomijam migrację.',e);return}
+  if(!raw)continue;
+  try{
+   let old=JSON.parse(raw);old=old.data||old;
+   for(const s of DATA_STORES){
+    if(Array.isArray(old[s])){
+     for(const rec of old[s]){
+      const obj={...rec};
+      if(!obj.id)obj.id=uid(s.slice(0,3).toUpperCase());
+      await put(s,obj);
+     }
+    }
+   }
+   if(old.settings){db.settings={...defaultSettings,...old.settings};await saveSettings()}
+   await loadMemory();
+   await put('meta',{id:'migration',value:{source:key,date:new Date().toISOString()}});
+   return;
+  }catch(e){console.warn('Migracja nieudana',e)}
+ }
+}
+async function init(){
+ try{
+  idb=await openDatabase();
+  await loadMemory();
+  await migrateLocalStorage();
+  await loadMemory();
+  bindNav();render();
+ }catch(e){
+  document.getElementById('content').innerHTML='<div class="card"><h3>Błąd uruchamiania IndexedDB</h3><div class="small">'+esc(e.message)+'</div></div>';
+ }finally{document.getElementById('loading').style.display='none'}
+}
+function bindNav(){
+ document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>{currentView=b.dataset.view;document.querySelectorAll('#nav button').forEach(x=>x.classList.toggle('active',x===b));render()});
+ document.getElementById('quickAdd').onclick=quickAdd;
+}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function uid(prefix){return prefix+'-'+new Date().toISOString().slice(2,10).replaceAll('-','')+'-'+Math.random().toString(36).slice(2,6).toUpperCase()}
+function today(){return new Date().toISOString().slice(0,10)}
+function nowLocal(){const d=new Date(),z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}T${z(d.getHours())}:${z(d.getMinutes())}`}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function money(n){return (Number(n)||0).toLocaleString('pl-PL',{style:'currency',currency:db.settings?.currency||'PLN'})}
+function datePL(d){if(!d)return'';return new Date(d.length===10?d+'T00:00:00':d).toLocaleString('pl-PL',{year:'numeric',month:'2-digit',day:'2-digit',...(d.includes('T')?{hour:'2-digit',minute:'2-digit'}:{})})}
+function daysBetween(a,b=today()){if(!a)return 0;return Math.floor((new Date(b+'T00:00:00')-new Date(a.slice(0,10)+'T00:00:00'))/86400000)}
+function num(n,d=2){return (Number(n)||0).toLocaleString('pl-PL',{maximumFractionDigits:d})}
+function getById(store,id){return db[store]?.find(x=>x.id===id)}
+function cultureName(id){const x=getById('cultures',id);return x?`${x.id} — ${x.organism}`:(id||'')}
+function clientName(id){return getById('clients',id)?.name||id||''}
+function harvestName(id){const x=getById('harvests',id);return x?`${x.id} — ${x.product}`:(id||'')}
+function productCode(product){
+ const p=String(product||'').toLowerCase();
+ if(p.includes('nann'))return 'NAN';
+ if(p.includes('tigri')||p.includes('widł'))return 'TIG';
+ if(p.includes('artem'))return 'ART';
+ if(p.includes('kieł'))return 'KIE';
+ return 'PRD';
+}
+function nextBatchId(product,date=today()){
+ const compact=(date||today()).replaceAll('-','');
+ const prefix=productCode(product)+'-'+compact+'-';
+ const nums=db.harvests.filter(x=>String(x.id||'').startsWith(prefix)).map(x=>Number(String(x.id).slice(prefix.length))||0);
+ return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function nextSampleCode(date=today()){
+ const compact=(date||today()).replaceAll('-','');
+ const prefix='SMP-'+compact+'-';
+ const nums=db.measurements.map(x=>x.sampleCode).filter(x=>String(x||'').startsWith(prefix)).map(x=>Number(String(x).slice(prefix.length))||0);
+ return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function activeReservationMl(cultureId,excludeOrderId=''){
+ return db.orders.filter(o=>o.id!==excludeOrderId&&o.reservedCulture===cultureId&&!['Anulowane','Dostarczone','Zrealizowane'].includes(o.status))
+   .reduce((a,o)=>a+Number(o.reservedVolumeMl||0),0);
+}
+function cultureAvailableMl(cultureId,excludeOrderId=''){
+ const c=getById('cultures',cultureId);if(!c)return 0;
+ return Math.max(0,Number(c.volume||0)*1000-activeReservationMl(cultureId,excludeOrderId));
+}
+function recipeEstimatedCost(recipeId,litres,units){
+ const r=getById('recipes',recipeId);if(!r)return 0;
+ return (r.ingredients||[]).reduce((sum,ing)=>{
+   const item=getById('inventory',ing.itemId);if(!item)return sum;
+   let q=Number(ing.qty||0);
+   if(ing.basis==='na 1 L')q*=Number(litres||0);
+   else if(ing.basis==='na opakowanie')q*=Number(units||0);
+   return sum+q*Number(item.price||0);
+ },0);
+}
+function estimateBatchCost(recipeId,litres,units){
+ return recipeCostBreakdown(recipeId,litres,units).reduce((a,x)=>a+Number(x.cost||0),0);
+}
+function recipeCostBreakdown(recipeId,litres,units){
+ const r=getById('recipes',recipeId),rows=[];
+ for(const ing of (r?.ingredients||[])){
+  const item=getById('inventory',ing.itemId);let qty=Number(ing.qty||0);
+  if(ing.basis==='na 1 L')qty*=Number(litres||0);else if(ing.basis==='na opakowanie')qty*=Number(units||0);
+  rows.push({itemId:ing.itemId,name:item?.name||ing.itemId,unit:item?.unit||'',qty,unitPrice:Number(item?.price||0),cost:qty*Number(item?.price||0),basis:ing.basis,lot:item?.lot||'',supplier:item?.supplier||'',category:item?.category||''});
+ }
+ const cats=new Set(rows.map(x=>x.category).filter(Boolean)),n=Number(units||0);
+ if(!cats.has('Butelki')&&n>0)rows.push({itemId:'DEFAULT-BOTTLE',name:'Butelka — koszt domyślny',unit:'szt.',qty:n,unitPrice:Number(db.settings.defaultBottleCost||0),cost:n*Number(db.settings.defaultBottleCost||0),basis:'na opakowanie',lot:'',supplier:'',category:'Butelki'});
+ if(!cats.has('Zakrętki')&&n>0)rows.push({itemId:'DEFAULT-CAP',name:'Zakrętka — koszt domyślny',unit:'szt.',qty:n,unitPrice:Number(db.settings.defaultCapCost||0),cost:n*Number(db.settings.defaultCapCost||0),basis:'na opakowanie',lot:'',supplier:'',category:'Zakrętki'});
+ if(!cats.has('Etykiety')&&n>0)rows.push({itemId:'DEFAULT-LABEL',name:'Etykieta — koszt domyślny',unit:'szt.',qty:n,unitPrice:Number(db.settings.defaultLabelCost||0),cost:n*Number(db.settings.defaultLabelCost||0),basis:'na opakowanie',lot:'',supplier:'',category:'Etykiety'});
+ return rows;
+}
+function organismForProduct(product){
+ const p=String(product||'').toLowerCase();
+ if(p.includes('nann'))return 'Nannochloropsis';
+ if(p.includes('tigri')||p.includes('widł'))return 'Tigriopus / widłonogi';
+ if(p.includes('artem'))return 'Artemia';
+ if(p.includes('kieł'))return 'Kiełże morskie';
+ return '';
+}
+function numericValue(v){
+ const n=Number(String(v??'').replace(/\s/g,'').replace(',','.').replace(/[^\d.+\-eE]/g,''));
+ return Number.isFinite(n)?n:null;
+}
+function growthParamFor(c){
+ if(c.organism==='Nannochloropsis')return ['Gęstość komórek','OD / absorbancja'];
+ if(c.organism==='Tigriopus / widłonogi')return ['Liczba osobników/ml'];
+ if(c.organism==='Artemia')return ['Wydajność wylęgu'];
+ return [];
+}
+function growthSeries(cultureId){
+ const c=getById('cultures',cultureId);if(!c)return null;
+ const preferred=growthParamFor(c);
+ const all=db.measurements.filter(m=>m.culture===cultureId&&numericValue(m.value)!==null);
+ let param=preferred.find(p=>all.filter(m=>m.param===p).length>=2);
+ if(!param){
+   const counts={};all.forEach(m=>counts[m.param]=(counts[m.param]||0)+1);
+   param=Object.keys(counts).find(k=>counts[k]>=2);
+ }
+ if(!param)return null;
+ const pts=all.filter(m=>m.param===param).sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(m=>({date:m.date,value:numericValue(m.value),unit:m.unit||''}));
+ return {param,points:pts,unit:pts[0]?.unit||''};
+}
+function lineChartSVG(series){
+ if(!series||series.points.length<2)return '<div class="empty">Za mało pomiarów liczbowych do wykresu.</div>';
+ const pts=series.points,w=860,h=300,padL=70,padR=25,padT=25,padB=50;
+ const times=pts.map(p=>new Date(p.date).getTime()),vals=pts.map(p=>p.value);
+ let minX=Math.min(...times),maxX=Math.max(...times),minY=Math.min(...vals),maxY=Math.max(...vals);
+ if(minX===maxX)maxX=minX+86400000;if(minY===maxY){minY-=1;maxY+=1}
+ const margin=(maxY-minY)*.08;minY-=margin;maxY+=margin;
+ const X=t=>padL+(t-minX)/(maxX-minX)*(w-padL-padR),Y=v=>padT+(maxY-v)/(maxY-minY)*(h-padT-padB);
+ const path=pts.map((p,i)=>(i?'L':'M')+X(new Date(p.date).getTime()).toFixed(1)+' '+Y(p.value).toFixed(1)).join(' ');
+ const dots=pts.map(p=>`<circle cx="${X(new Date(p.date).getTime()).toFixed(1)}" cy="${Y(p.value).toFixed(1)}" r="4"><title>${esc(datePL(p.date))}: ${esc(p.value)} ${esc(p.unit)}</title></circle>`).join('');
+ const grid=Array.from({length:5},(_,i)=>{const y=padT+i*(h-padT-padB)/4,val=maxY-i*(maxY-minY)/4;return `<line x1="${padL}" y1="${y}" x2="${w-padR}" y2="${y}" stroke="#29415e" stroke-width="1"/><text x="${padL-8}" y="${y+4}" text-anchor="end" fill="#91a4bb" font-size="11">${esc(num(val,2))}</text>`}).join('');
+ const labels=[0,Math.floor((pts.length-1)/2),pts.length-1].map(i=>`<text x="${X(new Date(pts[i].date).getTime())}" y="${h-18}" text-anchor="middle" fill="#91a4bb" font-size="11">${esc(datePL(pts[i].date).split(',')[0])}</text>`).join('');
+ return `<div class="growth-chart"><svg viewBox="0 0 ${w} ${h}" role="img"><text x="${padL}" y="15" fill="#eef6ff" font-size="13" font-weight="700">${esc(series.param)} ${series.unit?'['+esc(series.unit)+']':''}</text>${grid}<line x1="${padL}" y1="${h-padB}" x2="${w-padR}" y2="${h-padB}" stroke="#61778f"/><path d="${path}" fill="none" stroke="#32d6ad" stroke-width="3"/> <g fill="#6bb8ff">${dots}</g>${labels}</svg></div>`;
+}
+
+function printGrowthChart(series){
+ return lineChartSVG(series)
+  .replaceAll('#eef6ff','#111')
+  .replaceAll('#29415e','#dddddd')
+  .replaceAll('#91a4bb','#555555')
+  .replaceAll('#61778f','#777777')
+  .replaceAll('#32d6ad','#111111')
+  .replaceAll('#6bb8ff','#333333')
+  .replace('class="growth-chart"','class="growth-chart printchart"');
+}
+
+// Minimal offline QR generator: QR versions 1-4, byte mode, ECC L, mask 0.
+function qrGF(){
+ if(qrGF.cache)return qrGF.cache;
+ const exp=new Array(512),log=new Array(256);let x=1;
+ for(let i=0;i<255;i++){exp[i]=x;log[x]=i;x<<=1;if(x&0x100)x^=0x11d}
+ for(let i=255;i<512;i++)exp[i]=exp[i-255];
+ return qrGF.cache={exp,log};
+}
+function qrMul(a,b){if(!a||!b)return 0;const g=qrGF();return g.exp[g.log[a]+g.log[b]]}
+function qrGenerator(degree){
+ let poly=[1],g=qrGF();
+ for(let i=0;i<degree;i++){const next=new Array(poly.length+1).fill(0);for(let j=0;j<poly.length;j++){next[j]^=poly[j];next[j+1]^=qrMul(poly[j],g.exp[i])}poly=next}
+ return poly;
+}
+function qrECC(data,degree){
+ const gen=qrGenerator(degree),res=data.concat(new Array(degree).fill(0));
+ for(let i=0;i<data.length;i++){const factor=res[i];if(!factor)continue;for(let j=0;j<gen.length;j++)res[i+j]^=qrMul(gen[j],factor)}
+ return res.slice(data.length);
+}
+function qrBits(text){
+ const bytes=[...new TextEncoder().encode(text)];
+ const specs=[null,{data:19,ecc:7,size:21},{data:34,ecc:10,size:25},{data:55,ecc:15,size:29},{data:80,ecc:20,size:33}];
+ let ver=1;while(ver<4&&bytes.length+2>specs[ver].data)ver++;
+ if(bytes.length+2>specs[ver].data)throw new Error('Tekst QR jest za długi.');
+ const spec=specs[ver],bits=[];
+ const push=(v,n)=>{for(let i=n-1;i>=0;i--)bits.push((v>>>i)&1)};
+ push(4,4);push(bytes.length,8);bytes.forEach(b=>push(b,8));
+ const cap=spec.data*8;for(let i=0;i<4&&bits.length<cap;i++)bits.push(0);
+ while(bits.length%8)bits.push(0);
+ const data=[];for(let i=0;i<bits.length;i+=8){let b=0;for(let j=0;j<8;j++)b=(b<<1)|bits[i+j];data.push(b)}
+ let pad=0;while(data.length<spec.data)data.push((pad++%2===0)?0xec:0x11);
+ return {ver,spec,code:data.concat(qrECC(data,spec.ecc))};
+}
+function makeQR(text){
+ const q=qrBits(text),size=q.spec.size,m=Array.from({length:size},()=>Array(size).fill(null)),r=Array.from({length:size},()=>Array(size).fill(false));
+ const set=(x,y,v)=>{if(x>=0&&y>=0&&x<size&&y<size){m[y][x]=!!v;r[y][x]=true}};
+ const finder=(x,y)=>{for(let dy=-1;dy<=7;dy++)for(let dx=-1;dx<=7;dx++){const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=size||yy>=size)continue;const inside=dx>=0&&dx<=6&&dy>=0&&dy<=6;set(xx,yy,inside&&(dx===0||dx===6||dy===0||dy===6||(dx>=2&&dx<=4&&dy>=2&&dy<=4)))}}; 
+ finder(0,0);finder(size-7,0);finder(0,size-7);
+ for(let i=8;i<size-8;i++){if(!r[6][i])set(i,6,i%2===0);if(!r[i][6])set(6,i,i%2===0)}
+ const centers=q.ver===1?[]:(q.ver===2?[6,18]:q.ver===3?[6,22]:[6,26]);
+ for(const cy of centers)for(const cx of centers){if(r[cy]?.[cx])continue;for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++)set(cx+dx,cy+dy,Math.max(Math.abs(dx),Math.abs(dy))!==1)}
+ let fmtData=8,rem=fmtData;for(let i=0;i<10;i++)rem=(rem<<1)^(((rem>>>9)&1)*0x537);const fmt=((fmtData<<10)|rem)^0x5412,fb=i=>((fmt>>>i)&1)!==0;
+ for(let i=0;i<=5;i++)set(8,i,fb(i));set(8,7,fb(6));set(8,8,fb(7));set(7,8,fb(8));for(let i=9;i<15;i++)set(14-i,8,fb(i));
+ for(let i=0;i<8;i++)set(size-1-i,8,fb(i));for(let i=8;i<15;i++)set(8,size-15+i,fb(i));set(8,size-8,true);
+ const stream=[];q.code.forEach(b=>{for(let i=7;i>=0;i--)stream.push((b>>>i)&1)});
+ let bi=0;for(let right=size-1;right>=1;right-=2){if(right===6)right--;const up=((right+1)&2)===0;for(let vert=0;vert<size;vert++){const y=up?size-1-vert:vert;for(let j=0;j<2;j++){const x=right-j;if(r[y][x])continue;let bit=bi<stream.length?!!stream[bi++]:false;if((x+y)%2===0)bit=!bit;m[y][x]=bit}}}
+ const quiet=4,N=size+quiet*2;let d='';for(let y=0;y<size;y++)for(let x=0;x<size;x++)if(m[y][x])d+=`M${x+quiet} ${y+quiet}h1v1h-1z`;
+ return `<svg class="qrsvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges"><rect width="100%" height="100%" fill="#fff"/><path d="${d}" fill="#000"/></svg>`;
+}
+function qrPayload(type,id){return `${db.settings.qrPrefix||'ACM'}|${type}|${id}`}
+function resolveQR(){
+ const v=(document.getElementById('qrLookup')?.value||'').trim(),parts=v.split('|');if(parts.length<3)return alert('Nieprawidłowy kod. Oczekiwany format ACM|TYP|ID.');
+ const type=parts[1],id=parts.slice(2).join('|');
+ if(type==='CULTURE'&&getById('cultures',id))return openCultureCard(id);
+ if(type==='BATCH'&&getById('harvests',id))return openHarvestCard(id);
+ if(type==='SAMPLE'){const m=db.measurements.find(x=>(x.sampleCode||x.id)===id||x.id===id);if(m)return openMeasurementCard(m.id)}
+ alert('Nie znaleziono rekordu dla tego kodu.');
+}
+function findSearch(q,obj){return !q||Object.values(obj).join(' ').toLowerCase().includes(q.toLowerCase())}
+function badge(s){const v=String(s||'');let c='info';if(/akty|opłac|gotow|zreal|dostar|dobry|ok|czyst|przychód/i.test(v))c='ok';if(/oczek|plan|niski|rezerw|uwaga|w toku|nowe/i.test(v))c='warn';if(/anul|problem|zaleg|skaż|pad|odrzu|reklam|koszt/i.test(v))c='bad';return `<span class="badge ${c}">${esc(v)}</span>`}
+function btn(label,fn,cls='btn'){return `<button class="${cls}" type="button" onclick="${fn}">${label}</button>`}
+function table(headers,rows){if(!rows.length)return '<div class="empty">Brak danych.</div>';return `<div style="overflow:auto"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`}
+function profileBox(l,v){return `<div class="profilebox"><div class="label">${esc(l)}</div><div class="value">${esc(v||'—')}</div></div>`}
+
+async function saveRecord(store,obj){
+ await put(store,obj);
+ const i=db[store].findIndex(x=>x.id===obj.id);
+ if(i>=0)db[store][i]=obj;else db[store].push(obj);
+}
+async function deleteRecord(store,id){
+ if(!confirm('Usunąć ten wpis?'))return;
+ await delStoreRecord(store,id);
+ db[store]=db[store].filter(x=>x.id!==id);
+ if(store==='measurements'){
+  const mids=db.media.filter(m=>m.measurementId===id).map(m=>m.id);
+  for(const mid of mids){await delStoreRecord('media',mid)}
+  db.media=db.media.filter(m=>m.measurementId!==id);refreshMediaURLs();
+ }
+ render();
+}
+async function copyCulture(id){
+ const x=getById('cultures',id);if(!x)return;
+ const c={...clone(x),id:uid('KUL'),start:today(),parentCulture:id,status:'Aktywna'};
+ await saveRecord('cultures',c);render();
+}
+
+function render(){
+ const [t,s]=titles[currentView];document.getElementById('viewTitle').textContent=t;document.getElementById('viewSub').textContent=s;
+ document.getElementById('content').innerHTML=({
+  dashboard:renderDashboard,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,
+  harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,inventory:renderInventory,
+  finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup
+ })[currentView]();
+}
+
+function computedAlerts(){
+ const a=[];const limit=Number(db.settings.measurementAlertDays||3);
+ db.cultures.filter(x=>x.status==='Aktywna').forEach(c=>{
+  const m=[...db.measurements].filter(x=>x.culture===c.id).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+  if(!m||daysBetween(m.date||c.start)>=limit)a.push({level:'warn',title:'Brak świeżego pomiaru',desc:`${c.id} ${c.organism}: ${m?'ostatni '+datePL(m.date):'brak pomiarów'}`});
+  if(activeReservationMl(c.id)>Number(c.volume||0)*1000)a.push({level:'bad',title:'Przekroczona rezerwacja produkcji',desc:`${c.id}: zarezerwowano ${num(activeReservationMl(c.id)/1000,2)} L przy objętości ${num(Number(c.volume||0),2)} L`});
+  if(c.nextActionDate&&c.nextActionDate<today())a.push({level:'bad',title:'Przekroczony termin',desc:`${c.id}: ${c.nextAction||'czynność'} (${datePL(c.nextActionDate)})`});
+ });
+ db.inventory.filter(x=>Number(x.qty)<=Number(x.min||0)).forEach(x=>a.push({level:'warn',title:'Niski stan',desc:`${x.name}: ${x.qty} ${x.unit}; min. ${x.min}`}));
+ db.tasks.filter(x=>x.status!=='Zrealizowane'&&x.due&&x.due<today()).forEach(x=>a.push({level:'bad',title:'Zaległe zadanie',desc:`${x.title}: ${datePL(x.due)}`}));
+ db.harvests.filter(x=>x.bestBefore&&x.bestBefore<today()&&x.status!=='Wycofana').forEach(x=>a.push({level:'bad',title:'Partia po terminie',desc:`${x.id}: ${datePL(x.bestBefore)}`}));
+ return a;
+}
+function renderDashboard(){
+ const inc=db.finance.filter(x=>x.type==='Przychód').reduce((a,x)=>a+Number(x.amount||0),0),cost=db.finance.filter(x=>x.type==='Koszt').reduce((a,x)=>a+Number(x.amount||0),0);
+ const alerts=computedAlerts(),active=db.cultures.filter(x=>x.status==='Aktywna').length,open=db.orders.filter(x=>!['Dostarczone','Zrealizowane','Anulowane'].includes(x.status)).length;
+ const recent=[...db.events].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,6);
+ return `<div class="grid">
+  <div class="card kpi"><div class="l">Aktywne kultury</div><div class="v">${active}</div><div class="hint">${db.cultures.length} wszystkich</div></div>
+  <div class="card kpi"><div class="l">Otwarte zamówienia</div><div class="v">${open}</div><div class="hint">${db.clients.length} klientów</div></div>
+  <div class="card kpi"><div class="l">Zdjęcia mikroskopowe</div><div class="v">${db.media.length}</div><div class="hint">w IndexedDB</div></div>
+  <div class="card kpi"><div class="l">Wynik</div><div class="v">${money(inc-cost)}</div><div class="hint">przychód ${money(inc)}</div></div>
+ </div>
+ <div class="two section"><div class="card"><h3>Ostatnie działania</h3>${recent.length?`<div class="timeline">${recent.map(x=>`<div class="timeline-item"><div class="date">${datePL(x.date)}</div><div class="name">${esc(x.type)} — ${esc(cultureName(x.culture))}</div><div class="desc">${esc(x.description||'')}</div></div>`).join('')}</div>`:'<div class="empty">Brak działań.</div>'}</div>
+ <div class="card"><h3>Alerty</h3>${alerts.length?alerts.slice(0,9).map(x=>`<div class="alert">${badge(x.level==='bad'?'Problem':'Uwaga')}<strong>${esc(x.title)}</strong><span class="small">${esc(x.desc)}</span></div>`).join(''):'<div class="empty">Brak alertów.</div>'}</div></div>
+ <div class="grid3 section">${speciesDashboard('Nannochloropsis')}${speciesDashboard('Tigriopus / widłonogi')}${speciesDashboard('Artemia')}</div>`;
+}
+function speciesDashboard(org){const c=db.cultures.filter(x=>x.organism===org),h=db.harvests.filter(x=>c.some(y=>y.id===x.culture));return `<div class="card"><h3>${esc(org)}</h3><div class="statline"><span>Aktywne</span><strong>${c.filter(x=>x.status==='Aktywna').length}</strong></div><div class="statline"><span>Kultury łącznie</span><strong>${c.length}</strong></div><div class="statline"><span>Partie</span><strong>${h.length}</strong></div></div>`}
+
+function renderCultures(){
+ const q=document.getElementById('cultureSearch')?.value||'',status=document.getElementById('cultureStatus')?.value||'';
+ return `<div class="toolbar">${btn('+ Nowa kultura',"openCultureForm()",'btn primary')}<input id="cultureSearch" value="${esc(q)}" placeholder="Szukaj..." oninput="render()"><select id="cultureStatus" onchange="render()"><option value="">Wszystkie statusy</option>${['Aktywna','Wstrzymana','Zakończona','Problem / skażenie'].map(s=>`<option ${s===status?'selected':''}>${s}</option>`).join('')}</select></div>`+
+ table(['ID','Organizm','Rodzic','Start','Objętość','Status','Profil','Akcje'],db.cultures.filter(x=>findSearch(q,x)&&(!status||x.status===status)).sort((a,b)=>(b.start||'').localeCompare(a.start||'')).map(x=>`<tr>
+  <td><a class="link" onclick="openCultureCard('${x.id}')"><strong>${esc(x.id)}</strong></a></td><td>${esc(x.organism)}<div class="mini">${esc(x.strain||'')}</div></td>
+  <td>${x.parentCulture?`<a class="link" onclick="openCultureCard('${x.parentCulture}')">${esc(x.parentCulture)}</a>`:'—'}</td><td>${datePL(x.start)}<div class="mini">${daysBetween(x.start)} dni</div></td>
+  <td>${esc(x.volume||'')} L</td><td>${badge(x.status)}</td><td>${speciesProfileSummary(x)}</td>
+  <td>${btn('Karta',`openCultureCard('${x.id}')`,'btn tiny secondary')} ${btn('Edytuj',`openCultureForm('${x.id}')`,'btn tiny')} ${btn('Potomna',`copyCulture('${x.id}')`,'btn tiny')} ${btn('Usuń',`deleteRecord('cultures','${x.id}')`,'btn tiny danger')}</td></tr>`));
+}
+function speciesProfileSummary(c){
+ const p=c.profile||{};
+ if(c.organism==='Nannochloropsis')return `<span class="mini">${esc(p.targetCells||'—')} kom./ml • ${esc(p.photoperiod||'—')} h</span>`;
+ if(c.organism==='Tigriopus / widłonogi')return `<span class="mini">${esc(p.stockDensity||'—')} os./ml • karmienie ${esc(p.feed||'—')}</span>`;
+ if(c.organism==='Artemia')return `<span class="mini">${esc(p.cystDose||'—')} g/L • zbiór ${esc(p.harvestHours||'—')} h</span>`;
+ return '<span class="mini">profil ogólny</span>';
+}
+
+function speciesFields(org,p={}){
+ if(org==='Nannochloropsis')return `
+  <div class="species-panel"><h4>Profil Nannochloropsis</h4><div class="form-grid">
+   ${f('profile_targetCells','Docelowa gęstość [kom./ml]','number',p.targetCells)}
+   ${f('profile_inoculum','Inokulum startowe [ml]','number',p.inoculum)}
+   ${f('profile_photoperiod','Fotoperiod [h/dobę]','number',p.photoperiod||16)}
+   ${f('profile_light','Źródło / moc światła','text',p.light)}
+   ${f('profile_aeration','Napowietrzanie','text',p.aeration)}
+   ${f('profile_fertilizer','Nawóz / medium','text',p.fertilizer)}
+   ${f('profile_counting','Komora / metoda liczenia','text',p.counting)}
+   ${f('profile_harvestRule','Kryterium zbioru','text',p.harvestRule)}
+  </div></div>`;
+ if(org==='Tigriopus / widłonogi')return `
+  <div class="species-panel"><h4>Profil Tigriopus / widłonogów</h4><div class="form-grid">
+   ${f('profile_stockDensity','Obsada startowa [os./ml]','number',p.stockDensity)}
+   ${f('profile_feed','Pokarm','text',p.feed)}
+   ${f('profile_feedDose','Dawka pokarmu','text',p.feedDose)}
+   ${f('profile_waterChange','Podmiana [%]','number',p.waterChange)}
+   ${f('profile_changeInterval','Interwał podmian [dni]','number',p.changeInterval)}
+   ${f('profile_harvestInterval','Interwał zbioru [dni]','number',p.harvestInterval)}
+   ${f('profile_targetDensity','Docelowa obsada [os./ml]','number',p.targetDensity)}
+   ${f('profile_notes','Kryterium jakości','text',p.notes)}
+  </div></div>`;
+ if(org==='Artemia')return `
+  <div class="species-panel"><h4>Profil Artemia</h4><div class="form-grid">
+   ${f('profile_cystLot','Partia cyst','text',p.cystLot)}
+   ${f('profile_cystDose','Dawka cyst [g/L]','number',p.cystDose)}
+   ${f('profile_incubationVolume','Objętość inkubacji [L]','number',p.incubationVolume)}
+   ${f('profile_harvestHours','Planowany zbiór [h]','number',p.harvestHours||24)}
+   ${f('profile_aeration','Napowietrzanie','text',p.aeration)}
+   ${f('profile_light','Oświetlenie podczas wylęgu','text',p.light)}
+   ${f('profile_hatchTarget','Docelowa wydajność wylęgu [%]','number',p.hatchTarget)}
+   ${f('profile_decapsulated','Cysty dekapsulowane?','select',p.decapsulated,['Nie','Tak'])}
+  </div></div>`;
+ return `<div class="species-panel"><h4>Profil ogólny</h4><div class="form-grid">${f('profile_notes','Parametry gatunkowe','textarea',p.notes)}</div></div>`;
+}
+function f(name,label,type,value='',options=[]){
+ let inp='';
+ if(type==='select')inp=`<select name="${name}">${options.map(o=>`<option ${String(o)===String(value)?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+ else if(type==='textarea')inp=`<textarea name="${name}">${esc(value||'')}</textarea>`;
+ else inp=`<input name="${name}" type="${type}" ${type==='number'?'step="any"':''} value="${esc(value??'')}">`;
+ return `<div class="field ${type==='textarea'?'wide':''}"><label>${esc(label)}</label>${inp}</div>`;
+}
+function cultureBaseFields(c={}){
+ return `<div class="form-grid">
+  ${f('organism','Organizm','select',c.organism||'Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Inne'])}
+  ${f('strain','Szczep / źródło','text',c.strain)}
+  <div class="field"><label>Kultura macierzysta</label><select name="parentCulture"><option value="">— brak —</option>${db.cultures.filter(x=>x.id!==c.id).map(x=>`<option value="${x.id}" ${c.parentCulture===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)}</option>`).join('')}</select></div>
+  ${f('start','Data startu','date',c.start||today())}
+  ${f('volume','Objętość [L]','number',c.volume)}
+  ${f('vessel','Naczynie / stanowisko','text',c.vessel)}
+  ${f('salinity','Zasolenie [ppt]','number',c.salinity)}
+  ${f('temperature','Temperatura [°C]','number',c.temperature)}
+  ${f('medium','Medium / karmienie','text',c.medium)}
+  ${f('status','Status','select',c.status||'Aktywna',['Aktywna','Wstrzymana','Zakończona','Problem / skażenie'])}
+  ${f('nextAction','Następna czynność','text',c.nextAction)}
+  ${f('nextActionDate','Termin czynności','date',c.nextActionDate)}
+  ${f('notes','Uwagi','textarea',c.notes)}
+ </div>`;
+}
+function openCultureForm(id=''){
+ const c=id?getById('cultures',id):{id:uid('KUL'),organism:'Nannochloropsis',start:today(),status:'Aktywna',profile:{}};
+ document.getElementById('modalTitle').textContent=(id?'Edytuj ':'Nowa ')+'kultura';
+ document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<form id="cultureForm">${cultureBaseFields(c)}<div id="speciesFields">${speciesFields(c.organism,c.profile||{})}</div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button><button class="btn" type="button" onclick="closeModal()">Anuluj</button></div></form>`;
+ const form=document.getElementById('cultureForm');
+ form.elements.organism.onchange=()=>document.getElementById('speciesFields').innerHTML=speciesFields(form.elements.organism.value,{});
+ form.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(form);
+  const obj={...c};
+  ['organism','strain','parentCulture','start','volume','vessel','salinity','temperature','medium','status','nextAction','nextActionDate','notes'].forEach(k=>obj[k]=fd.get(k)||'');
+  const p={};for(const [k,v] of fd.entries())if(k.startsWith('profile_'))p[k.slice(8)]=v;obj.profile=p;
+  await saveRecord('cultures',obj);closeModal();render();
+ };
+ document.getElementById('modal').classList.add('open');
+}
+function openCultureCard(id){
+ const c=getById('cultures',id);if(!c)return;
+ const ev=[...db.events].filter(x=>x.culture===id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')),ms=[...db.measurements].filter(x=>x.culture===id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')),hs=[...db.harvests].filter(x=>x.culture===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+ const children=db.cultures.filter(x=>x.parentCulture===id);const parent=getById('cultures',c.parentCulture);
+ const tb=(k,l)=>`<button class="${cultureTab===k?'active':''}" onclick="cultureTab='${k}';openCultureCard('${id}')">${l}</button>`;
+ document.getElementById('modalTitle').textContent=`Karta kultury ${c.id}`;document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('+ Zdarzenie',`closeModal();openForm('event','',{'culture':'${id}'})`,'btn primary')}${btn('+ Pomiar',`closeModal();openMeasurementForm('',{'culture':'${id}'})`)}${btn('+ Partia',`closeModal();openHarvestForm('',{'culture':'${id}'})`)}${btn('ID naczynia',`printCultureID('${id}')`,'btn secondary')}${btn('Raport kultury',`printCultureReport('${id}')`)}</div>
+ <div class="tabs">${tb('overview','Podsumowanie')}${tb('growth','Wykres wzrostu')}${tb('timeline','Historia')}${tb('measurements','Pomiary / zdjęcia')}${tb('harvests','Partie')}${tb('reservations','Rezerwacje')}${tb('lineage','Pochodzenie')}</div>
+ ${cultureTab==='overview'?`<div class="two"><div class="card"><h3>Dane kultury</h3><div class="profile">${profileBox('Organizm',c.organism)}${profileBox('Szczep',c.strain)}${profileBox('Start',datePL(c.start))}${profileBox('Wiek',daysBetween(c.start)+' dni')}${profileBox('Objętość',(c.volume||'')+' L')}${profileBox('Naczynie',c.vessel)}${profileBox('Zasolenie',(c.salinity||'')+' ppt')}${profileBox('Temperatura',(c.temperature||'')+' °C')}${profileBox('Medium',c.medium)}${profileBox('Status',c.status)}</div><hr>${speciesProfileHTML(c)}</div><div class="card"><h3>Aktywność</h3><div class="statline"><span>Zdarzenia</span><strong>${ev.length}</strong></div><div class="statline"><span>Pomiary</span><strong>${ms.length}</strong></div><div class="statline"><span>Zdjęcia</span><strong>${db.media.filter(m=>m.cultureId===id).length}</strong></div><div class="statline"><span>Partie produktu</span><strong>${hs.length}</strong></div><div class="statline"><span>Zarezerwowane</span><strong>${num(activeReservationMl(id)/1000,2)} L</strong></div><div class="statline"><span>Wolna objętość</span><strong>${num(cultureAvailableMl(id)/1000,2)} L</strong></div><div class="statline"><span>Następna czynność</span><strong>${esc(c.nextAction||'—')} ${c.nextActionDate?'('+datePL(c.nextActionDate)+')':''}</strong></div></div></div>`:''}
+ ${cultureTab==='growth'?`<div class="card"><h3>Trend wzrostu / jakości</h3>${lineChartSVG(growthSeries(id))}<div class="small">Wykres wybiera główny parametr gatunkowy, a gdy go brakuje — pierwszy parametr liczbowy z co najmniej dwoma pomiarami.</div></div>`:''}
+ ${cultureTab==='timeline'?cultureTimeline(ev,ms,hs):''}
+ ${cultureTab==='measurements'?cultureMeasurements(ms):''}
+ ${cultureTab==='harvests'?cultureHarvests(hs):''}
+ ${cultureTab==='reservations'?`<div class="card"><h3>Rezerwacje objętości pod zamówienia</h3><div class="statline"><span>Objętość bieżąca</span><strong>${num(Number(c.volume||0),2)} L</strong></div><div class="statline"><span>Aktywne rezerwacje</span><strong>${num(activeReservationMl(id)/1000,2)} L</strong></div><div class="statline"><span>Dostępne</span><strong>${num(cultureAvailableMl(id)/1000,2)} L</strong></div>${table(['Zamówienie','Klient','Produkt','Rezerwacja','Status'],db.orders.filter(o=>o.reservedCulture===id&&!['Anulowane','Dostarczone','Zrealizowane'].includes(o.status)).map(o=>`<tr><td>${esc(o.id)}</td><td>${esc(clientName(o.client))}</td><td>${esc(o.product)}</td><td>${num(Number(o.reservedVolumeMl||0)/1000,2)} L</td><td>${badge(o.status)}</td></tr>`))}</div>`:''}
+ ${cultureTab==='lineage'?`<div class="equal2"><div class="card"><h3>Macierzysta</h3>${parent?`<div class="alert"><a class="link" onclick="openCultureCard('${parent.id}')"><strong>${esc(parent.id)}</strong></a><span class="small">${esc(parent.organism)} • ${datePL(parent.start)}</span></div>`:'<div class="empty">Brak.</div>'}</div><div class="card"><h3>Potomne</h3>${children.length?children.map(x=>`<div class="alert"><a class="link" onclick="openCultureCard('${x.id}')"><strong>${esc(x.id)}</strong></a><span class="small">${esc(x.organism)} • ${badge(x.status)}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div></div>`:''}`;
+ document.getElementById('modal').classList.add('open');
+}
+function speciesProfileHTML(c){const p=c.profile||{};return `<h3>Profil gatunkowy</h3><div class="profile">${Object.entries(p).map(([k,v])=>profileBox(k,v)).join('')||'<div class="small">Brak parametrów szczegółowych.</div>'}</div>`}
+function cultureTimeline(ev,ms,hs){const list=[...ev.map(x=>({date:x.date,n:x.type,d:x.description||''})),...ms.map(x=>({date:x.date,n:'Pomiar: '+x.param,d:`${x.value} ${x.unit} • ${x.rating}`})),...hs.map(x=>({date:x.date,n:'Partia: '+x.id,d:`${x.product} • ${x.amount} ${x.unit}`}))].sort((a,b)=>(b.date||'').localeCompare(a.date||''));return list.length?`<div class="timeline">${list.map(x=>`<div class="timeline-item"><div class="date">${datePL(x.date)}</div><div class="name">${esc(x.n)}</div><div class="desc">${esc(x.d)}</div></div>`).join('')}</div>`:'<div class="empty">Brak historii.</div>'}
+function cultureMeasurements(ms){return `${table(['Data','Parametr','Wynik','Ocena','Zdjęcia','Akcje'],ms.map(x=>`<tr><td>${datePL(x.date)}</td><td>${esc(x.param)}</td><td><strong>${esc(x.value)} ${esc(x.unit)}</strong></td><td>${badge(x.rating)}</td><td>${db.media.filter(m=>m.measurementId===x.id).length}</td><td>${btn('Otwórz',`openMeasurementCard('${x.id}')`,'btn tiny secondary')}</td></tr>`))}`}
+function cultureHarvests(hs){return table(['Partia','Data','Produkt','Ilość','Status'],hs.map(x=>`<tr><td><a class="link" onclick="openHarvestCard('${x.id}')">${esc(x.id)}</a></td><td>${datePL(x.date)}</td><td>${esc(x.product)}</td><td>${esc(x.amount)} ${esc(x.unit)}</td><td>${badge(x.status)}</td></tr>`))}
+
+function renderEvents(){return `<div class="toolbar">${btn('+ Zdarzenie',"openForm('event')",'btn primary')}</div>`+table(['Data','Kultura','Typ','Opis','Ilość','Operator','Akcje'],[...db.events].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td><a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a></td><td>${badge(x.type)}</td><td>${esc(x.description)}</td><td>${esc(x.amount||'')} ${esc(x.unit||'')}</td><td>${esc(x.operator||'')}</td><td>${btn('Edytuj',`openForm('event','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('events','${x.id}')`,'btn tiny danger')}</td></tr>`))}
+
+function renderMeasurements(){
+ return `<div class="toolbar">${btn('+ Pomiar / zdjęcia',"openMeasurementForm()",'btn primary')}${btn('Kalkulator komórek/ml',"openCellCalculator()",'btn secondary')}</div>`+
+ table(['Data','Kultura','Parametr','Wynik','Ocena','Zdjęcia','Akcje'],[...db.measurements].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td><a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a></td><td>${esc(x.param)}</td><td><strong>${esc(x.value)} ${esc(x.unit)}</strong></td><td>${badge(x.rating)}</td><td>${db.media.filter(m=>m.measurementId===x.id).length}</td><td>${btn('Karta',`openMeasurementCard('${x.id}')`,'btn tiny secondary')}${btn('Edytuj',`openMeasurementForm('${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('measurements','${x.id}')`,'btn tiny danger')}</td></tr>`));
+}
+function openMeasurementForm(id='',preset={}){
+ const m=id?getById('measurements',id):{id:uid('POM'),date:nowLocal(),culture:preset.culture||'',rating:'OK',sampleCode:nextSampleCode(today())};
+ document.getElementById('modalTitle').textContent=id?'Edytuj pomiar':'Nowy pomiar / dokumentacja';
+ document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<form id="measurementForm"><div class="form-grid">
+  ${f('date','Data i czas','datetime-local',m.date||nowLocal())}
+  <div class="field"><label>Kultura</label><select name="culture"><option value="">— wybierz —</option>${db.cultures.map(x=>`<option value="${x.id}" ${m.culture===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)}</option>`).join('')}</select></div>
+  ${f('param','Parametr','select',m.param||'Gęstość komórek',['Gęstość komórek','OD / absorbancja','Temperatura','Zasolenie','pH','NO3','PO4','Liczba osobników/ml','Wydajność wylęgu','Wygląd / barwa','Śmiertelność','Inny'])}
+  ${f('value','Wartość','text',m.value)}${f('unit','Jednostka','text',m.unit)}${f('method','Metoda / sprzęt','text',m.method)}
+  ${f('microscopeMagnification','Powiększenie mikroskopu','text',m.microscopeMagnification)}${f('sampleCode','Kod próbki','text',m.sampleCode)}
+  ${f('rating','Ocena','select',m.rating||'OK',['OK','Do obserwacji','Problem / odrzucić'])}
+  ${f('notes','Uwagi / obserwacje','textarea',m.notes)}
+  <div class="field wide"><label>Zdjęcia mikroskopowe</label>
+  <div class="equal2">
+   <div><div class="mini" style="margin-bottom:5px">Aparat iPhone’a</div><input id="measurementCamera" type="file" accept="image/*" capture="environment"></div>
+   <div><div class="mini" style="margin-bottom:5px">Biblioteka zdjęć</div><input id="measurementFiles" type="file" accept="image/*" multiple></div>
+  </div>
+  <div class="help">Zdjęcia są zapisywane lokalnie w IndexedDB. Aplikacja tworzy także miniaturę do szybkiego podglądu.</div>
+ </div>
+ </div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz pomiar</button><button class="btn" type="button" onclick="closeModal()">Anuluj</button></div></form>`;
+ document.getElementById('measurementForm').onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.target),obj={...m};
+  ['date','culture','param','value','unit','method','microscopeMagnification','sampleCode','rating','notes'].forEach(k=>obj[k]=fd.get(k)||'');
+  await saveRecord('measurements',obj);
+  const camera=[...document.getElementById('measurementCamera').files];
+  const gallery=[...document.getElementById('measurementFiles').files];
+  const files=[...camera,...gallery];
+  for(const file of files)await storeImage(file,obj.id,obj.culture);
+  closeModal();render();
+ };
+ document.getElementById('modal').classList.add('open');
+}
+async function storeImage(file,measurementId,cultureId){
+ const thumb=await makeThumbnail(file,800,600,.82);
+ const rec={id:uid('IMG'),measurementId,cultureId,name:file.name,type:file.type,size:file.size,createdAt:new Date().toISOString(),blob:file,thumbBlob:thumb};
+ await put('media',rec);db.media.push(rec);refreshMediaURLs();
+}
+function makeThumbnail(file,maxW,maxH,quality){
+ return new Promise((resolve,reject)=>{
+  const img=new Image(),url=URL.createObjectURL(file);
+  img.onload=()=>{const scale=Math.min(1,maxW/img.width,maxH/img.height),w=Math.max(1,Math.round(img.width*scale)),h=Math.max(1,Math.round(img.height*scale));const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);c.toBlob(b=>{URL.revokeObjectURL(url);b?resolve(b):reject(new Error('Błąd miniatury'))},'image/jpeg',quality)};
+  img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Nie można odczytać obrazu'))};img.src=url;
+ });
+}
+function openMeasurementCard(id){
+ const m=getById('measurements',id);if(!m)return;const photos=db.media.filter(x=>x.measurementId===id);
+ document.getElementById('modalTitle').textContent=`Pomiar ${m.id}`;document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('Edytuj / dodaj zdjęcia',`closeModal();openMeasurementForm('${id}')`,'btn primary')}${btn('Etykieta próbki',`printSampleLabel('${id}')`,'btn secondary')}</div>
+ <div class="two"><div class="card"><h3>Wynik</h3><div class="profile">${profileBox('Kultura',cultureName(m.culture))}${profileBox('Data',datePL(m.date))}${profileBox('Parametr',m.param)}${profileBox('Wartość',`${m.value||''} ${m.unit||''}`)}${profileBox('Metoda',m.method)}${profileBox('Powiększenie',m.microscopeMagnification)}${profileBox('Kod próbki',m.sampleCode)}${profileBox('Ocena',m.rating)}</div><hr><div class="small">${esc(m.notes||'')}</div></div><div class="card"><h3>Zdjęcia</h3>${photos.length?`<div class="photo-grid">${photos.map(photoHTML).join('')}</div>`:'<div class="empty">Brak zdjęć.</div>'}</div></div>`;
+ document.getElementById('modal').classList.add('open');
+}
+function photoHTML(p){const url=mediaURLs.get(p.id)||'';return `<div class="photo"><img src="${url}" onclick="openPhoto('${p.id}')"><div class="meta"><strong>${esc(p.name)}</strong><span>${num((p.size||0)/1024/1024,2)} MB</span><div style="margin-top:5px">${btn('Usuń',`deletePhoto('${p.id}')`,'btn tiny danger')}</div></div></div>`}
+function openPhoto(id){const p=getById('media',id);if(!p)return;const u=URL.createObjectURL(p.blob);window.open(u,'_blank');setTimeout(()=>URL.revokeObjectURL(u),60000)}
+async function deletePhoto(id){if(!confirm('Usunąć zdjęcie?'))return;await delStoreRecord('media',id);db.media=db.media.filter(x=>x.id!==id);refreshMediaURLs();closeModal();render()}
+function openCellCalculator(){
+ document.getElementById('modalTitle').textContent='Kalkulator komórek / ml';document.getElementById('modalBox').classList.remove('wide');
+ document.getElementById('modalBody').innerHTML=`<div class="callout">Współczynnik objętości zależy od używanej komory. Wpisz parametry właściwe dla swojej metody liczenia.</div><div class="form-grid" style="margin-top:12px">${f('ccCells','Łączna liczba komórek','number','')}${f('ccFields','Liczba pól / kwadratów','number',5)}${f('ccVolume','Objętość jednego pola [ml]','number','')}${f('ccDilution','Rozcieńczenie','number',1)}<div class="field span2"><label>Wynik</label><input id="ccResult" readonly></div></div><div class="actions" style="margin-top:12px">${btn('Oblicz',"calcCells()",'btn primary')}</div>`;
+ document.getElementById('modal').classList.add('open');
+}
+function calcCells(){const root=document.getElementById('modalBody'),cells=Number(root.querySelector('[name=ccCells]').value||0),fields=Number(root.querySelector('[name=ccFields]').value||0),vol=Number(root.querySelector('[name=ccVolume]').value||0),dil=Number(root.querySelector('[name=ccDilution]').value||1);document.getElementById('ccResult').value=fields&&vol?(cells/(fields*vol)*dil).toLocaleString('pl-PL',{maximumFractionDigits:0})+' komórek/ml':'Uzupełnij pola i objętość'}
+
+function renderSanitation(){return `<div class="toolbar">${btn('+ Dezynfekcja',"openForm('sanitation')",'btn primary')}</div>`+table(['Data','Sprzęt','Proces','Preparat','Stężenie','Kontakt','Status','Akcje'],[...db.sanitation].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td>${esc(x.asset)}</td><td>${esc(x.process)}</td><td>${esc(x.agent)}</td><td>${esc(x.concentration)}</td><td>${esc(x.contactTime)}</td><td>${badge(x.status)}</td><td>${btn('Edytuj',`openForm('sanitation','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('sanitation','${x.id}')`,'btn tiny danger')}</td></tr>`))}
+
+function renderHarvests(){return `<div class="toolbar">${btn('+ Partia / rozlew',"openHarvestForm()",'btn primary')}</div>`+table(['Partia','Data','Kultura','Produkt','Ilość','Opakowania','Receptura','Koszt','Status','Akcje'],[...db.harvests].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td><a class="link" onclick="openHarvestCard('${x.id}')"><strong>${esc(x.id)}</strong></a></td><td>${datePL(x.date)}</td><td><a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a></td><td>${esc(x.product)}</td><td>${esc(x.amount)} ${esc(x.unit)}</td><td>${esc(x.unitsProduced||'')} ${x.packageSizeMl?`× ${esc(x.packageSizeMl)} ml`:''}</td><td>${esc(getById('recipes',x.recipeId)?.name||'—')}</td><td>${money(x.totalCost)}</td><td>${badge(x.status)}</td><td>${btn('Karta',`openHarvestCard('${x.id}')`,'btn tiny secondary')}${btn('Etykiety',`printBatchLabels('${x.id}')`,'btn tiny')}${btn('Edytuj',`openHarvestForm('${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('harvests','${x.id}')`,'btn tiny danger')}</td></tr>`))}
+function openHarvestForm(id='',preset={}){
+ const h=id?getById('harvests',id):{id:nextBatchId('Nannochloropsis żywy',today()),date:today(),culture:preset.culture||'',product:'Nannochloropsis żywy',unit:'L',status:'Gotowa',quality:'OK',autoConsume:'Tak',consumeCulture:'Tak'};
+ document.getElementById('modalTitle').textContent=id?'Edytuj partię':'Nowa partia / rozlew';
+ document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<form id="harvestForm">
+ <div class="callout">${id?'Edycja istniejącej partii nie wykonuje ponownie automatycznych rozchodów ani pomniejszenia kultury.':'Automatyczne rozchody receptury i pomniejszenie objętości kultury wykonają się raz — przy utworzeniu partii.'}</div>
+ <div class="form-grid" style="margin-top:12px">
+  <div class="field"><label>Numer partii</label><input id="batchIdPreview" value="${esc(h.id)}" readonly></div>
+  ${f('date','Data','date',h.date||today())}
+  <div class="field"><label>Kultura źródłowa</label><select name="culture">${db.cultures.filter(x=>x.status==='Aktywna'||x.id===h.culture).map(x=>`<option value="${x.id}" ${h.culture===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)} — ${num(Number(x.volume||0),2)} L</option>`).join('')}</select></div>
+  ${f('product','Produkt','select',h.product,['Nannochloropsis żywy','Tigriopus / widłonogi','Artemia żywa','Kiełże morskie','Inny'])}
+  ${f('amount','Ilość produktu','number',h.amount)}
+  ${f('unit','Jednostka produktu','select',h.unit||'L',['ml','L','szt.','porcja'])}
+  ${f('cultureConsumedMl','Rzeczywiście pobrano z kultury [ml]','number',h.cultureConsumedMl)}
+  ${f('consumeCulture','Pomniejszyć objętość kultury?','select',h.consumeCulture||'Tak',['Tak','Nie'])}
+  ${f('packageSizeMl','Pojemność opakowania [ml]','number',h.packageSizeMl||db.settings.defaultBottleMl)}
+  ${f('unitsProduced','Liczba opakowań / porcji','number',h.unitsProduced)}
+  <div class="field"><label>Receptura zużycia</label><select name="recipeId"><option value="">— brak —</option>${db.recipes.filter(r=>r.active!=='Nie').map(r=>`<option value="${r.id}" ${h.recipeId===r.id?'selected':''}>${esc(r.name)}</option>`).join('')}</select></div>
+  ${f('autoConsume','Rozchodować recepturę z magazynu?','select',h.autoConsume||'Tak',['Tak','Nie'])}
+  ${f('totalCost','Koszt partii [PLN]','number',h.totalCost)}
+  ${f('bestBefore','Termin użycia','date',h.bestBefore)}
+  ${f('status','Status','select',h.status||'Gotowa',['Gotowa','Częściowo sprzedana','Wyprzedana','Wycofana'])}
+  ${f('quality','Jakość','select',h.quality||'OK',['OK','Do obserwacji','Odrzucona'])}
+  ${f('notes','Uwagi','textarea',h.notes)}
+ </div>
+ <div id="harvestPreview" class="section card"></div>
+ <div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz partię</button></div></form>`;
+
+ const form=document.getElementById('harvestForm');
+ const consumed=form.elements.cultureConsumedMl;
+ let consumptionManual=!!h.cultureConsumedMl;
+ consumed.addEventListener('input',()=>consumptionManual=true);
+
+ const refresh=()=>{
+  const date=form.elements.date.value||today(),product=form.elements.product.value;
+  if(!id)document.getElementById('batchIdPreview').value=nextBatchId(product,date);
+  const amount=Number(form.elements.amount.value||0),unit=form.elements.unit.value;
+  const litres=unit==='L'?amount:unit==='ml'?amount/1000:0;
+  const units=Number(form.elements.unitsProduced.value||0);
+  if(!id&&!consumptionManual&&(unit==='L'||unit==='ml'))consumed.value=Math.round(litres*1000*100)/100;
+  const cultureId=form.elements.culture.value,c=getById('cultures',cultureId);
+  const est=estimateBatchCost(form.elements.recipeId.value,litres,units);
+  const breakdown=recipeCostBreakdown(form.elements.recipeId.value,litres,units);
+  document.getElementById('harvestPreview').innerHTML=`<h3>Podgląd wykonania</h3>
+   <div class="statline"><span>Numer partii</span><strong>${esc(document.getElementById('batchIdPreview').value)}</strong></div>
+   <div class="statline"><span>Bieżąca objętość kultury</span><strong>${c?num(Number(c.volume||0),2)+' L':'—'}</strong></div>
+   <div class="statline"><span>Aktywne rezerwacje tej kultury</span><strong>${cultureId?num(activeReservationMl(cultureId)/1000,2)+' L':'—'}</strong></div>
+   <div class="statline"><span>Pobranie deklarowane</span><strong>${num(Number(consumed.value||0)/1000,2)} L</strong></div>
+   <div class="statline"><span>Szacowany koszt materiałów + opakowań</span><strong>${money(est)}</strong></div>
+   ${breakdown.length?`<div class="small" style="margin-top:8px">${breakdown.map(x=>`${esc(x.name)}: ${num(x.qty,3)} ${esc(x.unit)} × ${money(x.unitPrice)} = <strong>${money(x.cost)}</strong>`).join('<br>')}</div>`:'<div class="small" style="margin-top:8px">Brak składników receptury; koszt obejmuje domyślne opakowania.</div>'}`;
+ };
+ ['date','product','amount','unit','culture','unitsProduced','recipeId'].forEach(n=>form.elements[n]?.addEventListener('input',refresh));
+ consumed.addEventListener('input',refresh);refresh();
+
+ form.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(form),obj={...h};
+  ['date','culture','product','amount','unit','cultureConsumedMl','consumeCulture','packageSizeMl','unitsProduced','recipeId','autoConsume','totalCost','bestBefore','status','quality','notes'].forEach(k=>obj[k]=fd.get(k)||'');
+  const isNew=!id;
+  if(isNew)obj.id=nextBatchId(obj.product,obj.date);
+  const amount=Number(obj.amount||0),litres=obj.unit==='L'?amount:obj.unit==='ml'?amount/1000:0,units=Number(obj.unitsProduced||0);
+  const consumedMl=Number(obj.cultureConsumedMl||0),culture=getById('cultures',obj.culture);
+  if(isNew&&obj.consumeCulture==='Tak'&&culture&&consumedMl>Number(culture.volume||0)*1000+0.0001){
+   alert(`Pobranie ${num(consumedMl/1000,2)} L przekracza bieżącą objętość kultury ${num(Number(culture.volume||0),2)} L.`);return;
+  }
+  const est=estimateBatchCost(obj.recipeId,litres,units);
+  if(!Number(obj.totalCost||0))obj.totalCost=est.toFixed(2);
+  obj.costBreakdown=recipeCostBreakdown(obj.recipeId,litres,units);
+  obj.costCalculatedAt=new Date().toISOString();
+  if(isNew&&culture&&obj.consumeCulture==='Tak'&&consumedMl>0){
+   obj.cultureVolumeBefore=Number(culture.volume||0);
+   culture.volume=Math.max(0,Number(culture.volume||0)-consumedMl/1000);
+   obj.cultureVolumeAfter=culture.volume;
+   await saveRecord('cultures',culture);
+  }
+  await saveRecord('harvests',obj);
+  if(isNew){
+   await saveRecord('events',{id:uid('ZDR'),date:obj.date+'T12:00',culture:obj.culture,type:'Zbiór',description:`Partia ${obj.id}: ${obj.product}; pobrano ${num(consumedMl/1000,2)} L z kultury`,amount:obj.amount,unit:obj.unit,operator:db.settings.operator||'',notes:'Wpis automatyczny'});
+   if(obj.autoConsume==='Tak'&&obj.recipeId)await applyRecipe(obj);
+  }
+  closeModal();render();
+ };
+ document.getElementById('modal').classList.add('open');
+}
+
+async function applyRecipe(h){
+ const r=getById('recipes',h.recipeId);if(!r||h.recipeApplied)return;
+ const litres=h.unit==='L'?Number(h.amount||0):h.unit==='ml'?Number(h.amount||0)/1000:0,units=Number(h.unitsProduced||0),short=[];
+ for(const ing of (r.ingredients||[])){
+  const item=getById('inventory',ing.itemId);if(!item){short.push('brak pozycji '+ing.itemId);continue}
+  let qty=Number(ing.qty||0);if(ing.basis==='na 1 L')qty*=litres;else if(ing.basis==='na opakowanie')qty*=units;
+  item.qty=Number(item.qty||0)-qty;await put('inventory',item);
+  await saveRecord('stockMoves',{id:uid('RM'),date:nowLocal(),item:item.id,type:'Rozchód',qty:-qty,reason:`Receptura ${r.name}, partia ${h.id}`});
+  if(item.qty<0)short.push(item.name);
+ }
+ h.recipeApplied=true;await saveRecord('harvests',h);
+ if(short.length)alert('Receptura została rozchodowana, ale wystąpiły braki/ujemne stany: '+short.join(', '));
+}
+function openHarvestCard(id){
+ const h=getById('harvests',id);if(!h)return;const c=getById('cultures',h.culture),orders=db.orders.filter(x=>x.batch===id&&x.status!=='Anulowane'),value=orders.reduce((a,x)=>a+Number(x.total||0),0);
+ document.getElementById('modalTitle').textContent=`Partia ${h.id}`;document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('Etykiety produktu',`printBatchLabels('${id}')`,'btn primary')}${btn('Karta identyfikacyjna partii',`printBatchID('${id}')`,'btn secondary')}${btn('Raport partii',`printBatchReport('${id}')`)}</div><div class="two"><div class="card"><h3>Identyfikowalność</h3><div class="profile">${profileBox('Partia',h.id)}${profileBox('Produkt',h.product)}${profileBox('Data',datePL(h.date))}${profileBox('Kultura źródłowa',cultureName(h.culture))}${profileBox('Szczep / źródło',c?.strain)}${profileBox('Ilość',`${h.amount||''} ${h.unit||''}`)}${profileBox('Opakowania',h.unitsProduced?`${h.unitsProduced} × ${h.packageSizeMl||'?'} ml`:'—')}${profileBox('Receptura',getById('recipes',h.recipeId)?.name)}${profileBox('Termin',datePL(h.bestBefore))}${profileBox('Jakość',h.quality)}${profileBox('Koszt',money(h.totalCost))}${profileBox('Pobrano z kultury',h.cultureConsumedMl?num(Number(h.cultureConsumedMl)/1000,2)+' L':'—')}${profileBox('Objętość przed',h.cultureVolumeBefore!==undefined?num(Number(h.cultureVolumeBefore),2)+' L':'—')}${profileBox('Objętość po',h.cultureVolumeAfter!==undefined?num(Number(h.cultureVolumeAfter),2)+' L':'—')}${profileBox('Status',h.status)}</div>${h.costBreakdown?.length?`<hr><h3>Kosztorys materiałowy</h3>${table(['Składnik','Ilość','Cena jedn.','Koszt'],h.costBreakdown.map(x=>`<tr><td>${esc(x.name)}</td><td>${num(x.qty,3)} ${esc(x.unit)}</td><td>${money(x.unitPrice)}</td><td><strong>${money(x.cost)}</strong></td></tr>`))}`:''}</div><div class="card"><h3>Sprzedaż partii</h3><div class="statline"><span>Zamówienia</span><strong>${orders.length}</strong></div><div class="statline"><span>Sprzedaż</span><strong>${money(value)}</strong></div><div class="statline"><span>Wynik vs koszt partii</span><strong>${money(value-Number(h.totalCost||0))}</strong></div></div></div><div class="section card"><h3>Odbiorcy</h3>${table(['Data','Zamówienie','Klient','Ilość','Kwota','Status'],orders.map(o=>`<tr><td>${datePL(o.date)}</td><td>${esc(o.id)}</td><td>${esc(clientName(o.client))}</td><td>${esc(o.qty)}</td><td>${money(o.total)}</td><td>${badge(o.status)}</td></tr>`))}</div>`;
+ document.getElementById('modal').classList.add('open');
+}
+
+function renderRecipes(){return `<div class="toolbar">${btn('+ Nowa receptura',"openRecipeForm()",'btn primary')}</div>${db.inventory.length?'':`<div class="callout" style="margin-bottom:12px"><strong>Magazyn jest pusty.</strong> Receptura korzysta z pozycji magazynowych. Otwórz „Nowa receptura” — dodałem tam teraz szybkie tworzenie surowców bez opuszczania formularza.</div>`}`+table(['Nazwa','Produkt','Składniki','Aktywna','Akcje'],db.recipes.map(r=>`<tr><td><strong>${esc(r.name)}</strong><div class="mini">${esc(r.id)}</div></td><td>${esc(r.product)}</td><td>${(r.ingredients||[]).map(i=>`${esc(getById('inventory',i.itemId)?.name||i.itemId)}: ${esc(i.qty)} ${esc(i.basis)}`).join('<br>')}</td><td>${badge(r.active||'Tak')}</td><td>${btn('Edytuj',`openRecipeForm('${r.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('recipes','${r.id}')`,'btn tiny danger')}</td></tr>`))}
+function recipeRow(i={},idx=0){return `<div class="recipe-row" data-row="${idx}">
+ <div class="field"><label>Pozycja magazynowa</label>
+  <select class="ri-item"><option value="">${db.inventory.length?'— wybierz składnik —':'— magazyn jest pusty —'}</option>${db.inventory.map(x=>`<option value="${x.id}" ${i.itemId===x.id?'selected':''}>${esc(x.name)} • ${esc(x.qty)} ${esc(x.unit)} • ${money(x.price)}/${esc(x.unit)}</option>`).join('')}</select>
+ </div>
+ <div class="field"><label>Ilość</label><input class="ri-qty" type="number" min="0" step="any" value="${esc(i.qty||'')}"></div>
+ <div class="field"><label>Przelicznik</label><select class="ri-basis">${['na partię','na 1 L','na opakowanie'].map(b=>`<option ${i.basis===b?'selected':''}>${b}</option>`).join('')}</select></div>
+ <button class="btn danger" type="button" onclick="this.closest('.recipe-row').remove()">×</button>
+</div>`}
+function openRecipeForm(id=''){
+ const r=id?getById('recipes',id):{id:uid('REC'),name:'',product:'Nannochloropsis żywy',active:'Tak',ingredients:[]};
+ document.getElementById('modalTitle').textContent=id?'Edytuj recepturę':'Nowa receptura';
+ document.getElementById('modalBox').classList.add('wide');
+ document.getElementById('modalBody').innerHTML=`<form id="recipeForm">
+  <div class="form-grid">
+   ${f('name','Nazwa receptury','text',r.name)}
+   ${f('product','Produkt','select',r.product,['Nannochloropsis żywy','Tigriopus / widłonogi','Artemia żywa','Kiełże morskie','Inny'])}
+   ${f('active','Aktywna','select',r.active||'Tak',['Tak','Nie'])}
+   ${f('notes','Uwagi','textarea',r.notes)}
+  </div>
+
+  <hr>
+  <div class="equal2">
+   <div>
+    <h3>Składniki / zużycie</h3>
+    <div class="callout">Każdy składnik receptury jest powiązany z pozycją w magazynie. Dzięki temu przy utworzeniu partii system może automatycznie odjąć zużycie i policzyć koszt.</div>
+    <div id="recipeRows" style="margin-top:10px">${(r.ingredients||[]).map((i,n)=>recipeRow(i,n)).join('')}</div>
+    <div class="actions" style="margin-top:10px">
+     ${btn('+ Dodaj składnik',"addRecipeRow()",'btn primary')}
+     ${db.inventory.length?'':`<span class="small" style="align-self:center">Najpierw dodaj co najmniej jeden surowiec do magazynu — możesz zrobić to po prawej stronie.</span>`}
+    </div>
+   </div>
+
+   <div class="card" style="box-shadow:none">
+    <h3>Szybko dodaj surowiec do magazynu</h3>
+    <div class="small" style="margin-bottom:9px">Nie musisz wychodzić z receptury. Dodany surowiec od razu pojawi się na listach składników.</div>
+    <div class="form-grid">
+     ${f('quickInvName','Nazwa surowca','text','')}
+     ${f('quickInvCategory','Kategoria','select','Nawóz / pożywka',['Butelki','Zakrętki','Etykiety','Sól','Nawóz / pożywka','Pasza','Chemia / dezynfekcja','Wysyłka','Sprzęt','Inne'])}
+     ${f('quickInvUnit','Jednostka magazynowa','text','ml')}
+     ${f('quickInvQty','Stan początkowy','number','0')}
+     ${f('quickInvMin','Stan minimalny','number','0')}
+     ${f('quickInvPrice','Cena za 1 jednostkę [PLN]','number','0')}
+     ${f('quickInvSupplier','Dostawca','text','')}
+     ${f('quickInvLot','Partia dostawcy','text','')}
+    </div>
+    <div class="actions" style="margin-top:10px">${btn('+ Dodaj do magazynu',"quickAddInventoryFromRecipe()",'btn secondary')}</div>
+   </div>
+  </div>
+
+  <div class="actions" style="margin-top:16px"><button class="btn primary">Zapisz recepturę</button><button class="btn" type="button" onclick="closeModal()">Anuluj</button></div>
+ </form>`;
+
+ document.getElementById('recipeForm').onsubmit=async e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  const rows=[...document.querySelectorAll('.recipe-row')];
+  const ingredients=rows.map(row=>({
+    itemId:row.querySelector('.ri-item').value,
+    qty:row.querySelector('.ri-qty').value,
+    basis:row.querySelector('.ri-basis').value
+  })).filter(x=>x.itemId&&Number(x.qty)>0);
+
+  if(rows.length && ingredients.length!==rows.length){
+   alert('W jednym lub kilku wierszach składnika nie wybrano pozycji magazynowej albo ilość wynosi 0. Popraw wiersz lub usuń go.');
+   return;
+  }
+
+  const obj={...r,
+   name:fd.get('name')||'',
+   product:fd.get('product')||'',
+   active:fd.get('active')||'Tak',
+   notes:fd.get('notes')||'',
+   ingredients
+  };
+  if(!obj.name.trim()){alert('Podaj nazwę receptury.');return}
+  await saveRecord('recipes',obj);
+  closeModal();render();
+ };
+ document.getElementById('modal').classList.add('open');
+}
+
+function addRecipeRow(){
+ const box=document.getElementById('recipeRows');
+ if(!box)return;
+ box.insertAdjacentHTML('beforeend',recipeRow({},Date.now()));
+ const row=box.lastElementChild;
+ if(!db.inventory.length)row?.querySelector('.ri-item')?.focus();
+}
+
+async function quickAddInventoryFromRecipe(){
+ const form=document.getElementById('recipeForm');if(!form)return;
+ const name=form.elements.quickInvName.value.trim();
+ const unit=form.elements.quickInvUnit.value.trim()||'szt.';
+ if(!name){alert('Podaj nazwę surowca.');form.elements.quickInvName.focus();return}
+ const obj={
+  id:uid('MAG'),
+  name,
+  category:form.elements.quickInvCategory.value,
+  qty:Number(form.elements.quickInvQty.value||0),
+  unit,
+  min:Number(form.elements.quickInvMin.value||0),
+  supplier:form.elements.quickInvSupplier.value.trim(),
+  lot:form.elements.quickInvLot.value.trim(),
+  price:Number(form.elements.quickInvPrice.value||0),
+  notes:'Dodano bezpośrednio z formularza receptury'
+ };
+ await saveRecord('inventory',obj);
+
+ // Update all ingredient selects without closing or resetting the recipe form.
+ document.querySelectorAll('.ri-item').forEach(sel=>{
+  const opt=document.createElement('option');
+  opt.value=obj.id;
+  opt.textContent=`${obj.name} • ${obj.qty} ${obj.unit} • ${money(obj.price)}/${obj.unit}`;
+  sel.appendChild(opt);
+ });
+ // If no ingredient row exists yet, create one and preselect the new item.
+ if(!document.querySelector('.recipe-row'))addRecipeRow();
+ const last=document.querySelector('.recipe-row:last-child .ri-item');
+ if(last)last.value=obj.id;
+
+ form.elements.quickInvName.value='';
+ form.elements.quickInvQty.value='0';
+ form.elements.quickInvMin.value='0';
+ form.elements.quickInvPrice.value='0';
+ form.elements.quickInvSupplier.value='';
+ form.elements.quickInvLot.value='';
+ alert(`Dodano do magazynu: ${obj.name}. Możesz użyć go w recepturze.`);
+}
+
+
+function renderPlanner(){return `<div class="two"><div class="card"><h3>Kalkulator partii</h3><div class="form-grid">
+ ${f('plProduct','Produkt','select','Nannochloropsis żywy',['Nannochloropsis żywy','Tigriopus / widłonogi','Artemia żywa','Kiełże morskie'])}
+ ${f('plUnits','Liczba opakowań','number',30)}${f('plSize','Pojemność [ml]','number',db.settings.defaultBottleMl)}
+ ${f('plReserve','Rezerwa produkcyjna [%]','number',10)}${f('plCultureCost','Koszt bazowy hodowli 1 L [PLN]','number',0)}
+ ${f('plPrice','Cena / opak. [PLN]','number',19.99)}
+ <div class="field"><label>Receptura</label><select id="plRecipe"><option value="">— brak —</option>${db.recipes.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('')}</select></div>
+ </div><div class="actions" style="margin-top:12px">${btn('Przelicz',"calculatePlan()",'btn primary')}</div></div><div class="card" id="planResult"><h3>Wynik</h3><div class="empty">Wprowadź dane.</div></div></div>`}
+function calculatePlan(){
+ const root=document.getElementById('content'),product=root.querySelector('[name=plProduct]').value,units=Number(root.querySelector('[name=plUnits]').value||0),size=Number(root.querySelector('[name=plSize]').value||0),reserve=Number(root.querySelector('[name=plReserve]').value||0);
+ const litres=units*size/1000*(1+reserve/100),recipeId=document.getElementById('plRecipe').value,material=estimateBatchCost(recipeId,litres,units);
+ const base=litres*Number(root.querySelector('[name=plCultureCost]').value||0),total=material+base,revenue=units*Number(root.querySelector('[name=plPrice]').value||0),profit=revenue-total;
+ const org=organismForProduct(product),candidates=db.cultures.filter(c=>c.status==='Aktywna'&&(!org||c.organism===org)).sort((a,b)=>cultureAvailableMl(b.id)-cultureAvailableMl(a.id));
+ document.getElementById('planResult').innerHTML=`<h3>Wynik</h3>
+  <div class="statline"><span>Objętość wymagana z rezerwą</span><strong>${num(litres,2)} L</strong></div>
+  <div class="statline"><span>Koszt receptury / materiałów</span><strong>${money(material)}</strong></div>
+  <div class="statline"><span>Koszt bazowy hodowli</span><strong>${money(base)}</strong></div>
+  <div class="statline"><span>Koszt łącznie</span><strong>${money(total)}</strong></div>
+  <div class="statline"><span>Koszt / opak.</span><strong>${money(units?total/units:0)}</strong></div>
+  <div class="statline"><span>Przychód</span><strong>${money(revenue)}</strong></div>
+  <div class="statline"><span>Zysk brutto</span><strong>${money(profit)}</strong></div>
+  <div class="statline"><span>Marża</span><strong>${num(revenue?profit/revenue*100:0,1)}%</strong></div>
+  <hr><h3>Kultury mogące pokryć plan</h3>
+  ${candidates.length?candidates.map(c=>`<div class="alert"><strong>${esc(c.id)} — ${esc(c.organism)}</strong><span class="small">Bieżąca ${num(Number(c.volume||0),2)} L • rezerwacje ${num(activeReservationMl(c.id)/1000,2)} L • wolne <b>${num(cultureAvailableMl(c.id)/1000,2)} L</b> ${cultureAvailableMl(c.id)>=litres*1000?'<span class="reserve-ok">✓ wystarczy</span>':'<span class="reserve-warn">• za mało</span>'}</span></div>`).join(''):'<div class="empty">Brak pasujących aktywnych kultur.</div>'}`;
+}
+
+
+const schemas={
+ event:{title:'Zdarzenie',store:'events',prefix:'ZDR',fields:[['date','Data i czas','datetime-local'],['culture','Kultura','culture'],['type','Typ','select',['Nawożenie','Karmienie','Podmiana / dolewka','Podział kultury','Zwiększenie objętości','Zbiór','Czyszczenie','Obserwacja','Awaria','Skażenie','Inne']],['description','Opis','text'],['amount','Ilość','number'],['unit','Jednostka','text'],['operator','Operator','text'],['notes','Uwagi','textarea']]},
+ sanitation:{title:'Dezynfekcja',store:'sanitation',prefix:'DEZ',fields:[['date','Data i czas','datetime-local'],['asset','Sprzęt / naczynie','text'],['process','Proces','select',['Mycie','Dezynfekcja chemiczna','Dezynfekcja termiczna','Płukanie','Suszenie','Pełny cykl']],['agent','Preparat','text'],['concentration','Stężenie','text'],['contactTime','Czas kontaktu','text'],['status','Status','select',['Czyste / gotowe','W toku','Wymaga powtórzenia']],['operator','Operator','text'],['notes','Uwagi','textarea']]},
+ client:{title:'Klient',store:'clients',prefix:'KLI',fields:[['name','Imię i nazwisko / nazwa','text'],['segment','Segment','select',['Nowy','Powracający','Stały','VIP','Sklep','Hodowca','Lokalny']],['phone','Telefon','text'],['email','E-mail','email'],['city','Miejscowość','text'],['source','Źródło','select',['OLX','Allegro Lokalnie','Facebook','Polecenie','Odbiór lokalny','Inne']],['preferences','Preferowane produkty','text'],['lastContact','Ostatni kontakt','date'],['notes','Uwagi','textarea']]},
+ order:{title:'Zamówienie',store:'orders',prefix:'ZAM',fields:[
+ ['date','Data','date'],['client','Klient','client'],['product','Produkt','text'],['batch','Partia','harvest'],
+ ['reservedCulture','Rezerwuj z kultury','cultureReserve'],['reservedVolumeMl','Rezerwowana objętość [ml]','number'],
+ ['qty','Ilość handlowa','text'],['total','Kwota brutto [PLN]','number'],
+ ['channel','Kanał','select',['OLX','Allegro Lokalnie','Facebook','Bezpośrednio','Inne']],
+ ['status','Status','select',['Nowe','Rezerwacja','Przygotowanie','Gotowe','Wysłane','Dostarczone','Zrealizowane','Anulowane']],
+ ['payment','Płatność','select',['Oczekuje','Opłacona','Pobranie','Zwrot']],
+ ['carrier','Przewoźnik','text'],['tracking','Numer przesyłki','text'],['shippingCost','Koszt wysyłki','number'],
+ ['complaint','Reklamacja / problem','text'],['notes','Uwagi','textarea']
+]},  inventory:{title:'Magazyn',store:'inventory',prefix:'MAG',fields:[['name','Nazwa','text'],['category','Kategoria','select',['Butelki','Zakrętki','Etykiety','Sól','Nawóz / pożywka','Pasza','Chemia / dezynfekcja','Wysyłka','Sprzęt','Inne']],['qty','Stan','number'],['unit','Jednostka','text'],['min','Minimum','number'],['supplier','Dostawca','text'],['lot','Partia dostawcy','text'],['price','Cena za 1 jednostkę magazynową [PLN]','number'],['notes','Uwagi','textarea']]},
+ finance:{title:'Operacja finansowa',store:'finance',prefix:'FIN',fields:[['date','Data','date'],['type','Typ','select',['Przychód','Koszt']],['category','Kategoria','text'],['description','Opis','text'],['amount','Kwota [PLN]','number'],['ref','Powiązanie','text'],['notes','Uwagi','textarea']]},
+ task:{title:'Zadanie',store:'tasks',prefix:'ZAD',fields:[['due','Termin','date'],['title','Zadanie','text'],['category','Kategoria','select',['Hodowla','Pomiary','Zbiór','Klient','Wysyłka','Zakupy','Czyszczenie','Inne']],['ref','Powiązanie','text'],['priority','Priorytet','select',['Niski','Normalny','Wysoki']],['status','Status','select',['Otwarte','W toku','Zrealizowane']],['notes','Uwagi','textarea']]}
+};
+function genericField(n,l,t,o,val){
+ let inp='';const value=val??((t==='date')?today():(t==='datetime-local'?nowLocal():''));
+ if(t==='select')inp=`<select name="${n}">${o.map(x=>`<option ${String(x)===String(value)?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
+ else if(t==='textarea')inp=`<textarea name="${n}">${esc(value||'')}</textarea>`;
+ else if(t==='culture')inp=`<select name="${n}"><option value="">— wybierz —</option>${db.cultures.map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)}</option>`).join('')}</select>`;
+ else if(t==='cultureReserve')inp=`<select name="${n}"><option value="">— brak rezerwacji —</option>${db.cultures.filter(x=>x.status==='Aktywna').map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)} — wolne ${num(cultureAvailableMl(x.id)/1000,2)} L</option>`).join('')}</select>`;
+ else if(t==='client')inp=`<select name="${n}"><option value="">— wybierz —</option>${db.clients.map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
+ else if(t==='harvest')inp=`<select name="${n}"><option value="">— opcjonalnie —</option>${db.harvests.map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.id)} — ${esc(x.product)}</option>`).join('')}</select>`;
+ else inp=`<input name="${n}" type="${t}" ${t==='number'?'step="any"':''} value="${esc(value)}">`;
+ return `<div class="field ${t==='textarea'?'wide':''}"><label>${esc(l)}</label>${inp}</div>`;
+}
+function openForm(type,id='',preset={}){
+ const s=schemas[type],old=id?getById(s.store,id):null,obj=old?{...old}:{id:uid(s.prefix),...preset};
+ document.getElementById('modalTitle').textContent=(old?'Edytuj: ':'Nowy: ')+s.title;document.getElementById('modalBox').classList.remove('wide');
+ document.getElementById('modalBody').innerHTML=`<form id="genericForm"><div class="form-grid">${s.fields.map(([n,l,t,o])=>genericField(n,l,t,o,obj[n])).join('')}</div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button></div></form>`;
+ document.getElementById('genericForm').onsubmit=async e=>{
+  e.preventDefault();
+  const fd=new FormData(e.target);
+  s.fields.forEach(([n])=>obj[n]=fd.get(n)||'');
+  if(s.store==='orders'&&obj.reservedCulture&&Number(obj.reservedVolumeMl||0)>0){
+   const available=cultureAvailableMl(obj.reservedCulture,obj.id);
+   if(Number(obj.reservedVolumeMl)>available){
+    alert(`Nie można zarezerwować ${num(Number(obj.reservedVolumeMl)/1000,2)} L. Dostępne: ${num(available/1000,2)} L.`);
+    return;
+   }
+  }
+  await saveRecord(s.store,obj);
+  if(s.store==='orders'&&!old&&Number(obj.total)>0)await saveRecord('finance',{id:uid('FIN'),date:obj.date,type:'Przychód',category:'Sprzedaż',description:'Zamówienie '+obj.id,amount:obj.total,ref:obj.id,notes:'Wpis automatyczny'});
+  closeModal();render()
+ };
+ document.getElementById('modal').classList.add('open');
+}
+
+function renderClients(){return `<div class="toolbar">${btn('+ Klient',"openForm('client')",'btn primary')}</div>`+table(['Klient','Segment','Kontakt','Miejscowość','Zamówienia','Wartość','Akcje'],db.clients.map(c=>{const o=db.orders.filter(x=>x.client===c.id&&x.status!=='Anulowane'),v=o.reduce((a,x)=>a+Number(x.total||0),0);return `<tr><td><a class="link" onclick="openClientCard('${c.id}')"><strong>${esc(c.name)}</strong></a><div class="mini">${esc(c.id)}</div></td><td>${badge(c.segment||'Nowy')}</td><td>${esc(c.phone)}<div class="mini">${esc(c.email)}</div></td><td>${esc(c.city)}</td><td>${o.length}</td><td>${money(v)}</td><td>${btn('Karta',`openClientCard('${c.id}')`,'btn tiny secondary')}${btn('Edytuj',`openForm('client','${c.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('clients','${c.id}')`,'btn tiny danger')}</td></tr>`}))}
+function openClientCard(id){const c=getById('clients',id);if(!c)return;const o=db.orders.filter(x=>x.client===id),v=o.filter(x=>x.status!=='Anulowane').reduce((a,x)=>a+Number(x.total||0),0);document.getElementById('modalTitle').textContent='Klient — '+c.name;document.getElementById('modalBox').classList.add('wide');document.getElementById('modalBody').innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('+ Zamówienie',`closeModal();openForm('order','',{'client':'${id}'})`,'btn primary')}</div><div class="two"><div class="card"><h3>Dane</h3><div class="profile">${profileBox('Segment',c.segment)}${profileBox('Telefon',c.phone)}${profileBox('E-mail',c.email)}${profileBox('Miejscowość',c.city)}${profileBox('Źródło',c.source)}${profileBox('Preferencje',c.preferences)}</div></div><div class="card"><h3>Wartość</h3><div class="statline"><span>Zamówienia</span><strong>${o.length}</strong></div><div class="statline"><span>Sprzedaż</span><strong>${money(v)}</strong></div><div class="statline"><span>Średnie zamówienie</span><strong>${money(o.length?v/o.length:0)}</strong></div></div></div><div class="section card"><h3>Historia</h3>${table(['Data','ID','Produkt','Partia','Kwota','Status'],o.map(x=>`<tr><td>${datePL(x.date)}</td><td>${esc(x.id)}</td><td>${esc(x.product)}</td><td>${esc(x.batch)}</td><td>${money(x.total)}</td><td>${badge(x.status)}</td></tr>`))}</div>`;document.getElementById('modal').classList.add('open')}
+
+function renderOrders(){
+ const statuses=['Nowe','Rezerwacja','Przygotowanie','Gotowe','Wysłane','Dostarczone'];
+ const controls=`<div class="toolbar">${btn('+ Zamówienie',"openForm('order')",'btn primary')}${btn(orderMode==='pipeline'?'Tabela':'Kanban',`orderMode='${orderMode==='pipeline'?'table':'pipeline'}';render()`,'btn secondary')}</div>`;
+ if(orderMode==='table'){
+  return controls+table(['ID','Data','Klient','Produkt / partia','Rezerwacja produkcji','Kwota','Status','Płatność','Wysyłka','Akcje'],
+   [...db.orders].sort((x,y)=>(y.date||'').localeCompare(x.date||'')).map(x=>`<tr>
+    <td>${esc(x.id)}</td><td>${datePL(x.date)}</td><td>${esc(clientName(x.client))}</td>
+    <td>${esc(x.product)}<div class="mini">${esc(x.batch||'')}</div></td>
+    <td>${x.reservedCulture?`<a class="link" onclick="openCultureCard('${x.reservedCulture}')">${esc(x.reservedCulture)}</a><div class="mini">${num(Number(x.reservedVolumeMl||0)/1000,2)} L</div>`:'—'}</td>
+    <td>${money(x.total)}</td><td>${badge(x.status)}</td><td>${badge(x.payment)}</td>
+    <td>${esc(x.carrier||'')}<div class="mini">${esc(x.tracking||'')}</div></td>
+    <td>${btn('Edytuj',`openForm('order','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('orders','${x.id}')`,'btn tiny danger')}</td>
+   </tr>`));
+ }
+ return controls+`<div class="pipeline">${statuses.map(st=>`<div class="pipe-col"><h4>${st} (${db.orders.filter(x=>x.status===st).length})</h4>${db.orders.filter(x=>x.status===st).map(x=>`<div class="order-card">
+  <strong>${esc(x.id)}</strong>${esc(clientName(x.client))}
+  <div class="mini">${esc(x.product)} • ${money(x.total)}</div>
+  ${x.reservedCulture?`<div class="mini">Rezerwacja: ${esc(x.reservedCulture)} • ${num(Number(x.reservedVolumeMl||0)/1000,2)} L</div>`:''}
+  <div style="margin-top:6px">${btn('Edytuj',`openForm('order','${x.id}')`,'btn tiny')}</div>
+ </div>`).join('')}</div>`).join('')}</div>`;
+}
+
+function renderInventory(){return `<div class="toolbar">${btn('+ Pozycja',"openForm('inventory')",'btn primary')}${btn('+ Ruch',"openStockMove()")}</div>`+table(['Nazwa','Kategoria','Stan','Minimum','Partia dostawcy','Cena','Akcje'],db.inventory.map(x=>`<tr><td><strong>${esc(x.name)}</strong><div class="mini">${esc(x.id)}</div></td><td>${esc(x.category)}</td><td>${Number(x.qty)<=Number(x.min||0)?badge('Niski'):badge('OK')} ${esc(x.qty)} ${esc(x.unit)}</td><td>${esc(x.min)} ${esc(x.unit)}</td><td>${esc(x.lot||'')}</td><td>${money(x.price)}</td><td>${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny secondary')}${btn('Edytuj',`openForm('inventory','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('inventory','${x.id}')`,'btn tiny danger')}</td></tr>`))+`<div class="section card"><h3>Ostatnie ruchy</h3>${table(['Data','Pozycja','Typ','Ilość','Powód'],[...db.stockMoves].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,20).map(x=>`<tr><td>${datePL(x.date)}</td><td>${esc(getById('inventory',x.item)?.name||x.item)}</td><td>${badge(x.type)}</td><td>${esc(x.qty)}</td><td>${esc(x.reason)}</td></tr>`))}</div>`}
+function openStockMove(item=''){document.getElementById('modalTitle').textContent='Ruch magazynowy';document.getElementById('modalBox').classList.remove('wide');document.getElementById('modalBody').innerHTML=`<form id="stockForm"><div class="form-grid"><div class="field"><label>Pozycja</label><select name="item">${db.inventory.map(x=>`<option value="${x.id}" ${x.id===item?'selected':''}>${esc(x.name)} (${esc(x.qty)} ${esc(x.unit)})</option>`).join('')}</select></div>${f('type','Typ','select','Przyjęcie',['Przyjęcie','Rozchód','Korekta +','Korekta -'])}${f('qty','Ilość','number','')}${f('reason','Powód','text','')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz</button></div></form>`;document.getElementById('stockForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),it=getById('inventory',fd.get('item'));if(!it)return;const qty=Number(fd.get('qty')||0),type=fd.get('type'),sign=(type==='Przyjęcie'||type==='Korekta +')?1:-1;it.qty=Number(it.qty||0)+qty*sign;await put('inventory',it);await saveRecord('stockMoves',{id:uid('RM'),date:nowLocal(),item:it.id,type,qty:qty*sign,reason:fd.get('reason')||''});closeModal();render()};document.getElementById('modal').classList.add('open')}
+
+function renderFinance(){const inc=db.finance.filter(x=>x.type==='Przychód').reduce((a,x)=>a+Number(x.amount||0),0),cost=db.finance.filter(x=>x.type==='Koszt').reduce((a,x)=>a+Number(x.amount||0),0),p=inc-cost;return `<div class="grid"><div class="card kpi"><div class="l">Przychody</div><div class="v">${money(inc)}</div></div><div class="card kpi"><div class="l">Koszty</div><div class="v">${money(cost)}</div></div><div class="card kpi"><div class="l">Wynik</div><div class="v">${money(p)}</div></div><div class="card kpi"><div class="l">Rentowność</div><div class="v">${num(inc?p/inc*100:0,1)}%</div></div></div><div class="section card"><div class="toolbar">${btn('+ Operacja',"openForm('finance')",'btn primary')}</div>${table(['Data','Typ','Kategoria','Opis','Kwota','Powiązanie','Akcje'],[...db.finance].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td>${badge(x.type)}</td><td>${esc(x.category)}</td><td>${esc(x.description)}</td><td>${money(x.amount)}</td><td>${esc(x.ref)}</td><td>${btn('Edytuj',`openForm('finance','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('finance','${x.id}')`,'btn tiny danger')}</td></tr>`))}</div>`}
+
+function renderPrints(){
+ return `<div class="grid3">
+  <div class="card"><h3>Etykiety produktu + QR</h3><p class="small">Arkusz A4 etykiet z numerem partii i kodem identyfikacyjnym.</p><select id="printBatch">${db.harvests.map(h=>`<option value="${h.id}">${esc(h.id)} — ${esc(h.product)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj etykiety',"printSelectedBatchLabels()",'btn primary')}</div></div>
+  <div class="card"><h3>ID kultury / naczynia + QR</h3><p class="small">Karta stanowiska z aktualną objętością i identyfikatorem.</p><select id="printCulture">${db.cultures.map(c=>`<option value="${c.id}">${esc(c.id)} — ${esc(c.organism)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj kartę',"printSelectedCultureID()",'btn primary')}</div></div>
+  <div class="card"><h3>Etykieta próbki + QR</h3><p class="small">Kod próbki, kultura, wynik i kod QR.</p><select id="printMeasurement">${db.measurements.map(m=>`<option value="${m.id}">${esc(m.sampleCode||m.id)} — ${esc(m.param)} — ${esc(m.culture)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj etykietę',"printSelectedSample()",'btn primary')}</div></div>
+ </div>
+ <div class="section equal2">
+  <div class="card"><h3>Identyfikacja po kodzie QR</h3><p class="small">Zeskanuj kod czytnikiem USB/Bluetooth albo wklej jego tekst. Format: ACM|CULTURE|…, ACM|BATCH|… lub ACM|SAMPLE|…</p><input id="qrLookup" placeholder="ACM|BATCH|NAN-20260810-001" onkeydown="if(event.key==='Enter')resolveQR()"><div class="actions" style="margin-top:10px">${btn('Otwórz rekord',"resolveQR()",'btn primary')}</div></div>
+  <div class="card"><h3>Karty identyfikacyjne partii</h3><p class="small">Pełna karta partii z QR, kulturą źródłową, terminem i recepturą.</p><select id="printBatchID">${db.harvests.map(h=>`<option value="${h.id}">${esc(h.id)} — ${esc(h.product)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj kartę partii',"printSelectedBatchID()",'btn primary')}</div></div>
+ </div>
+ <div class="section callout">Kody QR zawierają identyfikatory lokalnej bazy, a nie adres internetowy. Skaner kodów podłączony do komputera może wpisać ich treść bezpośrednio do pola identyfikacji.</div>`;
+}
+function printSelectedBatchLabels(){const id=document.getElementById('printBatch').value;if(id)printBatchLabels(id)}
+function printSelectedCultureID(){const id=document.getElementById('printCulture').value;if(id)printCultureID(id)}
+function printSelectedSample(){const id=document.getElementById('printMeasurement').value;if(id)printSampleLabel(id)}
+function printSelectedBatchID(){const id=document.getElementById('printBatchID').value;if(id)printBatchID(id)}
+function popupDoc(title,body,css=''){const w=window.open('','_blank');if(!w){alert('Przeglądarka zablokowała nowe okno. Zezwól na wyskakujące okna dla tego pliku.');return null}w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;color:#111;margin:0}button{margin:8px;padding:7px 10px}${css}</style></head><body><button onclick="window.print()">Drukuj / Zapisz PDF</button>${body}</body></html>`);w.document.close();return w}
+function printBatchLabels(id){
+ const h=getById('harvests',id);if(!h)return;
+ const c=getById('cultures',h.culture),count=Math.max(1,Math.min(120,Number(h.unitsProduced||1))),qr=makeQR(qrPayload('BATCH',h.id));
+ const labels=Array.from({length:count},()=>`<div class="label">
+   <div class="labelmain"><div class="brand">${esc(db.settings.companyName)}</div><div class="subtitle">${esc(db.settings.companySubtitle)}</div><div class="product">${esc(h.product)}</div>
+   <div class="line"><b>Partia</b><span>${esc(h.id)}</span></div><div class="line"><b>Produkcja</b><span>${esc(datePL(h.date))}</span></div>
+   ${h.bestBefore?`<div class="line"><b>Użyć do</b><span>${esc(datePL(h.bestBefore))}</span></div>`:''}
+   ${h.packageSizeMl?`<div class="line"><b>Objętość</b><span>${esc(h.packageSizeMl)} ml</span></div>`:''}
+   <div class="line"><b>Linia</b><span>${esc(c?.strain||c?.organism||'')}</span></div><div class="footer">${esc(db.settings.labelFooter)}</div></div>
+   <div class="qrbox">${qr}<div>${esc(h.id)}</div></div>
+ </div>`).join('');
+ popupDoc('Etykiety '+h.id,`<div class="sheet">${labels}</div>`,`@page{size:A4;margin:7mm}.sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm}.label{height:58mm;border:1.2px solid #1d3d31;border-radius:5mm;padding:4mm;break-inside:avoid;display:grid;grid-template-columns:1fr 22mm;gap:3mm}.brand{font-size:16px;font-weight:800;color:#173f34}.subtitle{font-size:7px;color:#61706b;margin-bottom:2mm}.product{font-size:13px;font-weight:800;margin-bottom:2mm}.line{display:flex;justify-content:space-between;border-bottom:1px solid #d8dfdc;padding:1mm 0;font-size:9px}.footer{font-size:7px;color:#555;margin-top:3mm}.qrbox{align-self:center;text-align:center;font-size:6px;word-break:break-all}.qrbox .qrsvg{width:21mm;height:21mm}@media print{button{display:none}}`);
+}
+
+function printBatchID(id){
+ const h=getById('harvests',id);if(!h)return;
+ const c=getById('cultures',h.culture),qr=makeQR(qrPayload('BATCH',h.id));
+ popupDoc('ID partii '+id,`<div class="idcard"><div class="qr">${qr}</div>
+   <div class="top">${esc(db.settings.companyName)}</div><div class="id">${esc(h.id)}</div><div class="org">${esc(h.product)}</div>
+   <div class="gridp"><div><small>PRODUKCJA</small><b>${esc(datePL(h.date))}</b></div><div><small>KULTURA</small><b>${esc(h.culture)}</b></div><div><small>SZCZEP / ŹRÓDŁO</small><b>${esc(c?.strain||'—')}</b></div>
+   <div><small>ILOŚĆ</small><b>${esc(h.amount)} ${esc(h.unit)}</b></div><div><small>OPAKOWANIA</small><b>${esc(h.unitsProduced||'—')} × ${esc(h.packageSizeMl||'—')} ml</b></div><div><small>POBRANO Z KULTURY</small><b>${num(Number(h.cultureConsumedMl||0)/1000,2)} L</b></div>
+   <div><small>TERMIN</small><b>${esc(datePL(h.bestBefore)||'—')}</b></div><div><small>JAKOŚĆ</small><b>${esc(h.quality||'—')}</b></div><div><small>RECEPTURA</small><b>${esc(getById('recipes',h.recipeId)?.name||'—')}</b></div></div>
+   <div class="note">QR: ${esc(qrPayload('BATCH',h.id))} • kultura źródłowa ${esc(h.culture)}.</div></div>`,
+ `@page{size:A4;margin:15mm}.idcard{position:relative;border:3px solid #163c32;border-radius:8mm;padding:10mm;max-width:170mm}.qr{position:absolute;right:9mm;top:9mm;width:30mm;height:30mm}.qr .qrsvg{width:100%;height:100%}.top{font-size:14px;color:#355}.id{font-size:35px;font-weight:900;letter-spacing:1px;margin-top:4mm;padding-right:35mm}.org{font-size:20px;font-weight:700;margin-bottom:7mm}.gridp{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}.gridp div{border:1px solid #bbb;padding:4mm;border-radius:3mm}.gridp small{display:block;font-size:8px;color:#666}.gridp b{display:block;font-size:12px;margin-top:1mm;word-break:break-word}.note{margin-top:7mm;padding:4mm;background:#eef5f2;font-weight:700;font-size:10px}@media print{button{display:none}}`);
+}
+
+function printCultureID(id){
+ const c=getById('cultures',id);if(!c)return;const qr=makeQR(qrPayload('CULTURE',c.id));
+ popupDoc('ID '+id,`<div class="idcard"><div class="qr">${qr}</div><div class="top">${esc(db.settings.companyName)}</div><div class="id">${esc(c.id)}</div><div class="org">${esc(c.organism)}</div>
+ <div class="gridp"><div><small>START</small><b>${esc(datePL(c.start))}</b></div><div><small>NACZYNIE</small><b>${esc(c.vessel||'—')}</b></div><div><small>OBJĘTOŚĆ</small><b>${esc(c.volume||'—')} L</b></div><div><small>REZERWACJE</small><b>${num(activeReservationMl(c.id)/1000,2)} L</b></div><div><small>WOLNE</small><b>${num(cultureAvailableMl(c.id)/1000,2)} L</b></div><div><small>STATUS</small><b>${esc(c.status)}</b></div></div>
+ <div class="note">Następna czynność: ${esc(c.nextAction||'—')} ${c.nextActionDate?'• '+esc(datePL(c.nextActionDate)):''}<br>QR: ${esc(qrPayload('CULTURE',c.id))}</div></div>`,
+ `@page{size:A4;margin:15mm}.idcard{position:relative;border:3px solid #163c32;border-radius:8mm;padding:10mm;max-width:170mm}.qr{position:absolute;right:9mm;top:9mm;width:31mm;height:31mm}.qr .qrsvg{width:100%;height:100%}.top{font-size:14px;color:#355}.id{font-size:38px;font-weight:900;letter-spacing:1px;margin-top:4mm;padding-right:36mm}.org{font-size:22px;font-weight:700;margin-bottom:7mm}.gridp{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}.gridp div{border:1px solid #bbb;padding:4mm;border-radius:3mm}.gridp small{display:block;font-size:9px;color:#666}.gridp b{display:block;font-size:13px;margin-top:1mm}.note{margin-top:7mm;padding:4mm;background:#eef5f2;font-weight:700;font-size:10px}@media print{button{display:none}}`);
+}
+function printSampleLabel(id){
+ const m=getById('measurements',id);if(!m)return;const code=m.sampleCode||m.id,qr=makeQR(qrPayload('SAMPLE',code));
+ popupDoc('Próbka '+id,`<div class="sample"><div class="left"><div class="brand">${esc(db.settings.companyName)}</div><div class="code">${esc(code)}</div><div><b>Kultura:</b> ${esc(m.culture)}</div><div><b>Data:</b> ${esc(datePL(m.date))}</div><div><b>Badanie:</b> ${esc(m.param)}</div><div><b>Wynik:</b> ${esc(m.value)} ${esc(m.unit)}</div><div><b>Ocena:</b> ${esc(m.rating)}</div></div><div class="qr">${qr}</div></div>`,
+ `@page{size:A4;margin:10mm}.sample{width:92mm;border:1.5px solid #222;padding:5mm;border-radius:4mm;display:grid;grid-template-columns:1fr 28mm;gap:4mm}.brand{font-size:11px}.code{font-size:20px;font-weight:900;margin:2mm 0 4mm}.sample .left div{font-size:9px;margin:1mm 0}.qr .qrsvg{width:27mm;height:27mm}@media print{button{display:none}}`);
+}
+
+function renderReports(){
+ return `<div class="grid3">
+  <div class="card"><h3>Raport kultury</h3><select id="reportCulture">${db.cultures.map(c=>`<option value="${c.id}">${esc(c.id)} — ${esc(c.organism)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printSelectedCultureReport()",'btn primary')}</div></div>
+  <div class="card"><h3>Raport partii</h3><select id="reportBatch">${db.harvests.map(h=>`<option value="${h.id}">${esc(h.id)} — ${esc(h.product)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printSelectedBatchReport()",'btn primary')}</div></div>
+  <div class="card"><h3>Raport miesięczny</h3><input id="reportMonth" type="month" value="${today().slice(0,7)}"><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printMonthlyReport()",'btn primary')}</div></div>
+ </div>
+ <div class="section card"><h3>Eksport CSV</h3><div class="actions">${DATA_STORES.map(s=>btn('CSV: '+s,`exportCSV('${s}')`)).join('')}</div></div>`;
+}
+function printSelectedCultureReport(){const id=document.getElementById('reportCulture').value;if(id)printCultureReport(id)}
+function printSelectedBatchReport(){const id=document.getElementById('reportBatch').value;if(id)printBatchReport(id)}
+function reportCSS(){return `@page{size:A4;margin:15mm}.report{max-width:180mm;margin:auto}.head{display:grid;grid-template-columns:1fr 28mm;gap:6mm;border-bottom:2px solid #183b31;padding-bottom:5mm;margin-bottom:5mm}.head h1{font-size:22px;margin:0}.reportqr .qrsvg{width:27mm;height:27mm}.muted{color:#666;font-size:10px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:5mm 0}.kpi{border:1px solid #ccc;border-radius:2mm;padding:3mm}.kpi small{display:block;color:#666;font-size:8px}.kpi b{font-size:14px}table{width:100%;border-collapse:collapse;font-size:9px;margin-top:4mm}th,td{border-bottom:1px solid #ccc;text-align:left;padding:2mm}h2{font-size:14px;margin-top:7mm}.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:3mm}.photos img{width:100%;max-height:70mm;object-fit:contain;border:1px solid #ddd}.printchart svg{width:100%;max-height:75mm}.trace{background:#f1f5f3;padding:3mm;border-radius:2mm;font-size:9px}@media print{button{display:none}}`}
+function printCultureReport(id){
+ const c=getById('cultures',id);if(!c)return;
+ const ms=db.measurements.filter(x=>x.culture===id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
+ ev=db.events.filter(x=>x.culture===id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
+ hs=db.harvests.filter(x=>x.culture===id),photos=db.media.filter(x=>x.cultureId===id).slice(-6),
+ reservations=db.orders.filter(o=>o.reservedCulture===id&&!['Anulowane','Dostarczone','Zrealizowane'].includes(o.status)),
+ qr=makeQR(qrPayload('CULTURE',c.id)),growth=printGrowthChart(growthSeries(id));
+ const photoTags=photos.map(p=>`<img src="${mediaURLs.get(p.id)||''}">`).join('');
+ popupDoc('Raport kultury '+id,`<div class="report"><div class="head"><div><h1>Raport kultury ${esc(c.id)}</h1><div>${esc(c.organism)} • ${esc(c.strain||'')}</div><div class="muted">${esc(db.settings.companyName)} • wygenerowano ${esc(datePL(nowLocal()))}<br>${esc(qrPayload('CULTURE',c.id))}</div></div><div class="reportqr">${qr}</div></div>
+ <div class="kpis"><div class="kpi"><small>START</small><b>${esc(datePL(c.start))}</b></div><div class="kpi"><small>WIEK</small><b>${daysBetween(c.start)} dni</b></div><div class="kpi"><small>OBJĘTOŚĆ</small><b>${esc(c.volume||'—')} L</b></div><div class="kpi"><small>WOLNE PO REZERWACJACH</small><b>${num(cultureAvailableMl(c.id)/1000,2)} L</b></div></div>
+ <h2>Parametry i profil</h2><table><tr><th>Naczynie</th><td>${esc(c.vessel||'')}</td><th>Zasolenie</th><td>${esc(c.salinity||'')} ppt</td></tr><tr><th>Temperatura</th><td>${esc(c.temperature||'')} °C</td><th>Medium</th><td>${esc(c.medium||'')}</td></tr><tr><th>Status</th><td>${esc(c.status)}</td><th>Następna czynność</th><td>${esc(c.nextAction||'')} ${esc(datePL(c.nextActionDate))}</td></tr></table>
+ <h2>Wykres wzrostu / głównego parametru</h2>${growth}
+ <h2>Aktywne rezerwacje produkcji</h2>${printTable(['Zamówienie','Klient','Objętość','Status'],reservations.map(o=>[o.id,clientName(o.client),num(Number(o.reservedVolumeMl||0)/1000,2)+' L',o.status]))}
+ <h2>Pomiary</h2>${printTable(['Data','Parametr','Wynik','Metoda','Ocena'],ms.map(m=>[datePL(m.date),m.param,`${m.value||''} ${m.unit||''}`,m.method,m.rating]))}
+ <h2>Dziennik czynności</h2>${printTable(['Data','Typ','Opis','Ilość'],ev.map(e=>[datePL(e.date),e.type,e.description,`${e.amount||''} ${e.unit||''}`]))}
+ <h2>Partie produktu</h2>${printTable(['Partia','Data','Produkt','Pobranie z kultury','Ilość produktu','Koszt'],hs.map(h=>[h.id,datePL(h.date),h.product,num(Number(h.cultureConsumedMl||0)/1000,2)+' L',`${h.amount} ${h.unit}`,money(h.totalCost)]))}
+ ${photos.length?`<h2>Dokumentacja fotograficzna</h2><div class="photos">${photoTags}</div>`:''}</div>`,reportCSS());
+}
+
+function printBatchReport(id){
+ const h=getById('harvests',id);if(!h)return;
+ const c=getById('cultures',h.culture),o=db.orders.filter(x=>x.batch===id&&x.status!=='Anulowane'),
+ val=o.reduce((a,x)=>a+Number(x.total||0),0),
+ m=db.measurements.filter(x=>x.culture===h.culture).filter(x=>!h.date||x.date.slice(0,10)<=h.date).sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,10),
+ qr=makeQR(qrPayload('BATCH',h.id)),breakdown=h.costBreakdown||recipeCostBreakdown(h.recipeId,h.unit==='L'?Number(h.amount||0):h.unit==='ml'?Number(h.amount||0)/1000:0,Number(h.unitsProduced||0));
+ popupDoc('Raport partii '+id,`<div class="report"><div class="head"><div><h1>Raport partii ${esc(h.id)}</h1><div>${esc(h.product)}</div><div class="muted">${esc(db.settings.companyName)} • ${esc(datePL(nowLocal()))}<br>${esc(qrPayload('BATCH',h.id))}</div></div><div class="reportqr">${qr}</div></div>
+ <div class="kpis"><div class="kpi"><small>PRODUKCJA</small><b>${esc(datePL(h.date))}</b></div><div class="kpi"><small>KULTURA</small><b>${esc(h.culture)}</b></div><div class="kpi"><small>KOSZT</small><b>${esc(money(h.totalCost))}</b></div><div class="kpi"><small>SPRZEDAŻ</small><b>${esc(money(val))}</b></div></div>
+ <div class="trace"><b>Ścieżka identyfikowalności:</b> ${esc(h.id)} → ${esc(h.culture)} → ${esc(c?.parentCulture||'kultura bazowa')} • objętość kultury przed pobraniem ${h.cultureVolumeBefore!==undefined?num(Number(h.cultureVolumeBefore),2)+' L':'brak danych'}, po pobraniu ${h.cultureVolumeAfter!==undefined?num(Number(h.cultureVolumeAfter),2)+' L':'brak danych'}.</div>
+ <h2>Identyfikowalność partii</h2><table><tr><th>Produkt</th><td>${esc(h.product)}</td><th>Szczep / źródło</th><td>${esc(c?.strain||'')}</td></tr><tr><th>Ilość produktu</th><td>${esc(h.amount)} ${esc(h.unit)}</td><th>Rzeczywiste pobranie</th><td>${num(Number(h.cultureConsumedMl||0)/1000,2)} L</td></tr><tr><th>Opakowania</th><td>${esc(h.unitsProduced||'')} × ${esc(h.packageSizeMl||'')} ml</td><th>Termin</th><td>${esc(datePL(h.bestBefore))}</td></tr><tr><th>Receptura</th><td>${esc(getById('recipes',h.recipeId)?.name||'—')}</td><th>Jakość</th><td>${esc(h.quality)}</td></tr></table>
+ <h2>Kosztorys materiałów</h2>${printTable(['Składnik','Partia dostawcy','Ilość','Cena jednostkowa','Koszt'],breakdown.map(x=>[x.name,x.lot||'—',num(x.qty,3)+' '+(x.unit||''),money(x.unitPrice),money(x.cost)]))}
+ <h2>Ostatnie pomiary kultury przed rozlewem</h2>${printTable(['Data','Parametr','Wynik','Ocena'],m.map(x=>[datePL(x.date),x.param,`${x.value} ${x.unit}`,x.rating]))}
+ <h2>Odbiorcy partii</h2>${printTable(['Data','Zamówienie','Klient','Ilość','Kwota'],o.map(x=>[datePL(x.date),x.id,clientName(x.client),x.qty,money(x.total)]))}</div>`,reportCSS());
+}
+
+function printMonthlyReport(){
+ const month=document.getElementById('reportMonth').value;if(!month)return;const os=db.orders.filter(x=>(x.date||'').startsWith(month)&&x.status!=='Anulowane'),fs=db.finance.filter(x=>(x.date||'').startsWith(month)),hs=db.harvests.filter(x=>(x.date||'').startsWith(month)),inc=fs.filter(x=>x.type==='Przychód').reduce((a,x)=>a+Number(x.amount||0),0),cost=fs.filter(x=>x.type==='Koszt').reduce((a,x)=>a+Number(x.amount||0),0);
+ popupDoc('Raport miesięczny '+month,`<div class="report"><div class="head"><div><h1>Raport miesięczny ${esc(month)}</h1><div>${esc(db.settings.companyName)}</div></div><div class="muted">Wygenerowano ${esc(datePL(nowLocal()))}</div></div><div class="kpis"><div class="kpi"><small>ZAMÓWIENIA</small><b>${os.length}</b></div><div class="kpi"><small>PRZYCHÓD</small><b>${esc(money(inc))}</b></div><div class="kpi"><small>KOSZTY</small><b>${esc(money(cost))}</b></div><div class="kpi"><small>WYNIK</small><b>${esc(money(inc-cost))}</b></div></div><h2>Partie wyprodukowane</h2>${printTable(['Partia','Produkt','Kultura','Ilość','Koszt'],hs.map(h=>[h.id,h.product,h.culture,`${h.amount} ${h.unit}`,money(h.totalCost)]))}<h2>Zamówienia</h2>${printTable(['Data','ID','Klient','Produkt','Kwota','Status'],os.map(o=>[datePL(o.date),o.id,clientName(o.client),o.product,money(o.total),o.status]))}</div>`,reportCSS());
+}
+function printTable(headers,rows){return `<table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(v=>`<td>${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table>`}
+
+function renderTasks(){const a=computedAlerts();return `<div class="equal2"><div class="card"><div class="toolbar">${btn('+ Zadanie',"openForm('task')",'btn primary')}</div>${table(['Termin','Zadanie','Priorytet','Status','Akcje'],[...db.tasks].sort((x,y)=>(x.due||'').localeCompare(y.due||'')).map(x=>`<tr><td>${datePL(x.due)}</td><td><strong>${esc(x.title)}</strong><div class="mini">${esc(x.ref||'')} ${esc(x.notes||'')}</div></td><td>${badge(x.priority)}</td><td>${badge(x.status)}</td><td>${x.status!=='Zrealizowane'?btn('Zrobione',`markTaskDone('${x.id}')`,'btn tiny secondary'):''}${btn('Edytuj',`openForm('task','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('tasks','${x.id}')`,'btn tiny danger')}</td></tr>`))}</div><div class="card"><h3>Alerty automatyczne</h3>${a.length?a.map(x=>`<div class="alert">${badge(x.level==='bad'?'Problem':'Uwaga')}<strong>${esc(x.title)}</strong><span class="small">${esc(x.desc)}</span></div>`).join(''):'<div class="empty">Brak alertów.</div>'}</div></div>`}
+async function markTaskDone(id){const x=getById('tasks',id);if(x){x.status='Zrealizowane';await saveRecord('tasks',x);render()}}
+
+function renderBackup(){
+ setTimeout(updateStorageInfo,50);
+ return `<div class="two"><div class="card"><h3>Kopia pełna</h3><p class="small">Pełny backup JSON zawiera rekordy oraz zdjęcia zakodowane w Base64. Przy dużej liczbie zdjęć plik może być duży.</p><div class="actions">${btn('Eksport pełny + zdjęcia',"exportFullBackup()",'btn primary')}${btn('Eksport danych bez zdjęć',"exportDataBackup()")}</div></div><div class="card"><h3>Import</h3><input type="file" id="backupFile" accept=".json"><div class="actions" style="margin-top:10px">${btn('Importuj kopię',"importBackup()",'btn primary')}${btn('Wyczyść całą bazę',"resetDatabase()",'btn danger')}</div></div></div>
+ <div class="section card"><h3>Pamięć przeglądarki</h3><div id="storageInfo" class="small">Obliczanie…</div><div class="storage" style="margin-top:9px"><div id="storageBar" style="width:0%"></div></div><div class="actions" style="margin-top:10px">${btn('Poproś o trwałe przechowywanie',"requestPersistence()",'btn secondary')}</div></div>
+ <div class="section card"><h3>Ustawienia firmy i etykiet</h3><div class="form-grid">${f('setCompany','Nazwa na wydrukach','text',db.settings.companyName)}${f('setSubtitle','Podtytuł','text',db.settings.companySubtitle)}${f('setFooter','Stopka etykiety','text',db.settings.labelFooter)}${f('setOperator','Domyślny operator','text',db.settings.operator)}${f('setBottle','Koszt butelki','number',db.settings.defaultBottleCost)}${f('setCap','Koszt zakrętki','number',db.settings.defaultCapCost)}${f('setLabel','Koszt etykiety','number',db.settings.defaultLabelCost)}${f('setAlertDays','Alert braku pomiaru [dni]','number',db.settings.measurementAlertDays)}</div><div class="actions" style="margin-top:12px">${btn('Zapisz ustawienia',"saveSettingsFromUI()",'btn primary')}</div></div>`;
+}
+async function updateStorageInfo(){if(!navigator.storage?.estimate)return;const e=await navigator.storage.estimate(),used=e.usage||0,quota=e.quota||1,p=used/quota*100;const box=document.getElementById('storageInfo'),bar=document.getElementById('storageBar');if(box)box.textContent=`Użyto ${num(used/1024/1024,1)} MB z dostępnych około ${num(quota/1024/1024,0)} MB (${num(p,1)}%). Rekordy: ${DATA_STORES.reduce((a,s)=>a+db[s].length,0)}, zdjęcia: ${db.media.length}.`;if(bar)bar.style.width=Math.min(100,p)+'%'}
+async function requestPersistence(){if(!navigator.storage?.persist)return alert('Ta przeglądarka nie udostępnia tej funkcji.');const ok=await navigator.storage.persist();alert(ok?'Przeglądarka przyznała trwałe przechowywanie danych.':'Przeglądarka nie przyznała trwałego przechowywania. Nadal wykonuj kopie.')}
+async function saveSettingsFromUI(){const root=document.getElementById('content');db.settings.companyName=root.querySelector('[name=setCompany]').value;db.settings.companySubtitle=root.querySelector('[name=setSubtitle]').value;db.settings.labelFooter=root.querySelector('[name=setFooter]').value;db.settings.operator=root.querySelector('[name=setOperator]').value;db.settings.defaultBottleCost=Number(root.querySelector('[name=setBottle]').value||0);db.settings.defaultCapCost=Number(root.querySelector('[name=setCap]').value||0);db.settings.defaultLabelCost=Number(root.querySelector('[name=setLabel]').value||0);db.settings.measurementAlertDays=Number(root.querySelector('[name=setAlertDays]').value||3);await saveSettings();alert('Ustawienia zapisane.')}
+async function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
+function dataURLToBlob(dataURL){const [meta,b64]=dataURL.split(','),mime=(meta.match(/data:(.*?);/)||[])[1]||'application/octet-stream',bin=atob(b64),arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:mime})}
+async function exportFullBackup(){const media=[];for(const m of db.media){media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}const data={app:'AquaCulture Manager LAB',version:4,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')}
+function exportDataBackup(){const data={app:'AquaCulture Manager LAB',version:4,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')}
+async function importBackup(){const file=document.getElementById('backupFile')?.files?.[0];if(!file)return alert('Wybierz plik JSON.');if(!confirm('Import zastąpi obecną bazę. Kontynuować?'))return;try{const data=JSON.parse(await file.text());for(const s of STORES)await clearStore(s);for(const s of DATA_STORES)for(const rec of (data.stores?.[s]||[]))await put(s,rec);if(data.settings)await put('meta',{id:'settings',value:{...defaultSettings,...data.settings}});for(const m of (data.media||[])){await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await loadMemory();render();alert('Kopia przywrócona.')}catch(e){alert('Błąd importu: '+e.message)}}
+async function resetDatabase(){if(!confirm('Usunąć wszystkie rekordy i zdjęcia z IndexedDB?'))return;for(const s of STORES)await clearStore(s);db.settings={...defaultSettings};await saveSettings();await loadMemory();render()}
+function exportCSV(store){const rows=db[store];if(!rows.length)return alert('Brak danych.');const cols=[...new Set(rows.flatMap(x=>Object.keys(x)))].filter(c=>typeof rows.find(r=>r[c]!==undefined)?.[c]!=='object'),q=v=>'"'+String(v??'').replaceAll('"','""')+'"',csv='\ufeff'+[cols.map(q).join(';'),...rows.map(r=>cols.map(c=>q(r[c])).join(';'))].join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),store+'_'+today()+'.csv')}
+function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+
+function quickAdd(){const map={dashboard:'culture',cultures:'culture',events:'event',measurements:'measurement',sanitation:'sanitation',harvests:'harvest',recipes:'recipe',planner:'harvest',clients:'client',orders:'order',inventory:'inventory',finance:'finance',tasks:'task'};const t=map[currentView]||'culture';if(t==='culture')openCultureForm();else if(t==='measurement')openMeasurementForm();else if(t==='harvest')openHarvestForm();else if(t==='recipe')openRecipeForm();else openForm(t)}
+function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modalBox').classList.remove('wide')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+
+
+function isStandalonePWA(){
+ return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function registerPWA(){
+ if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+   navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service Worker:',err));
+  });
+ }
+}
+registerPWA();
+
+init();
+</script>
+</body>
+</html>
