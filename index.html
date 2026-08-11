@@ -140,6 +140,10 @@ input,select,textarea{font-size:16px}
  input,textarea{user-select:text;-webkit-user-select:text}
 }
 
+
+.stock-kind{font-weight:750}.stock-live{color:#82e7ff}.stock-raw{color:#ffe08a}.stock-pack{color:#d5b9ff}.stock-finished{color:#98f0ae}.ledger-ok{color:var(--ok)}.ledger-bad{color:var(--danger)}
+.production-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.production-choice .btn{min-height:62px;text-align:left}
+@media(max-width:700px){.production-choice{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -151,11 +155,10 @@ input,select,textarea{font-size:16px}
  <nav id="nav">
   <div class="group-title">Produkcja</div>
   <button class="active" data-view="dashboard">Pulpit</button>
-  <button data-view="cultures">Kultury / linie</button>
+  <button data-view="production">Produkcja</button>
   <button data-view="events">Dziennik czynności</button>
   <button data-view="measurements">Pomiary / mikroskop</button>
   <button data-view="sanitation">Dezynfekcja</button>
-  <button data-view="harvests">Partie / rozlewy</button>
   <button data-view="recipes">Receptury</button>
   <button data-view="planner">Plan produkcji</button>
 
@@ -187,8 +190,8 @@ input,select,textarea{font-size:16px}
 
 <script>
 const DB_NAME='AquaCultureManagerLAB';
-const DB_VERSION=4;
-const STORES=['cultures','events','measurements','sanitation','harvests','recipes','clients','orders','inventory','stockMoves','finance','tasks','media','meta'];
+const DB_VERSION=5;
+const STORES=['cultures','events','measurements','sanitation','harvests','recipes','clients','orders','inventory','stockMoves','productionRuns','finance','tasks','media','meta'];
 const DATA_STORES=STORES.filter(x=>!['media','meta'].includes(x));
 const OLD_KEYS=['aquaculture_manager_pro_v2','aquaculture_manager_v1'];
 let idb=null;
@@ -205,12 +208,12 @@ const defaultSettings={
 };
 
 const titles={
- dashboard:['Pulpit','Produkcja, jakość, sprzedaż i alerty.'],cultures:['Kultury / linie','Pełne karty kultur i profile gatunkowe.'],
+ dashboard:['Pulpit','Magazyn jest źródłem prawdy o stanach. Produkcja pobiera i odkłada stany magazynowe.'],production:['Produkcja','Pobierz z magazynu → wykonaj operację → odłóż wynik do magazynu.'],cultures:['Archiwum kultur v4','Dane historyczne zachowane dla zgodności.'],
  events:['Dziennik czynności','Operacje wykonywane na kulturach.'],measurements:['Pomiary / mikroskop','Pomiary jakości i dokumentacja fotograficzna.'],
- sanitation:['Dezynfekcja','Mycie i dezynfekcja sprzętu.'],harvests:['Partie / rozlewy','Partie handlowe i pełna identyfikowalność.'],
+ sanitation:['Dezynfekcja','Mycie i dezynfekcja sprzętu.'],harvests:['Archiwum partii v4','Dane historyczne zachowane dla zgodności.'],
  recipes:['Receptury','Automatyczne zużycie surowców podczas produkcji.'],planner:['Plan produkcji','Zapotrzebowanie, koszt i marża.'],
  clients:['Klienci CRM','Historia klientów i zakupów.'],orders:['Zamówienia','Pipeline sprzedaży, wysyłka i płatności.'],
- inventory:['Magazyn','Stany i ruchy magazynowe.'],finance:['Finanse','Przychody, koszty i rentowność.'],
+ inventory:['Magazyn','Jedno źródło prawdy: kultury, surowce, opakowania i produkty gotowe.'],finance:['Finanse','Przychody, koszty i rentowność.'],
  prints:['Etykiety / wydruki','Etykiety produktu, próbki i identyfikatory naczyń.'],reports:['Raporty / PDF','Raporty produkcyjne przygotowane do druku lub zapisu jako PDF.'],
  tasks:['Zadania / alerty','Zadania ręczne i alerty automatyczne.'],backup:['Baza / kopie','Kopie danych, migracja, trwałość i użycie miejsca.']
 };
@@ -284,6 +287,7 @@ async function init(){
   await loadMemory();
   await migrateLocalStorage();
   await loadMemory();
+  await migrateWarehouseV5();
   bindNav();render();
  }catch(e){
   document.getElementById('content').innerHTML='<div class="card"><h3>Błąd uruchamiania IndexedDB</h3><div class="small">'+esc(e.message)+'</div></div>';
@@ -470,7 +474,8 @@ function qrPayload(type,id){return `${db.settings.qrPrefix||'ACM'}|${type}|${id}
 function resolveQR(){
  const v=(document.getElementById('qrLookup')?.value||'').trim(),parts=v.split('|');if(parts.length<3)return alert('Nieprawidłowy kod. Oczekiwany format ACM|TYP|ID.');
  const type=parts[1],id=parts.slice(2).join('|');
- if(type==='CULTURE'&&getById('cultures',id))return openCultureCard(id);
+ if(type==='STOCK'&&getById('inventory',id))return openStockCard(id);
+ if(type==='CULTURE'){if(getById('inventory',id))return openStockCard(id);if(getById('cultures',id))return openCultureCard(id)}
  if(type==='BATCH'&&getById('harvests',id))return openHarvestCard(id);
  if(type==='SAMPLE'){const m=db.measurements.find(x=>(x.sampleCode||x.id)===id||x.id===id);if(m)return openMeasurementCard(m.id)}
  alert('Nie znaleziono rekordu dla tego kodu.');
@@ -485,6 +490,85 @@ async function saveRecord(store,obj){
  await put(store,obj);
  const i=db[store].findIndex(x=>x.id===obj.id);
  if(i>=0)db[store][i]=obj;else db[store].push(obj);
+}
+function inferStockKind(item){
+ if(item.kind)return item.kind;
+ const c=String(item.category||'').toLowerCase();
+ if(c.includes('butel')||c.includes('zakr')||c.includes('etykiet')||c.includes('wysył'))return 'Opakowanie';
+ if(c.includes('produkt got'))return 'Produkt gotowy';
+ if(c.includes('kultura')||item.organism||item.legacyCultureId)return 'Kultura żywa';
+ if(c.includes('sól')||c.includes('nawóz')||c.includes('pasza')||c.includes('chemia'))return 'Surowiec';
+ return 'Inne';
+}
+function stockKindClass(k){return k==='Kultura żywa'?'stock-live':k==='Surowiec'?'stock-raw':k==='Opakowanie'?'stock-pack':k==='Produkt gotowy'?'stock-finished':''}
+function liveStock(){return db.inventory.filter(x=>inferStockKind(x)==='Kultura żywa'&&Number(x.qty||0)>0)}
+function finishedStock(){return db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&Number(x.qty||0)>0)}
+function stockLabel(id){const x=getById('inventory',id);return x?`${x.name} • ${x.lot||x.id}`:id||''}
+function stockLedgerBalance(id){return db.stockMoves.filter(m=>m.item===id).reduce((a,m)=>a+Number(m.qty||0),0)}
+function nextCultureLot(org,date=today()){
+ const code=org==='Nannochloropsis'?'NAN':org==='Tigriopus / widłonogi'?'TIG':org==='Artemia'?'ART':'CUL';
+ const prefix=code+'-CUL-'+String(date).replaceAll('-','')+'-';
+ const nums=db.inventory.map(x=>x.lot).filter(x=>String(x||'').startsWith(prefix)).map(x=>Number(String(x).slice(prefix.length))||0);
+ return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function nextProductionRunId(date=today()){
+ const prefix='PROD-'+String(date).replaceAll('-','')+'-';
+ const nums=db.productionRuns.map(x=>x.id).filter(x=>String(x).startsWith(prefix)).map(x=>Number(String(x).slice(prefix.length))||0);
+ return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function stockQtyText(item){return `${num(Number(item?.qty||0),3)} ${esc(item?.unit||'')}`}
+async function commitProductionRun(run,changes){
+ // changes: [{item,delta,moveType,reason,isNew}]
+ const merged=new Map();
+ for(const ch of changes){
+  if(!ch.item?.id)throw new Error('Brak ID pozycji magazynowej.');
+  const prev=merged.get(ch.item.id);
+  if(prev){prev.delta+=Number(ch.delta||0);prev.reasons.push(ch.reason||run.type)}
+  else merged.set(ch.item.id,{...ch,delta:Number(ch.delta||0),reasons:[ch.reason||run.type]});
+ }
+ // Validate before opening transaction.
+ for(const ch of merged.values()){
+  const current=ch.isNew?0:Number(getById('inventory',ch.item.id)?.qty??ch.item.qty??0);
+  if(current+ch.delta < -1e-9)throw new Error(`Za mały stan: ${ch.item.name}. Dostępne ${num(current,3)} ${ch.item.unit}, wymagane ${num(Math.abs(ch.delta),3)} ${ch.item.unit}.`);
+ }
+ const tx=idb.transaction(['inventory','stockMoves','productionRuns'],'readwrite');
+ const inv=tx.objectStore('inventory'),mov=tx.objectStore('stockMoves'),prs=tx.objectStore('productionRuns');
+ const snapshots=[];
+ for(const ch of merged.values()){
+  const currentObj=ch.isNew?{...ch.item,qty:0}:{...getById('inventory',ch.item.id)};
+  const before=Number(currentObj.qty||0),after=before+ch.delta;
+  currentObj.qty=after;currentObj.updatedAt=new Date().toISOString();
+  if(ch.isNew&&!currentObj.createdAt)currentObj.createdAt=new Date().toISOString();
+  inv.put(currentObj);
+  const move={id:uid('RM'),date:run.dateTime||nowLocal(),item:currentObj.id,type:ch.moveType||(ch.delta>=0?'Przyjęcie':'Rozchód'),qty:ch.delta,reason:ch.reasons.join(' + '),productionRunId:run.id,before,after};
+  mov.put(move);snapshots.push({itemId:currentObj.id,name:currentObj.name,kind:inferStockKind(currentObj),lot:currentObj.lot||'',unit:currentObj.unit||'',delta:ch.delta,before,after});
+ }
+ run.movements=snapshots;run.status='Zaksięgowana';run.createdAt=run.createdAt||new Date().toISOString();prs.put(run);
+ await txDone(tx);await loadMemory();
+}
+async function migrateWarehouseV5(){
+ let meta=null;try{meta=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('warehouseV5'))}catch(e){}
+ if(meta?.value?.done)return;
+ // 1. Do not alter quantities. Add missing metadata and balancing ledger entries only.
+ for(const item of db.inventory){
+  let changed=false;
+  if(!item.kind){item.kind=inferStockKind(item);changed=true}
+  if(item.kind==='Kultura żywa'&&!item.category){item.category='Kultura biologiczna';changed=true}
+  if(changed)await put('inventory',item);
+  const ledger=stockLedgerBalance(item.id),diff=Number(item.qty||0)-ledger;
+  if(Math.abs(diff)>1e-9)await put('stockMoves',{id:uid('RM'),date:nowLocal(),item:item.id,type:'Saldo migracyjne',qty:diff,reason:'Uzgodnienie istniejącego stanu przy przejściu na model Magazyn → Produkcja',before:ledger,after:Number(item.qty||0),migration:'v5'});
+ }
+ await loadMemory();
+ // 2. Convert legacy active cultures to warehouse lots only when there is no matching item. Old culture records remain untouched.
+ for(const c of db.cultures){
+  if(!['Aktywna','Wstrzymana','Problem / skażenie'].includes(c.status)||Number(c.volume||0)<=0)continue;
+  const exists=db.inventory.some(i=>i.legacyCultureId===c.id||i.lot===c.id||String(i.name||'').includes(c.id));
+  if(exists)continue;
+  const item={id:uid('MAG'),name:`${c.organism} — migracja ${c.id}`,kind:'Kultura żywa',category:'Kultura biologiczna',qty:Number(c.volume||0)*1000,unit:'ml',min:0,price:0,lot:c.id,organism:c.organism,strain:c.strain||'',vessel:c.vessel||'',status:c.status,legacyCultureId:c.id,source:'Migracja z v4',createdAt:new Date().toISOString(),start:c.start||''};
+  await put('inventory',item);await put('stockMoves',{id:uid('RM'),date:nowLocal(),item:item.id,type:'Przyjęcie migracyjne',qty:item.qty,reason:`Migracja kultury ${c.id} do centralnego magazynu`,before:0,after:item.qty,migration:'v5'});
+ }
+ await put('meta',{id:'warehouseV5',value:{done:true,date:new Date().toISOString(),note:'Migracja wyłącznie dodająca. Nie usunięto rekordów v4.'}});
+ await loadMemory();
 }
 async function deleteRecord(store,id){
  if(!confirm('Usunąć ten wpis?'))return;
@@ -506,7 +590,7 @@ async function copyCulture(id){
 function render(){
  const [t,s]=titles[currentView];document.getElementById('viewTitle').textContent=t;document.getElementById('viewSub').textContent=s;
  document.getElementById('content').innerHTML=({
-  dashboard:renderDashboard,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,
+  dashboard:renderDashboard,production:renderProduction,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,
   harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,inventory:renderInventory,
   finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup
  })[currentView]();
@@ -514,11 +598,10 @@ function render(){
 
 function computedAlerts(){
  const a=[];const limit=Number(db.settings.measurementAlertDays||3);
- db.cultures.filter(x=>x.status==='Aktywna').forEach(c=>{
-  const m=[...db.measurements].filter(x=>x.culture===c.id).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
-  if(!m||daysBetween(m.date||c.start)>=limit)a.push({level:'warn',title:'Brak świeżego pomiaru',desc:`${c.id} ${c.organism}: ${m?'ostatni '+datePL(m.date):'brak pomiarów'}`});
-  if(activeReservationMl(c.id)>Number(c.volume||0)*1000)a.push({level:'bad',title:'Przekroczona rezerwacja produkcji',desc:`${c.id}: zarezerwowano ${num(activeReservationMl(c.id)/1000,2)} L przy objętości ${num(Number(c.volume||0),2)} L`});
-  if(c.nextActionDate&&c.nextActionDate<today())a.push({level:'bad',title:'Przekroczony termin',desc:`${c.id}: ${c.nextAction||'czynność'} (${datePL(c.nextActionDate)})`});
+ liveStock().forEach(c=>{
+  const m=[...db.measurements].filter(x=>x.stockItem===c.id||x.culture===c.legacyCultureId).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+  if(!m||daysBetween(m.date||c.createdAt||today())>=limit)a.push({level:'warn',title:'Brak świeżego pomiaru',desc:`${c.id} ${c.organism}: ${m?'ostatni '+datePL(m.date):'brak pomiarów'}`});
+  if(Math.abs(stockLedgerBalance(c.id)-Number(c.qty||0))>1e-9)a.push({level:'bad',title:'Niezgodność salda magazynowego',desc:`${c.name}: stan ${num(Number(c.qty||0),3)} ${c.unit}, ruchy ${num(stockLedgerBalance(c.id),3)} ${c.unit}`});
  });
  db.inventory.filter(x=>Number(x.qty)<=Number(x.min||0)).forEach(x=>a.push({level:'warn',title:'Niski stan',desc:`${x.name}: ${x.qty} ${x.unit}; min. ${x.min}`}));
  db.tasks.filter(x=>x.status!=='Zrealizowane'&&x.due&&x.due<today()).forEach(x=>a.push({level:'bad',title:'Zaległe zadanie',desc:`${x.title}: ${datePL(x.due)}`}));
@@ -527,10 +610,10 @@ function computedAlerts(){
 }
 function renderDashboard(){
  const inc=db.finance.filter(x=>x.type==='Przychód').reduce((a,x)=>a+Number(x.amount||0),0),cost=db.finance.filter(x=>x.type==='Koszt').reduce((a,x)=>a+Number(x.amount||0),0);
- const alerts=computedAlerts(),active=db.cultures.filter(x=>x.status==='Aktywna').length,open=db.orders.filter(x=>!['Dostarczone','Zrealizowane','Anulowane'].includes(x.status)).length;
+ const alerts=computedAlerts(),active=liveStock().filter(x=>x.status!=='Zakończona').length,open=db.orders.filter(x=>!['Dostarczone','Zrealizowane','Anulowane'].includes(x.status)).length;
  const recent=[...db.events].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,6);
  return `<div class="grid">
-  <div class="card kpi"><div class="l">Aktywne kultury</div><div class="v">${active}</div><div class="hint">${db.cultures.length} wszystkich</div></div>
+  <div class="card kpi"><div class="l">Aktywne kultury</div><div class="v">${active}</div><div class="hint">${liveStock().length} partii kultur w magazynie</div></div>
   <div class="card kpi"><div class="l">Otwarte zamówienia</div><div class="v">${open}</div><div class="hint">${db.clients.length} klientów</div></div>
   <div class="card kpi"><div class="l">Zdjęcia mikroskopowe</div><div class="v">${db.media.length}</div><div class="hint">w IndexedDB</div></div>
   <div class="card kpi"><div class="l">Wynik</div><div class="v">${money(inc-cost)}</div><div class="hint">przychód ${money(inc)}</div></div>
@@ -539,7 +622,7 @@ function renderDashboard(){
  <div class="card"><h3>Alerty</h3>${alerts.length?alerts.slice(0,9).map(x=>`<div class="alert">${badge(x.level==='bad'?'Problem':'Uwaga')}<strong>${esc(x.title)}</strong><span class="small">${esc(x.desc)}</span></div>`).join(''):'<div class="empty">Brak alertów.</div>'}</div></div>
  <div class="grid3 section">${speciesDashboard('Nannochloropsis')}${speciesDashboard('Tigriopus / widłonogi')}${speciesDashboard('Artemia')}</div>`;
 }
-function speciesDashboard(org){const c=db.cultures.filter(x=>x.organism===org),h=db.harvests.filter(x=>c.some(y=>y.id===x.culture));return `<div class="card"><h3>${esc(org)}</h3><div class="statline"><span>Aktywne</span><strong>${c.filter(x=>x.status==='Aktywna').length}</strong></div><div class="statline"><span>Kultury łącznie</span><strong>${c.length}</strong></div><div class="statline"><span>Partie</span><strong>${h.length}</strong></div></div>`}
+function speciesDashboard(org){const c=db.inventory.filter(x=>inferStockKind(x)==='Kultura żywa'&&x.organism===org),h=db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&x.organism===org);return `<div class="card"><h3>${esc(org)}</h3><div class="statline"><span>Partie kultur w magazynie</span><strong>${c.filter(x=>Number(x.qty)>0).length}</strong></div><div class="statline"><span>Łączna objętość</span><strong>${num(c.filter(x=>x.unit==='ml').reduce((a,x)=>a+Number(x.qty||0),0)/1000,2)} L</strong></div><div class="statline"><span>Produkty gotowe</span><strong>${h.length}</strong></div></div>`}
 
 function renderCultures(){
  const q=document.getElementById('cultureSearch')?.value||'',status=document.getElementById('cultureStatus')?.value||'';
@@ -656,11 +739,70 @@ function cultureTimeline(ev,ms,hs){const list=[...ev.map(x=>({date:x.date,n:x.ty
 function cultureMeasurements(ms){return `${table(['Data','Parametr','Wynik','Ocena','Zdjęcia','Akcje'],ms.map(x=>`<tr><td>${datePL(x.date)}</td><td>${esc(x.param)}</td><td><strong>${esc(x.value)} ${esc(x.unit)}</strong></td><td>${badge(x.rating)}</td><td>${db.media.filter(m=>m.measurementId===x.id).length}</td><td>${btn('Otwórz',`openMeasurementCard('${x.id}')`,'btn tiny secondary')}</td></tr>`))}`}
 function cultureHarvests(hs){return table(['Partia','Data','Produkt','Ilość','Status'],hs.map(x=>`<tr><td><a class="link" onclick="openHarvestCard('${x.id}')">${esc(x.id)}</a></td><td>${datePL(x.date)}</td><td>${esc(x.product)}</td><td>${esc(x.amount)} ${esc(x.unit)}</td><td>${badge(x.status)}</td></tr>`))}
 
-function renderEvents(){return `<div class="toolbar">${btn('+ Zdarzenie',"openForm('event')",'btn primary')}</div>`+table(['Data','Kultura','Typ','Opis','Ilość','Operator','Akcje'],[...db.events].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td><a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a></td><td>${badge(x.type)}</td><td>${esc(x.description)}</td><td>${esc(x.amount||'')} ${esc(x.unit||'')}</td><td>${esc(x.operator||'')}</td><td>${btn('Edytuj',`openForm('event','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('events','${x.id}')`,'btn tiny danger')}</td></tr>`))}
+function renderProduction(){
+ const recent=[...db.productionRuns].sort((a,b)=>(b.dateTime||b.createdAt||'').localeCompare(a.dateTime||a.createdAt||'')).slice(0,20);
+ const live=liveStock();
+ return `<div class="grid">
+  <div class="card kpi"><div class="l">Kultury żywe w magazynie</div><div class="v">${live.length}</div><div class="hint">${num(live.reduce((a,x)=>a+(x.unit==='ml'?Number(x.qty||0):0),0)/1000,2)} L w pozycjach ml</div></div>
+  <div class="card kpi"><div class="l">Produkty gotowe</div><div class="v">${finishedStock().length}</div><div class="hint">pozycje z dodatnim stanem</div></div>
+  <div class="card kpi"><div class="l">Operacje produkcyjne</div><div class="v">${db.productionRuns.length}</div><div class="hint">pełny dziennik ruchów</div></div>
+  <div class="card kpi"><div class="l">Pozycje magazynowe</div><div class="v">${db.inventory.length}</div><div class="hint">jedno źródło stanów</div></div>
+ </div>
+ <div class="section card"><h3>Nowa operacja</h3><div class="callout">Każda operacja księguje pobranie i przyjęcie w magazynie. Nie zmieniaj stanów „na oko” — korekty wykonuj ruchem magazynowym.</div>
+  <div class="production-choice" style="margin-top:12px">
+   ${btn('① Przyjmij kulturę startową<br><span class="small">pierwsza kultura / zakup / próbka startowa</span>',"openInitialCultureIntake()",'btn primary')}
+   ${btn('② Namnażanie / zwiększenie objętości<br><span class="small">pobierz kulturę + surowce → nowa kultura</span>',"openCultureExpansion()",'btn')}
+   ${btn('③ Rozdzielenie kultury<br><span class="small">pobierz jedną → odłóż 2–3 kultury potomne</span>',"openCultureSplit()",'btn')}
+   ${btn('④ Rozlew / pakowanie<br><span class="small">pobierz kulturę + opakowania → produkt gotowy</span>',"openBottling()",'btn')}
+  </div>
+ </div>
+ <div class="two section">
+  <div class="card"><h3>Kultury dostępne do produkcji</h3>${table(['Kultura / partia','Organizm','Stan','Naczynie','Status','Akcje'],live.map(x=>`<tr><td><a class="link" onclick="openStockCard('${x.id}')"><strong>${esc(x.name)}</strong></a><div class="mini">${esc(x.lot||x.id)}</div></td><td>${esc(x.organism||'—')}</td><td><strong>${stockQtyText(x)}</strong></td><td>${esc(x.vessel||'—')}</td><td>${badge(x.status||'Aktywna')}</td><td>${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${btn('Produkcja',`openCultureExpansion('${x.id}')`,'btn tiny')}</td></tr>`))}</div>
+  <div class="card"><h3>Ostatnie operacje</h3>${recent.length?recent.map(r=>`<div class="alert"><strong>${esc(r.id)} — ${esc(r.type)}</strong><span class="small">${datePL(r.dateTime||r.createdAt)} • ${esc(r.operator||'')}<br>${esc(r.summary||r.notes||'')}</span><div style="margin-top:5px">${btn('Szczegóły',`openProductionRun('${r.id}')`,'btn tiny')}</div></div>`).join(''):'<div class="empty">Brak operacji.</div>'}</div>
+ </div>
+ <div class="section callout"><strong>Dane z v4 są zachowane.</strong> Zakładki „Kultury / linie” i „Partie / rozlewy” zostały usunięte z nawigacji, ale ich rekordy nadal istnieją w IndexedDB i pełnych backupach. Aktywne stare kultury są jednorazowo kopiowane do magazynu jako pozycje migracyjne; nic nie jest kasowane.</div>`;
+}
+function productionRecipeChanges(recipeId,litres,units,runId){
+ const r=getById('recipes',recipeId);if(!r)return [];
+ return (r.ingredients||[]).map(ing=>{const item=getById('inventory',ing.itemId);if(!item)return null;let q=Number(ing.qty||0);if(ing.basis==='na 1 L')q*=Number(litres||0);else if(ing.basis==='na opakowanie')q*=Number(units||0);return q>0?{item,delta:-q,moveType:'Rozchód produkcyjny',reason:`Receptura ${r.name}`}:null}).filter(Boolean);
+}
+function liveStockOptions(selected=''){return liveStock().map(x=>`<option value="${x.id}" ${selected===x.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • ${stockQtyText(x)}</option>`).join('')}
+function recipeOptions(selected=''){return `<option value="">— bez receptury —</option>`+db.recipes.filter(r=>r.active!=='Nie').map(r=>`<option value="${r.id}" ${selected===r.id?'selected':''}>${esc(r.name)}</option>`).join('')}
+function openInitialCultureIntake(){
+ const lot=nextCultureLot('Nannochloropsis');
+ modalTitle.textContent='Przyjęcie kultury startowej do magazynu';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="intakeCulture"><div class="callout">To jest punkt wejścia pierwszej kultury. Po zapisie powstaje pozycja magazynowa i dodatni ruch magazynowy.</div><div class="form-grid" style="margin-top:12px">
+ ${f('name','Nazwa pozycji','text','Nannochloropsis — kultura startowa')}${f('organism','Organizm','select','Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Inne'])}
+ ${f('qty','Przyjęta ilość [ml]','number',1000)}${f('lot','Numer partii / oznaczenie','text',lot)}${f('strain','Szczep / źródło','text','')}${f('concentration','Stężenie / obsada','text','')}${f('vessel','Naczynie / stanowisko','text','')}${f('supplier','Dostawca / źródło','text','')}${f('price','Koszt całej pozycji / wartość ewidencyjna [PLN]','number',0)}${f('notes','Uwagi','textarea','')}</div><div class="actions" style="margin-top:14px"><button class="btn primary">Przyjmij do magazynu</button></div></form>`;
+ const form=document.getElementById('intakeCulture');form.elements.organism.onchange=()=>{if(!form.elements.lot.value||form.elements.lot.value===lot)form.elements.lot.value=nextCultureLot(form.elements.organism.value)};
+ form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),qty=Number(fd.get('qty')||0);if(qty<=0)return alert('Ilość musi być większa od 0.');const item={id:uid('MAG'),name:fd.get('name')||'',kind:'Kultura żywa',category:'Kultura biologiczna',qty:0,unit:'ml',min:0,price:qty?Number(fd.get('price')||0)/qty:0,lot:fd.get('lot')||nextCultureLot(fd.get('organism')),organism:fd.get('organism')||'',strain:fd.get('strain')||'',concentration:fd.get('concentration')||'',vessel:fd.get('vessel')||'',supplier:fd.get('supplier')||'',status:'Aktywna',notes:fd.get('notes')||''};const run={id:nextProductionRunId(),type:'Przyjęcie kultury startowej',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`Przyjęto ${num(qty,3)} ml ${item.organism} — ${item.lot}`,notes:item.notes};try{await commitProductionRun(run,[{item,delta:qty,isNew:true,moveType:'Przyjęcie',reason:'Przyjęcie kultury startowej'}]);closeModal();render()}catch(err){alert(err.message)}};modal.classList.add('open');
+}
+function openCultureExpansion(preset=''){
+ if(!liveStock().length)return alert('Brak kultury żywej w magazynie. Najpierw użyj „Przyjmij kulturę startową”.');
+ modalTitle.textContent='Namnażanie / zwiększenie objętości';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="expandForm"><div class="form-grid"><div class="field"><label>Kultura źródłowa</label><select name="source">${liveStockOptions(preset)}</select></div>${f('consume','Pobierz z kultury [ml]','number',200)}${f('output','Objętość nowej kultury [ml]','number',5000)}<div class="field"><label>Receptura surowców</label><select name="recipe">${recipeOptions()}</select></div>${f('name','Nazwa nowej pozycji','text','')}${f('lot','Nowy numer partii','text','')}${f('vessel','Nowe naczynie / stanowisko','text','')}${f('concentration','Stężenie / uwagi startowe','text','')}${f('notes','Uwagi','textarea','')}</div><div id="expandPreview" class="section card"></div><div class="actions" style="margin-top:12px"><button class="btn primary">Zaksięguj produkcję</button></div></form>`;
+ const form=document.getElementById('expandForm');const refresh=()=>{const src=getById('inventory',form.elements.source.value);if(!src)return;form.elements.name.placeholder=`${src.organism||src.name} — nowa kultura`;if(!form.elements.lot.value)form.elements.lot.placeholder=nextCultureLot(src.organism||'');const consume=Number(form.elements.consume.value||0),output=Number(form.elements.output.value||0),recipe=form.elements.recipe.value,lines=productionRecipeChanges(recipe,output/1000,0);document.getElementById('expandPreview').innerHTML=`<h3>Podgląd</h3><div class="statline"><span>Stan źródła</span><strong>${stockQtyText(src)}</strong></div><div class="statline"><span>Pobranie inokulum</span><strong>${num(consume,3)} ml</strong></div><div class="statline"><span>Nowa kultura</span><strong>${num(output,3)} ml</strong></div>${lines.length?`<hr><div class="small">Surowce: ${lines.map(ch=>`${esc(ch.item.name)} −${num(Math.abs(ch.delta),3)} ${esc(ch.item.unit)}`).join('<br>')}</div>`:''}`};['source','consume','output','recipe'].forEach(n=>form.elements[n].addEventListener('input',refresh));refresh();
+ form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),src=getById('inventory',fd.get('source')),consume=Number(fd.get('consume')||0),output=Number(fd.get('output')||0);if(!src||consume<=0||output<=0)return alert('Uzupełnij ilości.');const out={id:uid('MAG'),name:(fd.get('name')||`${src.organism||src.name} — kultura potomna`),kind:'Kultura żywa',category:'Kultura biologiczna',qty:0,unit:'ml',min:0,price:0,lot:fd.get('lot')||nextCultureLot(src.organism||''),organism:src.organism||'',strain:src.strain||'',concentration:fd.get('concentration')||'',vessel:fd.get('vessel')||'',status:'Aktywna',parentItemId:src.id,notes:fd.get('notes')||''};const run={id:nextProductionRunId(),type:'Namnażanie / zwiększenie objętości',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${src.lot||src.name}: −${num(consume,3)} ml → ${out.lot}: +${num(output,3)} ml`,notes:fd.get('notes')||''};const changes=[{item:src,delta:-consume,moveType:'Rozchód produkcyjny',reason:'Inokulum do nowej kultury'},...productionRecipeChanges(fd.get('recipe'),output/1000,0),{item:out,delta:output,isNew:true,moveType:'Przyjęcie z produkcji',reason:'Nowa kultura po namnażaniu'}];try{await commitProductionRun(run,changes);closeModal();render()}catch(err){alert(err.message)}};modal.classList.add('open');
+}
+function openCultureSplit(){
+ if(!liveStock().length)return alert('Brak kultury żywej w magazynie.');modalTitle.textContent='Rozdzielenie kultury';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="splitForm"><div class="form-grid"><div class="field"><label>Kultura źródłowa</label><select name="source">${liveStockOptions()}</select></div>${f('consume','Łącznie pobierz [ml]','number',2000)}${f('out1','Kultura potomna A [ml]','number',1000)}${f('out2','Kultura potomna B [ml]','number',1000)}${f('out3','Kultura potomna C [ml] — opcjonalnie','number',0)}${f('vessel1','Naczynie A','text','')}${f('vessel2','Naczynie B','text','')}${f('vessel3','Naczynie C','text','')}${f('notes','Uwagi','textarea','')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Rozdziel i zaksięguj</button></div></form>`;
+ const form=document.getElementById('splitForm');form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),src=getById('inventory',fd.get('source')),consume=Number(fd.get('consume')||0),vals=[Number(fd.get('out1')||0),Number(fd.get('out2')||0),Number(fd.get('out3')||0)],sum=vals.reduce((a,x)=>a+x,0);if(!src||consume<=0||sum<=0)return alert('Uzupełnij ilości.');if(Math.abs(sum-consume)>0.01)return alert(`Suma kultur potomnych (${num(sum,2)} ml) musi być równa pobranej ilości (${num(consume,2)} ml).`);const run={id:nextProductionRunId(),type:'Rozdzielenie kultury',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${src.lot||src.name}: ${num(consume,2)} ml → ${vals.filter(x=>x>0).length} kultury potomne`,notes:fd.get('notes')||''};const changes=[{item:src,delta:-consume,moveType:'Rozchód produkcyjny',reason:'Rozdzielenie kultury'}];const firstLot=nextCultureLot(src.organism||''),lotPrefix=firstLot.slice(0,-3),lotStart=Number(firstLot.slice(-3))||1;let lotOffset=0;for(let i=0;i<3;i++)if(vals[i]>0){const out={id:uid('MAG'),name:`${src.organism||src.name} — potomna ${String.fromCharCode(65+i)}`,kind:'Kultura żywa',category:'Kultura biologiczna',qty:0,unit:'ml',min:0,price:0,lot:lotPrefix+String(lotStart+lotOffset++).padStart(3,'0'),organism:src.organism||'',strain:src.strain||'',concentration:src.concentration||'',vessel:fd.get('vessel'+(i+1))||'',status:'Aktywna',parentItemId:src.id,notes:fd.get('notes')||''};changes.push({item:out,delta:vals[i],isNew:true,moveType:'Przyjęcie z produkcji',reason:'Kultura potomna po rozdzieleniu'})}try{await commitProductionRun(run,changes);closeModal();render()}catch(err){alert(err.message)}};modal.classList.add('open');
+}
+function openBottling(){
+ if(!liveStock().length)return alert('Brak kultury żywej w magazynie.');modalTitle.textContent='Rozlew / pakowanie';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="bottleForm"><div class="form-grid"><div class="field"><label>Źródło z magazynu</label><select name="source">${liveStockOptions()}</select></div>${f('consume','Pobierz kultury [ml]','number',5000)}${f('bottleMl','Objętość 1 opakowania [ml]','number',500)}${f('units','Liczba opakowań','number',10)}${f('product','Nazwa produktu gotowego','text','Nannochloropsis żywy 500 ml')}<div class="field"><label>Receptura opakowań / materiałów</label><select name="recipe">${recipeOptions()}</select></div>${f('bestBefore','Termin użycia','date','')}${f('notes','Uwagi','textarea','')}</div><div id="bottlePreview" class="section card"></div><div class="actions" style="margin-top:12px"><button class="btn primary">Rozlej i zaksięguj</button></div></form>`;
+ const form=document.getElementById('bottleForm');const refresh=()=>{const src=getById('inventory',form.elements.source.value),consume=Number(form.elements.consume.value||0),units=Number(form.elements.units.value||0),ml=Number(form.elements.bottleMl.value||0),recipe=form.elements.recipe.value,lines=productionRecipeChanges(recipe,consume/1000,units);document.getElementById('bottlePreview').innerHTML=`<h3>Podgląd</h3><div class="statline"><span>Stan źródła</span><strong>${src?stockQtyText(src):'—'}</strong></div><div class="statline"><span>Pobierasz</span><strong>${num(consume,2)} ml</strong></div><div class="statline"><span>Rozlew nominalny</span><strong>${units} × ${num(ml,0)} ml = ${num(units*ml,0)} ml</strong></div>${consume<units*ml?'<div class="alert"><strong>Uwaga</strong><span class="small">Pobranie jest mniejsze niż nominalna objętość rozlewu.</span></div>':''}${lines.length?`<hr><div class="small">Dodatkowe rozchody: ${lines.map(ch=>`${esc(ch.item.name)} −${num(Math.abs(ch.delta),3)} ${esc(ch.item.unit)}`).join('<br>')}</div>`:''}`};['source','consume','units','bottleMl','recipe'].forEach(n=>form.elements[n].addEventListener('input',refresh));refresh();
+ form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),src=getById('inventory',fd.get('source')),consume=Number(fd.get('consume')||0),units=Number(fd.get('units')||0),ml=Number(fd.get('bottleMl')||0);if(!src||consume<=0||units<=0||ml<=0)return alert('Uzupełnij ilości.');if(consume+0.01<units*ml)return alert('Nie możesz rozlać większej objętości niż pobierasz z magazynu.');const product=fd.get('product')||`${src.organism||'Produkt'} ${ml} ml`,lot=nextBatchId(product,today()),out={id:uid('MAG'),name:product,kind:'Produkt gotowy',category:'Produkt gotowy',qty:0,unit:'szt.',min:0,price:0,lot,organism:src.organism||'',sourceItemId:src.id,bestBefore:fd.get('bestBefore')||'',status:'Gotowy',notes:fd.get('notes')||''};const run={id:nextProductionRunId(),type:'Rozlew / pakowanie',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${src.lot||src.name}: −${num(consume,2)} ml → ${lot}: +${units} szt.`,notes:fd.get('notes')||''};const changes=[{item:src,delta:-consume,moveType:'Rozchód produkcyjny',reason:'Rozlew produktu'},...productionRecipeChanges(fd.get('recipe'),consume/1000,units),{item:out,delta:units,isNew:true,moveType:'Przyjęcie z produkcji',reason:'Produkt gotowy po rozlewie'}];try{await commitProductionRun(run,changes);const harvest={id:lot,date:today(),stockSource:src.id,culture:src.legacyCultureId||'',product,amount:consume,unit:'ml',packageSizeMl:ml,unitsProduced:units,bestBefore:fd.get('bestBefore')||'',status:'Gotowa',quality:'OK',productionRunId:run.id,inventoryOutputId:out.id,notes:'Wygenerowano automatycznie z nowego modułu Produkcja'};await saveRecord('harvests',harvest);const persistedOut=getById('inventory',out.id);if(persistedOut){persistedOut.legacyHarvestId=lot;await saveRecord('inventory',persistedOut)}closeModal();render()}catch(err){alert(err.message)}};modal.classList.add('open');
+}
+function openProductionRun(id){const r=getById('productionRuns',id);if(!r)return;modalTitle.textContent=`Operacja ${r.id}`;modalBox.classList.add('wide');modalBody.innerHTML=`<div class="two"><div class="card"><h3>${esc(r.type)}</h3><div class="statline"><span>Data</span><strong>${datePL(r.dateTime||r.createdAt)}</strong></div><div class="statline"><span>Operator</span><strong>${esc(r.operator||'—')}</strong></div><div class="statline"><span>Status</span><strong>${badge(r.status)}</strong></div><hr><div class="small">${esc(r.summary||'')}<br>${esc(r.notes||'')}</div></div><div class="card"><h3>Ruchy magazynowe</h3>${table(['Pozycja','Zmiana','Przed','Po'],(r.movements||[]).map(m=>`<tr><td>${esc(m.name)}<div class="mini">${esc(m.lot)}</div></td><td><strong>${m.delta>=0?'+':''}${num(m.delta,3)} ${esc(m.unit)}</strong></td><td>${num(m.before,3)}</td><td>${num(m.after,3)}</td></tr>`))}</div></div>`;modal.classList.add('open')}
+function openStockCard(id){const x=getById('inventory',id);if(!x)return;const moves=[...db.stockMoves].filter(m=>m.item===id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')),runs=db.productionRuns.filter(r=>(r.movements||[]).some(m=>m.itemId===id));modalTitle.textContent=`Magazyn — ${x.name}`;modalBox.classList.add('wide');modalBody.innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('Korekta / ruch',`closeModal();openStockMove('${x.id}')`,'btn primary')}${btn('Edytuj dane',`closeModal();openWarehouseItemForm('${x.id}')`)}${x.legacyHarvestId?btn('Etykiety',`printBatchLabels('${x.legacyHarvestId}')`,'btn secondary'):''}</div><div class="two"><div class="card"><h3>Stan</h3><div class="profile">${profileBox('Typ',inferStockKind(x))}${profileBox('Stan',`${num(Number(x.qty||0),3)} ${x.unit||''}`)}${profileBox('Partia',x.lot)}${profileBox('Organizm',x.organism)}${profileBox('Naczynie',x.vessel)}${profileBox('Status',x.status)}${profileBox('Dostawca',x.supplier)}${profileBox('Cena jednostkowa',money(x.price))}</div><hr><div class="statline"><span>Saldo z ruchów</span><strong class="${Math.abs(stockLedgerBalance(x.id)-Number(x.qty||0))<1e-9?'ledger-ok':'ledger-bad'}">${num(stockLedgerBalance(x.id),3)} ${esc(x.unit)}</strong></div></div><div class="card"><h3>Operacje produkcyjne</h3>${runs.length?runs.map(r=>`<div class="alert"><strong><a class="link" onclick="openProductionRun('${r.id}')">${esc(r.id)}</a> — ${esc(r.type)}</strong><span class="small">${datePL(r.dateTime||r.createdAt)}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div></div><div class="section card"><h3>Historia ruchów</h3>${table(['Data','Typ','Zmiana','Przed','Po','Powód'],moves.map(m=>`<tr><td>${datePL(m.date)}</td><td>${badge(m.type)}</td><td><strong>${m.qty>=0?'+':''}${num(m.qty,3)} ${esc(x.unit)}</strong></td><td>${m.before!==undefined?num(m.before,3):'—'}</td><td>${m.after!==undefined?num(m.after,3):'—'}</td><td>${esc(m.reason)}</td></tr>`))}</div>`;modal.classList.add('open')}
+
+function renderEvents(){return `<div class="toolbar">${btn('+ Zdarzenie',"openForm('event')",'btn primary')}</div>`+table(['Data','Kultura / partia','Typ','Opis','Ilość','Operator','Akcje'],[...db.events].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td>${x.stockItem?`<a class="link" onclick="openStockCard('${x.stockItem}')">${esc(stockLabel(x.stockItem))}</a>`:(x.culture?`<a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a>`:'—')}</td><td>${badge(x.type)}</td><td>${esc(x.description)}</td><td>${esc(x.amount||'')} ${esc(x.unit||'')}</td><td>${esc(x.operator||'')}</td><td>${btn('Edytuj',`openForm('event','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('events','${x.id}')`,'btn tiny danger')}</td></tr>`))}
 
 function renderMeasurements(){
  return `<div class="toolbar">${btn('+ Pomiar / zdjęcia',"openMeasurementForm()",'btn primary')}${btn('Kalkulator komórek/ml',"openCellCalculator()",'btn secondary')}</div>`+
- table(['Data','Kultura','Parametr','Wynik','Ocena','Zdjęcia','Akcje'],[...db.measurements].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td><a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a></td><td>${esc(x.param)}</td><td><strong>${esc(x.value)} ${esc(x.unit)}</strong></td><td>${badge(x.rating)}</td><td>${db.media.filter(m=>m.measurementId===x.id).length}</td><td>${btn('Karta',`openMeasurementCard('${x.id}')`,'btn tiny secondary')}${btn('Edytuj',`openMeasurementForm('${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('measurements','${x.id}')`,'btn tiny danger')}</td></tr>`));
+ table(['Data','Kultura','Parametr','Wynik','Ocena','Zdjęcia','Akcje'],[...db.measurements].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td>${x.stockItem?`<a class="link" onclick="openStockCard('${x.stockItem}')">${esc(stockLabel(x.stockItem))}</a>`:(x.culture?`<a class="link" onclick="openCultureCard('${x.culture}')">${esc(x.culture)}</a>`:'—')}</td><td>${esc(x.param)}</td><td><strong>${esc(x.value)} ${esc(x.unit)}</strong></td><td>${badge(x.rating)}</td><td>${db.media.filter(m=>m.measurementId===x.id).length}</td><td>${btn('Karta',`openMeasurementCard('${x.id}')`,'btn tiny secondary')}${btn('Edytuj',`openMeasurementForm('${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('measurements','${x.id}')`,'btn tiny danger')}</td></tr>`));
 }
 function openMeasurementForm(id='',preset={}){
  const m=id?getById('measurements',id):{id:uid('POM'),date:nowLocal(),culture:preset.culture||'',rating:'OK',sampleCode:nextSampleCode(today())};
@@ -668,7 +810,7 @@ function openMeasurementForm(id='',preset={}){
  document.getElementById('modalBox').classList.add('wide');
  document.getElementById('modalBody').innerHTML=`<form id="measurementForm"><div class="form-grid">
   ${f('date','Data i czas','datetime-local',m.date||nowLocal())}
-  <div class="field"><label>Kultura</label><select name="culture"><option value="">— wybierz —</option>${db.cultures.map(x=>`<option value="${x.id}" ${m.culture===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)}</option>`).join('')}</select></div>
+  <div class="field"><label>Kultura / partia z magazynu</label><select name="stockItem"><option value="">— wybierz —</option>${liveStock().map(x=>`<option value="${x.id}" ${(m.stockItem||m.culture)===x.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • ${stockQtyText(x)}</option>`).join('')}</select></div>
   ${f('param','Parametr','select',m.param||'Gęstość komórek',['Gęstość komórek','OD / absorbancja','Temperatura','Zasolenie','pH','NO3','PO4','Liczba osobników/ml','Wydajność wylęgu','Wygląd / barwa','Śmiertelność','Inny'])}
   ${f('value','Wartość','text',m.value)}${f('unit','Jednostka','text',m.unit)}${f('method','Metoda / sprzęt','text',m.method)}
   ${f('microscopeMagnification','Powiększenie mikroskopu','text',m.microscopeMagnification)}${f('sampleCode','Kod próbki','text',m.sampleCode)}
@@ -684,12 +826,12 @@ function openMeasurementForm(id='',preset={}){
  </div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz pomiar</button><button class="btn" type="button" onclick="closeModal()">Anuluj</button></div></form>`;
  document.getElementById('measurementForm').onsubmit=async e=>{
   e.preventDefault();const fd=new FormData(e.target),obj={...m};
-  ['date','culture','param','value','unit','method','microscopeMagnification','sampleCode','rating','notes'].forEach(k=>obj[k]=fd.get(k)||'');
+  ['date','param','value','unit','method','microscopeMagnification','sampleCode','rating','notes'].forEach(k=>obj[k]=fd.get(k)||'');obj.stockItem=fd.get('stockItem')||obj.stockItem||'';if(!id&&!obj.culture)obj.culture='';
   await saveRecord('measurements',obj);
   const camera=[...document.getElementById('measurementCamera').files];
   const gallery=[...document.getElementById('measurementFiles').files];
   const files=[...camera,...gallery];
-  for(const file of files)await storeImage(file,obj.id,obj.culture);
+  for(const file of files)await storeImage(file,obj.id,obj.stockItem||obj.culture);
   closeModal();render();
  };
  document.getElementById('modal').classList.add('open');
@@ -710,7 +852,7 @@ function openMeasurementCard(id){
  const m=getById('measurements',id);if(!m)return;const photos=db.media.filter(x=>x.measurementId===id);
  document.getElementById('modalTitle').textContent=`Pomiar ${m.id}`;document.getElementById('modalBox').classList.add('wide');
  document.getElementById('modalBody').innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('Edytuj / dodaj zdjęcia',`closeModal();openMeasurementForm('${id}')`,'btn primary')}${btn('Etykieta próbki',`printSampleLabel('${id}')`,'btn secondary')}</div>
- <div class="two"><div class="card"><h3>Wynik</h3><div class="profile">${profileBox('Kultura',cultureName(m.culture))}${profileBox('Data',datePL(m.date))}${profileBox('Parametr',m.param)}${profileBox('Wartość',`${m.value||''} ${m.unit||''}`)}${profileBox('Metoda',m.method)}${profileBox('Powiększenie',m.microscopeMagnification)}${profileBox('Kod próbki',m.sampleCode)}${profileBox('Ocena',m.rating)}</div><hr><div class="small">${esc(m.notes||'')}</div></div><div class="card"><h3>Zdjęcia</h3>${photos.length?`<div class="photo-grid">${photos.map(photoHTML).join('')}</div>`:'<div class="empty">Brak zdjęć.</div>'}</div></div>`;
+ <div class="two"><div class="card"><h3>Wynik</h3><div class="profile">${profileBox('Źródło',m.stockItem?stockLabel(m.stockItem):cultureName(m.culture))}${profileBox('Data',datePL(m.date))}${profileBox('Parametr',m.param)}${profileBox('Wartość',`${m.value||''} ${m.unit||''}`)}${profileBox('Metoda',m.method)}${profileBox('Powiększenie',m.microscopeMagnification)}${profileBox('Kod próbki',m.sampleCode)}${profileBox('Ocena',m.rating)}</div><hr><div class="small">${esc(m.notes||'')}</div></div><div class="card"><h3>Zdjęcia</h3>${photos.length?`<div class="photo-grid">${photos.map(photoHTML).join('')}</div>`:'<div class="empty">Brak zdjęć.</div>'}</div></div>`;
  document.getElementById('modal').classList.add('open');
 }
 function photoHTML(p){const url=mediaURLs.get(p.id)||'';return `<div class="photo"><img src="${url}" onclick="openPhoto('${p.id}')"><div class="meta"><strong>${esc(p.name)}</strong><span>${num((p.size||0)/1024/1024,2)} MB</span><div style="margin-top:5px">${btn('Usuń',`deletePhoto('${p.id}')`,'btn tiny danger')}</div></div></div>`}
@@ -925,7 +1067,7 @@ async function quickAddInventoryFromRecipe(){
  const name=form.elements.quickInvName.value.trim();
  const unit=form.elements.quickInvUnit.value.trim()||'szt.';
  if(!name){alert('Podaj nazwę surowca.');form.elements.quickInvName.focus();return}
- const obj={
+ let obj={
   id:uid('MAG'),
   name,
   category:form.elements.quickInvCategory.value,
@@ -937,7 +1079,11 @@ async function quickAddInventoryFromRecipe(){
   price:Number(form.elements.quickInvPrice.value||0),
   notes:'Dodano bezpośrednio z formularza receptury'
  };
- await saveRecord('inventory',obj);
+ obj.kind=inferStockKind(obj);
+ const opening=Number(obj.qty||0);obj.qty=0;
+ const intakeRun={id:nextProductionRunId(),type:'Przyjęcie magazynowe',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${obj.name}: +${num(opening,3)} ${obj.unit}`,notes:'Dodano z formularza receptury'};
+ await commitProductionRun(intakeRun,[{item:obj,delta:opening,isNew:true,moveType:'Przyjęcie',reason:'Dodano bezpośrednio z receptury'}]);
+ obj=getById('inventory',obj.id);
 
  // Update all ingredient selects without closing or resetting the recipe form.
  document.querySelectorAll('.ri-item').forEach(sel=>{
@@ -972,7 +1118,7 @@ function calculatePlan(){
  const root=document.getElementById('content'),product=root.querySelector('[name=plProduct]').value,units=Number(root.querySelector('[name=plUnits]').value||0),size=Number(root.querySelector('[name=plSize]').value||0),reserve=Number(root.querySelector('[name=plReserve]').value||0);
  const litres=units*size/1000*(1+reserve/100),recipeId=document.getElementById('plRecipe').value,material=estimateBatchCost(recipeId,litres,units);
  const base=litres*Number(root.querySelector('[name=plCultureCost]').value||0),total=material+base,revenue=units*Number(root.querySelector('[name=plPrice]').value||0),profit=revenue-total;
- const org=organismForProduct(product),candidates=db.cultures.filter(c=>c.status==='Aktywna'&&(!org||c.organism===org)).sort((a,b)=>cultureAvailableMl(b.id)-cultureAvailableMl(a.id));
+ const org=organismForProduct(product),candidates=liveStock().filter(c=>(!org||c.organism===org)).sort((a,b)=>Number(b.qty||0)-Number(a.qty||0));
  document.getElementById('planResult').innerHTML=`<h3>Wynik</h3>
   <div class="statline"><span>Objętość wymagana z rezerwą</span><strong>${num(litres,2)} L</strong></div>
   <div class="statline"><span>Koszt receptury / materiałów</span><strong>${money(material)}</strong></div>
@@ -983,12 +1129,12 @@ function calculatePlan(){
   <div class="statline"><span>Zysk brutto</span><strong>${money(profit)}</strong></div>
   <div class="statline"><span>Marża</span><strong>${num(revenue?profit/revenue*100:0,1)}%</strong></div>
   <hr><h3>Kultury mogące pokryć plan</h3>
-  ${candidates.length?candidates.map(c=>`<div class="alert"><strong>${esc(c.id)} — ${esc(c.organism)}</strong><span class="small">Bieżąca ${num(Number(c.volume||0),2)} L • rezerwacje ${num(activeReservationMl(c.id)/1000,2)} L • wolne <b>${num(cultureAvailableMl(c.id)/1000,2)} L</b> ${cultureAvailableMl(c.id)>=litres*1000?'<span class="reserve-ok">✓ wystarczy</span>':'<span class="reserve-warn">• za mało</span>'}</span></div>`).join(''):'<div class="empty">Brak pasujących aktywnych kultur.</div>'}`;
+  ${candidates.length?candidates.map(c=>`<div class="alert"><strong>${esc(c.name)} — ${esc(c.lot||c.id)}</strong><span class="small">Stan magazynowy <b>${num(Number(c.qty||0)/1000,2)} L</b> ${Number(c.qty||0)>=litres*1000?'<span class="reserve-ok">✓ wystarczy</span>':'<span class="reserve-warn">• za mało</span>'}</span></div>`).join(''):'<div class="empty">Brak pasujących kultur w magazynie.</div>'}`;
 }
 
 
 const schemas={
- event:{title:'Zdarzenie',store:'events',prefix:'ZDR',fields:[['date','Data i czas','datetime-local'],['culture','Kultura','culture'],['type','Typ','select',['Nawożenie','Karmienie','Podmiana / dolewka','Podział kultury','Zwiększenie objętości','Zbiór','Czyszczenie','Obserwacja','Awaria','Skażenie','Inne']],['description','Opis','text'],['amount','Ilość','number'],['unit','Jednostka','text'],['operator','Operator','text'],['notes','Uwagi','textarea']]},
+ event:{title:'Zdarzenie',store:'events',prefix:'ZDR',fields:[['date','Data i czas','datetime-local'],['stockItem','Kultura / partia z magazynu','stockCulture'],['type','Typ','select',['Nawożenie','Karmienie','Podmiana / dolewka','Podział kultury','Zwiększenie objętości','Zbiór','Czyszczenie','Obserwacja','Awaria','Skażenie','Inne']],['description','Opis','text'],['amount','Ilość','number'],['unit','Jednostka','text'],['operator','Operator','text'],['notes','Uwagi','textarea']]},
  sanitation:{title:'Dezynfekcja',store:'sanitation',prefix:'DEZ',fields:[['date','Data i czas','datetime-local'],['asset','Sprzęt / naczynie','text'],['process','Proces','select',['Mycie','Dezynfekcja chemiczna','Dezynfekcja termiczna','Płukanie','Suszenie','Pełny cykl']],['agent','Preparat','text'],['concentration','Stężenie','text'],['contactTime','Czas kontaktu','text'],['status','Status','select',['Czyste / gotowe','W toku','Wymaga powtórzenia']],['operator','Operator','text'],['notes','Uwagi','textarea']]},
  client:{title:'Klient',store:'clients',prefix:'KLI',fields:[['name','Imię i nazwisko / nazwa','text'],['segment','Segment','select',['Nowy','Powracający','Stały','VIP','Sklep','Hodowca','Lokalny']],['phone','Telefon','text'],['email','E-mail','email'],['city','Miejscowość','text'],['source','Źródło','select',['OLX','Allegro Lokalnie','Facebook','Polecenie','Odbiór lokalny','Inne']],['preferences','Preferowane produkty','text'],['lastContact','Ostatni kontakt','date'],['notes','Uwagi','textarea']]},
  order:{title:'Zamówienie',store:'orders',prefix:'ZAM',fields:[
@@ -1009,6 +1155,7 @@ function genericField(n,l,t,o,val){
  if(t==='select')inp=`<select name="${n}">${o.map(x=>`<option ${String(x)===String(value)?'selected':''}>${esc(x)}</option>`).join('')}</select>`;
  else if(t==='textarea')inp=`<textarea name="${n}">${esc(value||'')}</textarea>`;
  else if(t==='culture')inp=`<select name="${n}"><option value="">— wybierz —</option>${db.cultures.map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)}</option>`).join('')}</select>`;
+ else if(t==='stockCulture')inp=`<select name="${n}"><option value="">— wybierz —</option>${liveStock().map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • ${stockQtyText(x)}</option>`).join('')}</select>`;
  else if(t==='cultureReserve')inp=`<select name="${n}"><option value="">— brak rezerwacji —</option>${db.cultures.filter(x=>x.status==='Aktywna').map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.id)} — ${esc(x.organism)} — wolne ${num(cultureAvailableMl(x.id)/1000,2)} L</option>`).join('')}</select>`;
  else if(t==='client')inp=`<select name="${n}"><option value="">— wybierz —</option>${db.clients.map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select>`;
  else if(t==='harvest')inp=`<select name="${n}"><option value="">— opcjonalnie —</option>${db.harvests.map(x=>`<option value="${x.id}" ${value===x.id?'selected':''}>${esc(x.id)} — ${esc(x.product)}</option>`).join('')}</select>`;
@@ -1062,15 +1209,29 @@ function renderOrders(){
  </div>`).join('')}</div>`).join('')}</div>`;
 }
 
-function renderInventory(){return `<div class="toolbar">${btn('+ Pozycja',"openForm('inventory')",'btn primary')}${btn('+ Ruch',"openStockMove()")}</div>`+table(['Nazwa','Kategoria','Stan','Minimum','Partia dostawcy','Cena','Akcje'],db.inventory.map(x=>`<tr><td><strong>${esc(x.name)}</strong><div class="mini">${esc(x.id)}</div></td><td>${esc(x.category)}</td><td>${Number(x.qty)<=Number(x.min||0)?badge('Niski'):badge('OK')} ${esc(x.qty)} ${esc(x.unit)}</td><td>${esc(x.min)} ${esc(x.unit)}</td><td>${esc(x.lot||'')}</td><td>${money(x.price)}</td><td>${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny secondary')}${btn('Edytuj',`openForm('inventory','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('inventory','${x.id}')`,'btn tiny danger')}</td></tr>`))+`<div class="section card"><h3>Ostatnie ruchy</h3>${table(['Data','Pozycja','Typ','Ilość','Powód'],[...db.stockMoves].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,20).map(x=>`<tr><td>${datePL(x.date)}</td><td>${esc(getById('inventory',x.item)?.name||x.item)}</td><td>${badge(x.type)}</td><td>${esc(x.qty)}</td><td>${esc(x.reason)}</td></tr>`))}</div>`}
-function openStockMove(item=''){document.getElementById('modalTitle').textContent='Ruch magazynowy';document.getElementById('modalBox').classList.remove('wide');document.getElementById('modalBody').innerHTML=`<form id="stockForm"><div class="form-grid"><div class="field"><label>Pozycja</label><select name="item">${db.inventory.map(x=>`<option value="${x.id}" ${x.id===item?'selected':''}>${esc(x.name)} (${esc(x.qty)} ${esc(x.unit)})</option>`).join('')}</select></div>${f('type','Typ','select','Przyjęcie',['Przyjęcie','Rozchód','Korekta +','Korekta -'])}${f('qty','Ilość','number','')}${f('reason','Powód','text','')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz</button></div></form>`;document.getElementById('stockForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),it=getById('inventory',fd.get('item'));if(!it)return;const qty=Number(fd.get('qty')||0),type=fd.get('type'),sign=(type==='Przyjęcie'||type==='Korekta +')?1:-1;it.qty=Number(it.qty||0)+qty*sign;await put('inventory',it);await saveRecord('stockMoves',{id:uid('RM'),date:nowLocal(),item:it.id,type,qty:qty*sign,reason:fd.get('reason')||''});closeModal();render()};document.getElementById('modal').classList.add('open')}
+function renderInventory(){
+ const q=document.getElementById('warehouseSearch')?.value||'',kind=document.getElementById('warehouseKind')?.value||'';
+ const rows=db.inventory.filter(x=>findSearch(q,x)&&(!kind||inferStockKind(x)===kind)).sort((a,b)=>inferStockKind(a).localeCompare(inferStockKind(b))||String(a.name).localeCompare(String(b.name))).map(x=>{const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9;return `<tr><td><a class="link" onclick="openStockCard('${x.id}')"><strong>${esc(x.name)}</strong></a><div class="mini">${esc(x.id)}</div></td><td><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></td><td>${esc(x.lot||'—')}</td><td>${esc(x.organism||'—')}</td><td><strong>${stockQtyText(x)}</strong><div class="mini ${ok?'ledger-ok':'ledger-bad'}">ruchy: ${num(ledger,3)} ${esc(x.unit)} ${ok?'✓':'⚠'}</div></td><td>${esc(x.vessel||x.location||'—')}</td><td>${Number(x.qty)<=Number(x.min||0)?badge('Niski'):badge(x.status||'OK')}</td><td>${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Edytuj',`openWarehouseItemForm('${x.id}')`,'btn tiny')}</td></tr>`});
+ return `<div class="toolbar">${btn('+ Przyjmij kulturę startową',"openInitialCultureIntake()",'btn primary')}${btn('+ Dodaj surowiec / opakowanie',"openWarehouseItemForm()")}${btn('+ Ruch / korekta',"openStockMove()")}</div><div class="toolbar"><input id="warehouseSearch" placeholder="Szukaj nazwy, partii, organizmu..." value="${esc(q)}" oninput="render()"><select id="warehouseKind" onchange="render()"><option value="">Wszystkie typy</option>${['Kultura żywa','Surowiec','Opakowanie','Produkt gotowy','Inne'].map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>${table(['Pozycja','Typ','Partia','Organizm','Stan','Lokalizacja','Status','Akcje'],rows)}<div class="section callout">Stan ilościowy istniejącej pozycji nie jest edytowany w formularzu. Każda zmiana ilości przechodzi przez ruch magazynowy albo operację produkcyjną, dzięki czemu saldo jest audytowalne.</div>`;
+}
+function openWarehouseItemForm(id=''){
+ const old=id?getById('inventory',id):null,x=old?{...old}:{id:uid('MAG'),name:'',kind:'Surowiec',category:'Nawóz / pożywka',qty:0,unit:'ml',min:0,price:0,status:'OK'};
+ modalTitle.textContent=id?'Edytuj dane pozycji magazynowej':'Nowa pozycja magazynowa';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="warehouseForm"><div class="form-grid">${f('name','Nazwa','text',x.name)}${f('kind','Typ','select',inferStockKind(x),['Kultura żywa','Surowiec','Opakowanie','Produkt gotowy','Inne'])}${f('category','Kategoria','select',x.category||'Nawóz / pożywka',['Kultura biologiczna','Produkt gotowy','Butelki','Zakrętki','Etykiety','Sól','Nawóz / pożywka','Pasza','Chemia / dezynfekcja','Wysyłka','Sprzęt','Inne'])}${f('unit','Jednostka','text',x.unit||'ml')}${f('min','Stan minimalny','number',x.min)}${f('price','Cena za 1 jednostkę [PLN]','number',x.price)}${f('lot','Partia dostawcy / partia własna','text',x.lot)}${f('organism','Organizm — jeśli dotyczy','text',x.organism)}${f('vessel','Naczynie / stanowisko','text',x.vessel)}${f('supplier','Dostawca / źródło','text',x.supplier)}${f('status','Status','text',x.status||'OK')}${f('notes','Uwagi','textarea',x.notes)}${id?`<div class="field"><label>Aktualny stan — tylko odczyt</label><input value="${num(Number(x.qty||0),3)} ${esc(x.unit||'')}" readonly><div class="help">Stan zmieniaj przez „Ruch / korekta” albo Produkcję.</div></div>`:f('initialQty','Stan początkowy','number',0)}</div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button></div></form>`;
+ warehouseForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);['name','kind','category','unit','min','price','lot','organism','vessel','supplier','status','notes'].forEach(k=>x[k]=fd.get(k)||'');if(x.kind==='Kultura żywa')x.unit='ml';x.min=Number(x.min||0);x.price=Number(x.price||0);if(old){x.qty=old.qty;await saveRecord('inventory',x)}else{x.qty=0;const initial=Number(fd.get('initialQty')||0);if(initial>0){const run={id:nextProductionRunId(),type:'Przyjęcie magazynowe',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${x.name}: +${num(initial,3)} ${x.unit}`};try{await commitProductionRun(run,[{item:x,delta:initial,isNew:true,moveType:'Przyjęcie',reason:'Stan początkowy / przyjęcie magazynowe'}])}catch(err){return alert(err.message)}}else await saveRecord('inventory',x)}closeModal();render()};modal.classList.add('open')
+}
+function openStockMove(item=''){
+ modalTitle.textContent='Ruch / korekta magazynowa';modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<form id="stockForm"><div class="form-grid"><div class="field"><label>Pozycja</label><select name="item">${db.inventory.map(x=>`<option value="${x.id}" ${x.id===item?'selected':''}>${esc(x.name)} • ${stockQtyText(x)}</option>`).join('')}</select></div>${f('type','Typ','select','Przyjęcie',['Przyjęcie','Rozchód','Korekta +','Korekta -'])}${f('qty','Ilość','number','')}${f('reason','Powód','text','')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zaksięguj ruch</button></div></form>`;
+ stockForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),it=getById('inventory',fd.get('item'));if(!it)return;const qty=Number(fd.get('qty')||0),type=fd.get('type'),sign=(type==='Przyjęcie'||type==='Korekta +')?1:-1;if(qty<=0)return alert('Ilość musi być większa od 0.');const run={id:nextProductionRunId(),type:'Ruch magazynowy',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${it.name}: ${sign>0?'+':'−'}${num(qty,3)} ${it.unit}`,notes:fd.get('reason')||''};try{await commitProductionRun(run,[{item:it,delta:qty*sign,moveType:type,reason:fd.get('reason')||type}]);closeModal();render()}catch(err){alert(err.message)}};modal.classList.add('open');
+}
 
 function renderFinance(){const inc=db.finance.filter(x=>x.type==='Przychód').reduce((a,x)=>a+Number(x.amount||0),0),cost=db.finance.filter(x=>x.type==='Koszt').reduce((a,x)=>a+Number(x.amount||0),0),p=inc-cost;return `<div class="grid"><div class="card kpi"><div class="l">Przychody</div><div class="v">${money(inc)}</div></div><div class="card kpi"><div class="l">Koszty</div><div class="v">${money(cost)}</div></div><div class="card kpi"><div class="l">Wynik</div><div class="v">${money(p)}</div></div><div class="card kpi"><div class="l">Rentowność</div><div class="v">${num(inc?p/inc*100:0,1)}%</div></div></div><div class="section card"><div class="toolbar">${btn('+ Operacja',"openForm('finance')",'btn primary')}</div>${table(['Data','Typ','Kategoria','Opis','Kwota','Powiązanie','Akcje'],[...db.finance].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(x=>`<tr><td>${datePL(x.date)}</td><td>${badge(x.type)}</td><td>${esc(x.category)}</td><td>${esc(x.description)}</td><td>${money(x.amount)}</td><td>${esc(x.ref)}</td><td>${btn('Edytuj',`openForm('finance','${x.id}')`,'btn tiny')}${btn('Usuń',`deleteRecord('finance','${x.id}')`,'btn tiny danger')}</td></tr>`))}</div>`}
 
 function renderPrints(){
  return `<div class="grid3">
   <div class="card"><h3>Etykiety produktu + QR</h3><p class="small">Arkusz A4 etykiet z numerem partii i kodem identyfikacyjnym.</p><select id="printBatch">${db.harvests.map(h=>`<option value="${h.id}">${esc(h.id)} — ${esc(h.product)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj etykiety',"printSelectedBatchLabels()",'btn primary')}</div></div>
-  <div class="card"><h3>ID kultury / naczynia + QR</h3><p class="small">Karta stanowiska z aktualną objętością i identyfikatorem.</p><select id="printCulture">${db.cultures.map(c=>`<option value="${c.id}">${esc(c.id)} — ${esc(c.organism)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj kartę',"printSelectedCultureID()",'btn primary')}</div></div>
+  <div class="card"><h3>ID kultury / naczynia + QR</h3><p class="small">Karta stanowiska z aktualną objętością i identyfikatorem.</p><select id="printCulture">${liveStock().map(c=>`<option value="${c.id}">${esc(c.name)} — ${esc(c.lot||c.id)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj kartę',"printSelectedCultureID()",'btn primary')}</div></div>
   <div class="card"><h3>Etykieta próbki + QR</h3><p class="small">Kod próbki, kultura, wynik i kod QR.</p><select id="printMeasurement">${db.measurements.map(m=>`<option value="${m.id}">${esc(m.sampleCode||m.id)} — ${esc(m.param)} — ${esc(m.culture)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj etykietę',"printSelectedSample()",'btn primary')}</div></div>
  </div>
  <div class="section equal2">
@@ -1086,13 +1247,13 @@ function printSelectedBatchID(){const id=document.getElementById('printBatchID')
 function popupDoc(title,body,css=''){const w=window.open('','_blank');if(!w){alert('Przeglądarka zablokowała nowe okno. Zezwól na wyskakujące okna dla tego pliku.');return null}w.document.write(`<!doctype html><html lang="pl"><head><meta charset="utf-8"><title>${esc(title)}</title><style>body{font-family:Arial,sans-serif;color:#111;margin:0}button{margin:8px;padding:7px 10px}${css}</style></head><body><button onclick="window.print()">Drukuj / Zapisz PDF</button>${body}</body></html>`);w.document.close();return w}
 function printBatchLabels(id){
  const h=getById('harvests',id);if(!h)return;
- const c=getById('cultures',h.culture),count=Math.max(1,Math.min(120,Number(h.unitsProduced||1))),qr=makeQR(qrPayload('BATCH',h.id));
+ const c=getById('cultures',h.culture),stockSrc=getById('inventory',h.stockSource),count=Math.max(1,Math.min(120,Number(h.unitsProduced||1))),qr=makeQR(qrPayload('BATCH',h.id));
  const labels=Array.from({length:count},()=>`<div class="label">
    <div class="labelmain"><div class="brand">${esc(db.settings.companyName)}</div><div class="subtitle">${esc(db.settings.companySubtitle)}</div><div class="product">${esc(h.product)}</div>
    <div class="line"><b>Partia</b><span>${esc(h.id)}</span></div><div class="line"><b>Produkcja</b><span>${esc(datePL(h.date))}</span></div>
    ${h.bestBefore?`<div class="line"><b>Użyć do</b><span>${esc(datePL(h.bestBefore))}</span></div>`:''}
    ${h.packageSizeMl?`<div class="line"><b>Objętość</b><span>${esc(h.packageSizeMl)} ml</span></div>`:''}
-   <div class="line"><b>Linia</b><span>${esc(c?.strain||c?.organism||'')}</span></div><div class="footer">${esc(db.settings.labelFooter)}</div></div>
+   <div class="line"><b>Linia</b><span>${esc(stockSrc?.strain||stockSrc?.organism||c?.strain||c?.organism||'')}</span></div><div class="footer">${esc(db.settings.labelFooter)}</div></div>
    <div class="qrbox">${qr}<div>${esc(h.id)}</div></div>
  </div>`).join('');
  popupDoc('Etykiety '+h.id,`<div class="sheet">${labels}</div>`,`@page{size:A4;margin:7mm}.sheet{display:grid;grid-template-columns:repeat(2,1fr);gap:4mm}.label{height:58mm;border:1.2px solid #1d3d31;border-radius:5mm;padding:4mm;break-inside:avoid;display:grid;grid-template-columns:1fr 22mm;gap:3mm}.brand{font-size:16px;font-weight:800;color:#173f34}.subtitle{font-size:7px;color:#61706b;margin-bottom:2mm}.product{font-size:13px;font-weight:800;margin-bottom:2mm}.line{display:flex;justify-content:space-between;border-bottom:1px solid #d8dfdc;padding:1mm 0;font-size:9px}.footer{font-size:7px;color:#555;margin-top:3mm}.qrbox{align-self:center;text-align:center;font-size:6px;word-break:break-all}.qrbox .qrsvg{width:21mm;height:21mm}@media print{button{display:none}}`);
@@ -1111,29 +1272,31 @@ function printBatchID(id){
 }
 
 function printCultureID(id){
- const c=getById('cultures',id);if(!c)return;const qr=makeQR(qrPayload('CULTURE',c.id));
- popupDoc('ID '+id,`<div class="idcard"><div class="qr">${qr}</div><div class="top">${esc(db.settings.companyName)}</div><div class="id">${esc(c.id)}</div><div class="org">${esc(c.organism)}</div>
- <div class="gridp"><div><small>START</small><b>${esc(datePL(c.start))}</b></div><div><small>NACZYNIE</small><b>${esc(c.vessel||'—')}</b></div><div><small>OBJĘTOŚĆ</small><b>${esc(c.volume||'—')} L</b></div><div><small>REZERWACJE</small><b>${num(activeReservationMl(c.id)/1000,2)} L</b></div><div><small>WOLNE</small><b>${num(cultureAvailableMl(c.id)/1000,2)} L</b></div><div><small>STATUS</small><b>${esc(c.status)}</b></div></div>
- <div class="note">Następna czynność: ${esc(c.nextAction||'—')} ${c.nextActionDate?'• '+esc(datePL(c.nextActionDate)):''}<br>QR: ${esc(qrPayload('CULTURE',c.id))}</div></div>`,
- `@page{size:A4;margin:15mm}.idcard{position:relative;border:3px solid #163c32;border-radius:8mm;padding:10mm;max-width:170mm}.qr{position:absolute;right:9mm;top:9mm;width:31mm;height:31mm}.qr .qrsvg{width:100%;height:100%}.top{font-size:14px;color:#355}.id{font-size:38px;font-weight:900;letter-spacing:1px;margin-top:4mm;padding-right:36mm}.org{font-size:22px;font-weight:700;margin-bottom:7mm}.gridp{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}.gridp div{border:1px solid #bbb;padding:4mm;border-radius:3mm}.gridp small{display:block;font-size:9px;color:#666}.gridp b{display:block;font-size:13px;margin-top:1mm}.note{margin-top:7mm;padding:4mm;background:#eef5f2;font-weight:700;font-size:10px}@media print{button{display:none}}`);
+ const w=getById('inventory',id);
+ if(w){const qr=makeQR(qrPayload('STOCK',w.id));popupDoc('ID '+(w.lot||w.id),`<div class="idcard"><div class="qr">${qr}</div><div class="top">${esc(db.settings.companyName)}</div><div class="id">${esc(w.lot||w.id)}</div><div class="org">${esc(w.name)}</div><div class="gridp"><div><small>ORGANIZM</small><b>${esc(w.organism||'—')}</b></div><div><small>NACZYNIE</small><b>${esc(w.vessel||'—')}</b></div><div><small>STAN</small><b>${stockQtyText(w)}</b></div><div><small>SZCZEP</small><b>${esc(w.strain||'—')}</b></div><div><small>STĘŻENIE / OBSADA</small><b>${esc(w.concentration||'—')}</b></div><div><small>STATUS</small><b>${esc(w.status||'—')}</b></div></div><div class="note">Magazyn: ${esc(w.id)}<br>QR: ${esc(qrPayload('STOCK',w.id))}</div></div>`,`@page{size:A4;margin:15mm}.idcard{position:relative;border:3px solid #163c32;border-radius:8mm;padding:10mm;max-width:170mm}.qr{position:absolute;right:9mm;top:9mm;width:31mm;height:31mm}.qr .qrsvg{width:100%;height:100%}.top{font-size:14px;color:#355}.id{font-size:31px;font-weight:900;letter-spacing:1px;margin-top:4mm;padding-right:36mm}.org{font-size:20px;font-weight:700;margin-bottom:7mm}.gridp{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}.gridp div{border:1px solid #bbb;padding:4mm;border-radius:3mm}.gridp small{display:block;font-size:9px;color:#666}.gridp b{display:block;font-size:13px;margin-top:1mm}.note{margin-top:7mm;padding:4mm;background:#eef5f2;font-weight:700;font-size:10px}@media print{button{display:none}}`);return}
+ const c=getById('cultures',id);if(!c)return;const qr=makeQR(qrPayload('CULTURE',c.id));popupDoc('ID '+id,`<div class="idcard"><div class="qr">${qr}</div><div class="top">${esc(db.settings.companyName)}</div><div class="id">${esc(c.id)}</div><div class="org">${esc(c.organism)}</div><div class="gridp"><div><small>START</small><b>${esc(datePL(c.start))}</b></div><div><small>NACZYNIE</small><b>${esc(c.vessel||'—')}</b></div><div><small>OBJĘTOŚĆ</small><b>${esc(c.volume||'—')} L</b></div><div><small>ZASOLENIE</small><b>${esc(c.salinity||'—')} ppt</b></div><div><small>TEMPERATURA</small><b>${esc(c.temperature||'—')} °C</b></div><div><small>STATUS</small><b>${esc(c.status)}</b></div></div><div class="note">Archiwum v4 • QR: ${esc(qrPayload('CULTURE',c.id))}</div></div>`,`@page{size:A4;margin:15mm}.idcard{position:relative;border:3px solid #163c32;border-radius:8mm;padding:10mm;max-width:170mm}.qr{position:absolute;right:9mm;top:9mm;width:31mm;height:31mm}.qr .qrsvg{width:100%;height:100%}.top{font-size:14px;color:#355}.id{font-size:38px;font-weight:900;margin-top:4mm;padding-right:36mm}.org{font-size:22px;font-weight:700;margin-bottom:7mm}.gridp{display:grid;grid-template-columns:repeat(3,1fr);gap:5mm}.gridp div{border:1px solid #bbb;padding:4mm;border-radius:3mm}.gridp small{display:block;font-size:9px;color:#666}.gridp b{display:block;font-size:13px}.note{margin-top:7mm;padding:4mm;background:#eef5f2}@media print{button{display:none}}`)
 }
+
 function printSampleLabel(id){
  const m=getById('measurements',id);if(!m)return;const code=m.sampleCode||m.id,qr=makeQR(qrPayload('SAMPLE',code));
- popupDoc('Próbka '+id,`<div class="sample"><div class="left"><div class="brand">${esc(db.settings.companyName)}</div><div class="code">${esc(code)}</div><div><b>Kultura:</b> ${esc(m.culture)}</div><div><b>Data:</b> ${esc(datePL(m.date))}</div><div><b>Badanie:</b> ${esc(m.param)}</div><div><b>Wynik:</b> ${esc(m.value)} ${esc(m.unit)}</div><div><b>Ocena:</b> ${esc(m.rating)}</div></div><div class="qr">${qr}</div></div>`,
+ popupDoc('Próbka '+id,`<div class="sample"><div class="left"><div class="brand">${esc(db.settings.companyName)}</div><div class="code">${esc(code)}</div><div><b>Źródło:</b> ${esc(m.stockItem?stockLabel(m.stockItem):m.culture)}</div><div><b>Data:</b> ${esc(datePL(m.date))}</div><div><b>Badanie:</b> ${esc(m.param)}</div><div><b>Wynik:</b> ${esc(m.value)} ${esc(m.unit)}</div><div><b>Ocena:</b> ${esc(m.rating)}</div></div><div class="qr">${qr}</div></div>`,
  `@page{size:A4;margin:10mm}.sample{width:92mm;border:1.5px solid #222;padding:5mm;border-radius:4mm;display:grid;grid-template-columns:1fr 28mm;gap:4mm}.brand{font-size:11px}.code{font-size:20px;font-weight:900;margin:2mm 0 4mm}.sample .left div{font-size:9px;margin:1mm 0}.qr .qrsvg{width:27mm;height:27mm}@media print{button{display:none}}`);
 }
 
 function renderReports(){
  return `<div class="grid3">
-  <div class="card"><h3>Raport kultury</h3><select id="reportCulture">${db.cultures.map(c=>`<option value="${c.id}">${esc(c.id)} — ${esc(c.organism)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printSelectedCultureReport()",'btn primary')}</div></div>
+  <div class="card"><h3>Raport kultury / pozycji magazynowej</h3><select id="reportCulture">${liveStock().map(c=>`<option value="${c.id}">${esc(c.name)} — ${esc(c.lot||c.id)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printSelectedCultureReport()",'btn primary')}</div></div>
   <div class="card"><h3>Raport partii</h3><select id="reportBatch">${db.harvests.map(h=>`<option value="${h.id}">${esc(h.id)} — ${esc(h.product)}</option>`).join('')}</select><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printSelectedBatchReport()",'btn primary')}</div></div>
   <div class="card"><h3>Raport miesięczny</h3><input id="reportMonth" type="month" value="${today().slice(0,7)}"><div class="actions" style="margin-top:10px">${btn('Generuj raport',"printMonthlyReport()",'btn primary')}</div></div>
  </div>
  <div class="section card"><h3>Eksport CSV</h3><div class="actions">${DATA_STORES.map(s=>btn('CSV: '+s,`exportCSV('${s}')`)).join('')}</div></div>`;
 }
-function printSelectedCultureReport(){const id=document.getElementById('reportCulture').value;if(id)printCultureReport(id)}
+function printSelectedCultureReport(){const id=document.getElementById('reportCulture').value;if(id)printStockReport(id)}
 function printSelectedBatchReport(){const id=document.getElementById('reportBatch').value;if(id)printBatchReport(id)}
 function reportCSS(){return `@page{size:A4;margin:15mm}.report{max-width:180mm;margin:auto}.head{display:grid;grid-template-columns:1fr 28mm;gap:6mm;border-bottom:2px solid #183b31;padding-bottom:5mm;margin-bottom:5mm}.head h1{font-size:22px;margin:0}.reportqr .qrsvg{width:27mm;height:27mm}.muted{color:#666;font-size:10px}.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:3mm;margin:5mm 0}.kpi{border:1px solid #ccc;border-radius:2mm;padding:3mm}.kpi small{display:block;color:#666;font-size:8px}.kpi b{font-size:14px}table{width:100%;border-collapse:collapse;font-size:9px;margin-top:4mm}th,td{border-bottom:1px solid #ccc;text-align:left;padding:2mm}h2{font-size:14px;margin-top:7mm}.photos{display:grid;grid-template-columns:repeat(2,1fr);gap:3mm}.photos img{width:100%;max-height:70mm;object-fit:contain;border:1px solid #ddd}.printchart svg{width:100%;max-height:75mm}.trace{background:#f1f5f3;padding:3mm;border-radius:2mm;font-size:9px}@media print{button{display:none}}`}
+function printStockReport(id){
+ const x=getById('inventory',id);if(!x)return;const moves=[...db.stockMoves].filter(m=>m.item===id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')),runs=db.productionRuns.filter(r=>(r.movements||[]).some(m=>m.itemId===id)).sort((a,b)=>(a.dateTime||'').localeCompare(b.dateTime||'')),ms=db.measurements.filter(m=>m.stockItem===id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')),qr=makeQR(qrPayload('STOCK',id));popupDoc('Raport magazynowy '+(x.lot||x.id),`<div class="report"><div class="head"><div><h1>${esc(x.name)}</h1><div>${esc(x.lot||x.id)} • ${esc(inferStockKind(x))}</div><div class="muted">${esc(db.settings.companyName)} • ${esc(datePL(nowLocal()))}</div></div><div class="reportqr">${qr}</div></div><div class="kpis"><div class="kpi"><small>STAN</small><b>${stockQtyText(x)}</b></div><div class="kpi"><small>ORGANIZM</small><b>${esc(x.organism||'—')}</b></div><div class="kpi"><small>NACZYNIE</small><b>${esc(x.vessel||'—')}</b></div><div class="kpi"><small>SALDO RUCHÓW</small><b>${num(stockLedgerBalance(id),3)} ${esc(x.unit)}</b></div></div><h2>Historia ruchów magazynowych</h2>${printTable(['Data','Typ','Zmiana','Przed','Po','Powód'],moves.map(m=>[datePL(m.date),m.type,(m.qty>=0?'+':'')+num(m.qty,3)+' '+x.unit,m.before!==undefined?num(m.before,3):'—',m.after!==undefined?num(m.after,3):'—',m.reason]))}<h2>Operacje produkcyjne</h2>${printTable(['Data','Operacja','ID','Opis'],runs.map(r=>[datePL(r.dateTime||r.createdAt),r.type,r.id,r.summary||'']))}<h2>Pomiary</h2>${printTable(['Data','Parametr','Wynik','Ocena'],ms.map(m=>[datePL(m.date),m.param,`${m.value||''} ${m.unit||''}`,m.rating]))}</div>`,reportCSS())
+}
 function printCultureReport(id){
  const c=getById('cultures',id);if(!c)return;
  const ms=db.measurements.filter(x=>x.culture===id).sort((a,b)=>(a.date||'').localeCompare(b.date||'')),
@@ -1179,7 +1342,7 @@ async function markTaskDone(id){const x=getById('tasks',id);if(x){x.status='Zrea
 
 function renderBackup(){
  setTimeout(updateStorageInfo,50);
- return `<div class="two"><div class="card"><h3>Kopia pełna</h3><p class="small">Pełny backup JSON zawiera rekordy oraz zdjęcia zakodowane w Base64. Przy dużej liczbie zdjęć plik może być duży.</p><div class="actions">${btn('Eksport pełny + zdjęcia',"exportFullBackup()",'btn primary')}${btn('Eksport danych bez zdjęć',"exportDataBackup()")}</div></div><div class="card"><h3>Import</h3><input type="file" id="backupFile" accept=".json"><div class="actions" style="margin-top:10px">${btn('Importuj kopię',"importBackup()",'btn primary')}${btn('Wyczyść całą bazę',"resetDatabase()",'btn danger')}</div></div></div>
+ return `<div class="two"><div class="card"><h3>Kopia pełna</h3><p class="small">Pełny backup JSON zawiera rekordy v4, nowy magazyn, operacje produkcyjne oraz zdjęcia zakodowane w Base64. Przy dużej liczbie zdjęć plik może być duży.</p><div class="actions">${btn('Eksport pełny + zdjęcia',"exportFullBackup()",'btn primary')}${btn('Eksport danych bez zdjęć',"exportDataBackup()")}</div></div><div class="card"><h3>Import</h3><input type="file" id="backupFile" accept=".json"><div class="actions" style="margin-top:10px">${btn('Importuj kopię',"importBackup()",'btn primary')}${btn('Wyczyść całą bazę',"resetDatabase()",'btn danger')}</div></div></div>
  <div class="section card"><h3>Pamięć przeglądarki</h3><div id="storageInfo" class="small">Obliczanie…</div><div class="storage" style="margin-top:9px"><div id="storageBar" style="width:0%"></div></div><div class="actions" style="margin-top:10px">${btn('Poproś o trwałe przechowywanie',"requestPersistence()",'btn secondary')}</div></div>
  <div class="section card"><h3>Ustawienia firmy i etykiet</h3><div class="form-grid">${f('setCompany','Nazwa na wydrukach','text',db.settings.companyName)}${f('setSubtitle','Podtytuł','text',db.settings.companySubtitle)}${f('setFooter','Stopka etykiety','text',db.settings.labelFooter)}${f('setOperator','Domyślny operator','text',db.settings.operator)}${f('setBottle','Koszt butelki','number',db.settings.defaultBottleCost)}${f('setCap','Koszt zakrętki','number',db.settings.defaultCapCost)}${f('setLabel','Koszt etykiety','number',db.settings.defaultLabelCost)}${f('setAlertDays','Alert braku pomiaru [dni]','number',db.settings.measurementAlertDays)}</div><div class="actions" style="margin-top:12px">${btn('Zapisz ustawienia',"saveSettingsFromUI()",'btn primary')}</div></div>`;
 }
@@ -1190,12 +1353,12 @@ async function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r
 function dataURLToBlob(dataURL){const [meta,b64]=dataURL.split(','),mime=(meta.match(/data:(.*?);/)||[])[1]||'application/octet-stream',bin=atob(b64),arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:mime})}
 async function exportFullBackup(){const media=[];for(const m of db.media){media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}const data={app:'AquaCulture Manager LAB',version:4,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')}
 function exportDataBackup(){const data={app:'AquaCulture Manager LAB',version:4,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')}
-async function importBackup(){const file=document.getElementById('backupFile')?.files?.[0];if(!file)return alert('Wybierz plik JSON.');if(!confirm('Import zastąpi obecną bazę. Kontynuować?'))return;try{const data=JSON.parse(await file.text());for(const s of STORES)await clearStore(s);for(const s of DATA_STORES)for(const rec of (data.stores?.[s]||[]))await put(s,rec);if(data.settings)await put('meta',{id:'settings',value:{...defaultSettings,...data.settings}});for(const m of (data.media||[])){await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await loadMemory();render();alert('Kopia przywrócona.')}catch(e){alert('Błąd importu: '+e.message)}}
+async function importBackup(){const file=document.getElementById('backupFile')?.files?.[0];if(!file)return alert('Wybierz plik JSON.');if(!confirm('Import zastąpi obecną bazę. Aktualizacja plików aplikacji na GitHub Pages sama w sobie NIE usuwa IndexedDB. Kontynuować?'))return;try{const data=JSON.parse(await file.text());for(const s of STORES)await clearStore(s);for(const s of DATA_STORES)for(const rec of (data.stores?.[s]||[]))await put(s,rec);if(data.settings)await put('meta',{id:'settings',value:{...defaultSettings,...data.settings}});for(const m of (data.media||[])){await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await loadMemory();render();alert('Kopia przywrócona.')}catch(e){alert('Błąd importu: '+e.message)}}
 async function resetDatabase(){if(!confirm('Usunąć wszystkie rekordy i zdjęcia z IndexedDB?'))return;for(const s of STORES)await clearStore(s);db.settings={...defaultSettings};await saveSettings();await loadMemory();render()}
 function exportCSV(store){const rows=db[store];if(!rows.length)return alert('Brak danych.');const cols=[...new Set(rows.flatMap(x=>Object.keys(x)))].filter(c=>typeof rows.find(r=>r[c]!==undefined)?.[c]!=='object'),q=v=>'"'+String(v??'').replaceAll('"','""')+'"',csv='\ufeff'+[cols.map(q).join(';'),...rows.map(r=>cols.map(c=>q(r[c])).join(';'))].join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),store+'_'+today()+'.csv')}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
 
-function quickAdd(){const map={dashboard:'culture',cultures:'culture',events:'event',measurements:'measurement',sanitation:'sanitation',harvests:'harvest',recipes:'recipe',planner:'harvest',clients:'client',orders:'order',inventory:'inventory',finance:'finance',tasks:'task'};const t=map[currentView]||'culture';if(t==='culture')openCultureForm();else if(t==='measurement')openMeasurementForm();else if(t==='harvest')openHarvestForm();else if(t==='recipe')openRecipeForm();else openForm(t)}
+function quickAdd(){if(currentView==='production')return openInitialCultureIntake();if(currentView==='inventory')return openWarehouseItemForm();const map={dashboard:'task',events:'event',measurements:'measurement',sanitation:'sanitation',recipes:'recipe',planner:'task',clients:'client',orders:'order',finance:'finance',tasks:'task'};const t=map[currentView]||'task';if(t==='measurement')openMeasurementForm();else if(t==='recipe')openRecipeForm();else openForm(t)}
 function closeModal(){document.getElementById('modal').classList.remove('open');document.getElementById('modalBox').classList.remove('wide')}
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
 
