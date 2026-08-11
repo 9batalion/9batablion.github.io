@@ -1,4 +1,4 @@
-const CACHE = 'aquaculture-mobile-v1';
+const CACHE = 'aquaculture-mobile-v2-warehouse';
 const APP_SHELL = [
   './',
   './index.html',

@@ -1,32 +1,25 @@
-# AquaCulture Manager Mobile — PWA
+# AquaCulture Manager Mobile v2 — Magazyn → Produkcja
 
-Pakiet jest gotowy do hostowania jako Progressive Web App.
+Ta wersja zmienia model ewidencji: magazyn jest jedynym źródłem prawdy o ilościach.
 
-## Instalacja na iPhone
+## Bezpieczna aktualizacja z poprzedniej wersji
 
-1. Umieść cały folder na hostingu HTTPS (np. GitHub Pages, Cloudflare Pages, Netlify albo własny serwer HTTPS).
-2. Otwórz adres aplikacji w Safari na iPhonie.
-3. Stuknij przycisk Udostępnij.
-4. Wybierz „Dodaj do ekranu początkowego”.
-5. Jeżeli iOS pokaże opcję otwierania jako aplikacja internetowa, pozostaw ją włączoną.
+Jeżeli aplikacja jest już opublikowana pod tym samym adresem GitHub Pages, zastąp pliki `index.html`, `sw.js`, `manifest.webmanifest` i folder `icons/` plikami z tego pakietu.
 
-Po instalacji AquaCulture pojawi się jako osobna ikona na ekranie głównym.
+**Nie zmieniaj adresu strony/repozytorium**, jeżeli chcesz zachować lokalne IndexedDB na iPhonie. Nazwa bazy pozostaje `AquaCultureManagerLAB`. Aktualizacja podnosi tylko wersję schematu i dodaje magazyn operacji `productionRuns`; istniejące stores nie są usuwane.
 
-## Tryb offline
+Przed aktualizacją wykonaj w aplikacji pełny backup JSON.
 
-Po pierwszym prawidłowym załadowaniu przez HTTPS Service Worker zapisuje powłokę aplikacji w pamięci podręcznej.
-Dane użytkownika i zdjęcia są przechowywane lokalnie w IndexedDB.
+## Nowy model
 
-## Ważne
+- Magazyn: kultura żywa, surowce, opakowania, produkty gotowe.
+- Produkcja: przyjęcie kultury startowej, namnażanie, rozdzielenie, rozlew/pakowanie.
+- Każda operacja tworzy ruchy magazynowe.
+- Ilości istniejącej pozycji nie edytuje się ręcznie; służy do tego ruch/korekta albo produkcja.
+- Stare rekordy `cultures` i `harvests` pozostają w bazie i backupie dla zgodności.
+- Aktywne kultury v4 są jednorazowo kopiowane do centralnego magazynu tylko wtedy, gdy nie ma już odpowiadającej pozycji.
+- Istniejące stany magazynowe są uzgadniane dodatnim/ujemnym ruchem migracyjnym bez zmiany ich ilości.
 
-- Nie otwieraj `index.html` bezpośrednio jako `file://` — Service Worker wymaga bezpiecznego originu.
-- Dla iPhone'a używaj HTTPS.
-- Regularnie wykonuj pełny backup JSON z modułu „Baza / kopie”.
-- Dane z desktopowej wersji można przenieść przez pełny eksport/import JSON.
+## Instalacja PWA na iPhone
 
-## Pliki
-
-- `index.html` — aplikacja
-- `manifest.webmanifest` — konfiguracja PWA
-- `sw.js` — tryb offline
-- `icons/` — ikony iOS/PWA
+Hostuj cały katalog przez HTTPS, otwórz stronę w Safari i wybierz Udostępnij → Dodaj do ekranu początkowego.

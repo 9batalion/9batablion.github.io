@@ -1,7 +1,7 @@
 {
-  "name": "AquaCulture Manager Mobile",
+  "name": "AquaCulture Manager Mobile — Magazyn i Produkcja",
   "short_name": "AquaCulture",
-  "description": "Mobilny dziennik hodowli, LIMS, partie, CRM, magazyn i raporty dla hodowli akwarystycznej.",
+  "description": "Magazyn jako centralny stan: kultury, surowce, opakowania i produkty; produkcja księguje wejścia i wyjścia.",
   "id": "./",
   "start_url": "./index.html",
   "scope": "./",
