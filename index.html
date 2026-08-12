@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
 <link rel="icon" sizes="192x192" href="./icons/icon-192.png">
-<title>AquaCulture Manager Mobile</title>
+<title>AquaCulture Manager v6 Ultimate</title>
 <style>
 :root{
  --bg:#07111f;--panel:#0d1a2b;--panel2:#13243a;--panel3:#18304d;--text:#eef6ff;--muted:#91a4bb;
@@ -141,9 +141,151 @@ input,select,textarea{font-size:16px}
 }
 
 
-.stock-kind{font-weight:750}.stock-live{color:#82e7ff}.stock-raw{color:#ffe08a}.stock-pack{color:#d5b9ff}.stock-finished{color:#98f0ae}.ledger-ok{color:var(--ok)}.ledger-bad{color:var(--danger)}
+.stock-kind{font-weight:750}.stock-live{color:#82e7ff}.stock-raw{color:#ffe08a}.stock-pack{color:#d5b9ff}.stock-medium{background:#173d48;color:#9ce8ff;border-color:#2b6b78}.stock-finished{color:#98f0ae}.ledger-ok{color:var(--ok)}.ledger-bad{color:var(--danger)}
 .production-choice{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.production-choice .btn{min-height:62px;text-align:left}
 @media(max-width:700px){.production-choice{grid-template-columns:1fr}}
+
+/* =========================
+   v4 SIMPLE UI
+   ========================= */
+:root{--bottom-nav-h:72px}
+aside{display:none!important}
+.app{display:block;min-height:100dvh}
+main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) + 34px + env(safe-area-inset-bottom));overflow:visible}
+.topbar{align-items:center;margin-bottom:16px}
+.topbar h2{font-size:24px;letter-spacing:-.02em}
+.simple-top-actions .btn{min-width:92px}
+.bottom-nav{
+ position:fixed;z-index:45;left:50%;transform:translateX(-50%);
+ bottom:max(8px,env(safe-area-inset-bottom));
+ width:min(620px,calc(100% - 18px));
+ min-height:var(--bottom-nav-h);
+ display:grid;grid-template-columns:repeat(5,1fr);gap:4px;
+ padding:7px;border:1px solid rgba(77,115,153,.65);border-radius:20px;
+ background:rgba(8,18,31,.94);box-shadow:0 18px 46px rgba(0,0,0,.48);
+ backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)
+}
+.bottom-nav button{
+ border:0;background:transparent;color:#8da2ba;border-radius:14px;
+ min-height:56px;padding:5px 3px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:3px;font-size:10px;font-weight:700
+}
+.bottom-nav button.active{background:#142841;color:#f4f9ff}
+.bottom-nav .bn-icon{font-size:19px;line-height:1}
+.bottom-nav .production-main{background:#16382f;color:#b8ffe8}
+.bottom-nav .production-main.active{background:var(--accent);color:#06241c}
+.simple-hero{padding:17px;background:linear-gradient(135deg,#102842,#0c1c30);border:1px solid #315170;border-radius:17px}
+.simple-hero h3{font-size:18px;margin:0 0 5px}
+.simple-search{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:13px}
+.simple-search input{min-height:46px}
+.simple-search .btn{min-height:46px}
+.simple-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:13px}
+.simple-kpi{background:#0c192a;border:1px solid var(--line);border-radius:14px;padding:13px}
+.simple-kpi .n{font-size:25px;font-weight:850;margin-top:4px}
+.simple-kpi .t{font-size:10px;color:var(--muted)}
+.quick-actions{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.quick-action{
+ border:1px solid var(--line);background:#0d1b2d;color:var(--text);border-radius:15px;padding:14px;
+ text-align:left;min-height:90px
+}
+.quick-action:hover{background:#142943}
+.quick-action strong{display:block;font-size:13px;margin-bottom:5px}.quick-action span{font-size:10px;color:var(--muted)}
+.simple-list{display:grid;gap:8px}
+.simple-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#0b1828;border:1px solid var(--line);border-radius:12px;padding:11px}
+.simple-row .main{min-width:0}.simple-row .main strong{display:block;font-size:12px}.simple-row .meta{font-size:10px;color:var(--muted);margin-top:3px}
+.simple-row .side{text-align:right;flex:0 0 auto}.simple-row .big{font-weight:850;font-size:16px}
+.inventory-filters{display:flex;gap:6px;overflow-x:auto;padding:2px 0 9px;scrollbar-width:none}
+.inventory-filters::-webkit-scrollbar{display:none}
+.filter-pill{border:1px solid var(--line);background:#0b1829;color:#9db1c7;padding:8px 10px;border-radius:999px;white-space:nowrap}
+.filter-pill.active{background:#183450;color:#fff;border-color:#476b90}
+.inventory-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.inventory-card{background:#0c192a;border:1px solid var(--line);border-radius:15px;padding:13px}
+.inventory-card .head{display:flex;justify-content:space-between;gap:10px}
+.inventory-card h4{margin:0;font-size:13px;color:#f1f7ff}
+.inventory-card .qty{font-size:22px;font-weight:900;margin:11px 0 2px}
+.inventory-card .actions{margin-top:10px}
+.flow-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.flow-step{position:relative;background:#0b1829;border:1px solid var(--line);border-radius:14px;padding:13px}
+.flow-step .nr{font-size:10px;color:var(--accent);font-weight:900}.flow-step strong{display:block;font-size:13px;margin:5px 0}.flow-step span{font-size:10px;color:var(--muted)}
+.big-action-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.big-action{min-height:105px;text-align:left;border-radius:16px;padding:15px}
+.big-action strong{display:block;font-size:15px;margin-bottom:6px}.big-action span{display:block;font-size:10px;color:var(--muted)}
+.more-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.more-tile{border:1px solid var(--line);background:#0c192a;color:var(--text);border-radius:15px;padding:14px;text-align:left;min-height:82px}
+.more-tile strong{display:block;font-size:13px;margin-bottom:5px}.more-tile span{font-size:10px;color:var(--muted)}
+.import-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.import-summary .simple-kpi{padding:10px}
+.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);margin-right:5px}
+.status-dot.warn{background:var(--warn)}.status-dot.bad{background:var(--danger)}
+@media(max-width:820px){
+ main{padding:12px 11px calc(var(--bottom-nav-h) + 26px + env(safe-area-inset-bottom))}
+ .topbar{display:flex;flex-direction:row;align-items:center}
+ .topbar h2{font-size:21px}.topbar .sub{display:none}.simple-top-actions{margin-top:0!important}
+ .simple-top-actions .btn{min-width:70px;min-height:40px;padding:8px 10px}
+ .simple-kpis{grid-template-columns:repeat(2,1fr)}
+ .quick-actions{grid-template-columns:repeat(2,1fr)}
+ .inventory-card-grid{grid-template-columns:1fr}
+ .flow-steps{grid-template-columns:repeat(2,1fr)}
+ .more-grid{grid-template-columns:repeat(2,1fr)}
+ footer{padding-bottom:10px}
+}
+@media(max-width:520px){
+ .bottom-nav{width:calc(100% - 12px);bottom:max(4px,env(safe-area-inset-bottom));border-radius:18px}
+ .bottom-nav button{font-size:9px}
+ .simple-hero{padding:14px}
+ .big-action-grid{grid-template-columns:1fr}
+ .flow-steps{grid-template-columns:1fr 1fr}
+ .import-summary{grid-template-columns:1fr 1fr}
+}
+@media print{.bottom-nav{display:none!important}}
+
+
+/* =========================
+   v5 COMMAND CENTER
+   ========================= */
+.command-banner{background:linear-gradient(135deg,#102b3c,#103329 58%,#11233c);border:1px solid #35645f;border-radius:18px;padding:16px;position:relative;overflow:hidden}
+.command-banner:after{content:'';position:absolute;width:170px;height:170px;border-radius:50%;right:-65px;top:-75px;background:rgba(85,231,190,.08)}
+.command-banner h3{font-size:19px;margin:0 0 5px}.command-banner .clock{font-size:11px;color:#9db2c8}
+.today-stack{display:grid;gap:8px}.today-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#0b1829;border:1px solid var(--line);border-radius:13px;padding:11px}
+.today-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;background:#142c43;font-size:17px}.today-icon.warn{background:#3b3017}.today-icon.bad{background:#3a1d27}.today-icon.ok{background:#12352c}
+.today-item strong{display:block;font-size:12px}.today-item .meta{font-size:10px;color:var(--muted);margin-top:3px}.today-item .when{font-size:10px;font-weight:800;text-align:right}
+.aquaflow{display:flex;gap:7px;align-items:stretch;overflow-x:auto;padding:4px 1px 9px;scrollbar-width:none}.aquaflow::-webkit-scrollbar{display:none}
+.flow-node{min-width:145px;max-width:190px;flex:1;background:#0c192a;border:1px solid var(--line);border-radius:14px;padding:12px;position:relative}.flow-node.good{border-color:#2d705d}.flow-node.warn{border-color:#80672c}.flow-node.bad{border-color:#88404c}
+.flow-node .kind{font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:#7189a3}.flow-node strong{display:block;margin:5px 0;font-size:12px}.flow-node .flow-qty{font-size:18px;font-weight:900}.flow-node .mini{line-height:1.35}.flow-arrow{align-self:center;font-size:21px;color:#4a6b88;flex:0 0 auto}
+.tank-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.tank-card{background:linear-gradient(160deg,#0d1c2e,#0a1625);border:1px solid var(--line);border-radius:16px;padding:13px;position:relative;overflow:hidden}.tank-card:before{content:'';position:absolute;left:0;bottom:0;height:4px;width:var(--progress,0%);background:var(--accent)}
+.tank-card.problem{border-color:#7b3543}.tank-card.ready{border-color:#2f705d}.tank-card h4{margin:0;font-size:13px}.tank-card .litres{font-size:24px;font-weight:900;margin:11px 0 3px}.tank-card .actions{margin-top:10px}
+.forecast-row{display:grid;grid-template-columns:1.4fr .7fr .7fr .8fr;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #1e3145}.forecast-row:last-child{border-bottom:0}.forecast-days{font-weight:900}.forecast-days.bad{color:#ff9da7}.forecast-days.warn{color:#ffd782}.forecast-days.good{color:#91f0cf}
+.audit-score{display:flex;align-items:center;gap:12px}.audit-ring{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:conic-gradient(var(--accent) var(--score),#203246 0);position:relative}.audit-ring:after{content:'';position:absolute;inset:7px;border-radius:50%;background:var(--panel)}.audit-ring b{z-index:1;font-size:16px}
+.audit-list{display:grid;gap:8px}.audit-issue{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0b1829}.audit-issue.bad{border-color:#723743}.audit-issue.warn{border-color:#745e2d}.audit-issue strong{display:block;font-size:11px}.audit-issue span{font-size:10px;color:var(--muted)}
+.lineage-tree{display:flex;gap:7px;align-items:center;overflow-x:auto;padding:8px 0}.lineage-node{min-width:125px;border:1px solid var(--line);background:#0b1829;border-radius:12px;padding:10px}.lineage-node.current{border-color:var(--accent)}
+.scanner-box{position:relative;overflow:hidden;border-radius:15px;background:#050a10;min-height:260px}.scanner-box video{width:100%;height:300px;object-fit:cover;display:block}.scan-frame{position:absolute;inset:50% auto auto 50%;transform:translate(-50%,-50%);width:180px;height:180px;border:2px solid #7ef0cc;border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.28);pointer-events:none}
+.command-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.command-shortcut{border:1px solid var(--line);background:#0b192a;color:var(--text);border-radius:14px;padding:12px;text-align:left;min-height:75px}.command-shortcut strong{display:block;font-size:12px}.command-shortcut span{display:block;font-size:9px;color:var(--muted);margin-top:4px}
+@media(max-width:820px){.tank-grid{grid-template-columns:repeat(2,1fr)}.command-shortcuts{grid-template-columns:repeat(2,1fr)}.forecast-row{grid-template-columns:1.2fr .65fr .75fr}.forecast-row .forecast-cost{display:none}}
+@media(max-width:520px){.tank-grid{grid-template-columns:1fr}.flow-node{min-width:132px}.today-item{grid-template-columns:auto 1fr}.today-item .when{grid-column:2;text-align:left}.scanner-box video{height:260px}}
+
+
+/* =========================
+   v6 ULTIMATE
+   ========================= */
+.device-panel{display:grid;grid-template-columns:190px 1fr;gap:14px;align-items:stretch}
+.readiness-ring{--p:0;position:relative;width:160px;height:160px;margin:auto;border-radius:50%;background:conic-gradient(var(--accent) calc(var(--p)*1%),#17283a 0);display:grid;place-items:center}
+.readiness-ring:before{content:"";position:absolute;inset:14px;border-radius:50%;background:#0b1727;border:1px solid var(--line)}
+.readiness-ring .inside{position:relative;text-align:center;z-index:1}.readiness-ring .inside strong{display:block;font-size:30px}.readiness-ring .inside span{font-size:10px;color:var(--muted)}
+.readiness-ring.problem{background:conic-gradient(var(--danger) calc(var(--p)*1%),#17283a 0)}
+.readiness-ring.ready{background:conic-gradient(var(--ok) calc(var(--p)*1%),#17283a 0)}
+.device-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.device-actions button{min-height:68px;text-align:left}
+.metric-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.metric-box{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0b1828}.metric-box b{font-size:17px;display:block}.metric-box span{font-size:9px;color:var(--muted)}
+.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.calendar-dayname{font-size:9px;color:var(--muted);text-align:center;padding:6px}.calendar-cell{min-height:105px;border:1px solid var(--line);border-radius:11px;padding:7px;background:#0a1727;overflow:hidden}.calendar-cell.out{opacity:.3}.calendar-cell.today{outline:2px solid var(--accent)}.calendar-date{font-size:10px;font-weight:800;margin-bottom:5px}.cal-event{display:block;border-radius:6px;padding:4px 5px;margin:3px 0;background:#142943;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.cal-event.ready{background:#163b30}.cal-event.warn{background:#493716}.cal-event.bad{background:#4b2025}
+.template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.template-card{border:1px solid var(--line);border-radius:14px;padding:13px;background:#0b1829}.template-card h4{margin:0 0 4px}.template-card .vol{font-size:25px;font-weight:900;margin:8px 0}
+.tree2{overflow-x:auto;padding:6px}.tree2-row{display:flex;align-items:center;gap:8px;min-width:max-content}.tree2-node{min-width:145px;border:1px solid var(--line);border-radius:12px;padding:10px;background:#0b1828}.tree2-node.current{border-color:var(--accent);box-shadow:0 0 0 1px rgba(72,210,171,.25)}.tree2-node.problem{border-color:var(--danger)}.tree2-children{display:grid;gap:5px}.tree2-arrow{font-size:21px;color:var(--muted)}
+.fefo-row{display:grid;grid-template-columns:1.3fr .7fr .7fr .8fr;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}.fefo-row:last-child{border-bottom:0}
+.plan-result{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.plan-result .simple-kpi .n{font-size:18px}
+.analysis-bars{display:grid;gap:8px}.analysis-bar{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center}.analysis-track{height:11px;background:#142338;border-radius:999px;overflow:hidden}.analysis-fill{height:100%;background:var(--accent);border-radius:999px}
+.sync-state{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sync-code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;background:#07111e;border:1px solid var(--line);padding:10px;border-radius:10px;word-break:break-all}
+.incident-card{border-left:4px solid var(--danger)}
+.purchase-row{display:grid;grid-template-columns:1.5fr .6fr .6fr .7fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}.purchase-row:last-child{border-bottom:0}
+@media(max-width:820px){.device-panel{grid-template-columns:1fr}.device-actions{grid-template-columns:repeat(2,1fr)}.metric-strip{grid-template-columns:repeat(2,1fr)}.calendar-cell{min-height:78px;padding:4px}.cal-event{font-size:7px;padding:3px}.template-grid{grid-template-columns:1fr}.plan-result{grid-template-columns:repeat(2,1fr)}.analysis-bar{grid-template-columns:95px 1fr 55px}.sync-state{grid-template-columns:1fr}.purchase-row{grid-template-columns:1fr .7fr .7fr}.purchase-row>*:nth-child(4),.purchase-row>*:nth-child(5){grid-column:auto}}
+
 </style>
 </head>
 <body>
@@ -151,7 +293,7 @@ input,select,textarea{font-size:16px}
 
 <div class="app">
 <aside>
- <div class="brand"><h1>AquaCulture Manager Mobile</h1><p>produkcja • LIMS • CRM • identyfikowalność</p><span class="version">v4.1 • IndexedDB • VERIFIED</span></div>
+ <div class="brand"><h1>AquaCulture Manager</h1><p>Dzisiaj • AquaFlow • magazyn • sprzedaż</p><span class="version">v5 • Command Center • AquaFlow</span></div>
  <nav id="nav">
   <div class="group-title">Produkcja</div>
   <button class="active" data-view="dashboard">Pulpit</button>
@@ -179,19 +321,27 @@ input,select,textarea{font-size:16px}
 <main>
  <div class="topbar">
   <div><h2 id="viewTitle">Pulpit</h2><div id="viewSub" class="sub">System hodowli.</div></div>
-  <div class="actions"><button class="btn" onclick="window.print()">Drukuj widok</button><button class="btn primary" id="quickAdd">+ Dodaj</button></div>
+  <div class="actions simple-top-actions"><button class="btn primary" id="quickAdd">+ Dodaj</button></div>
  </div>
  <div id="content"></div>
  <footer>Dane są przechowywane lokalnie w IndexedDB. Zdjęcia nie opuszczają komputera. Nadal wykonuj regularne kopie zapasowe.</footer>
 </main>
 </div>
 
+<nav class="bottom-nav no-print" id="bottomNav" aria-label="Główna nawigacja">
+ <button class="active" data-view="dashboard"><span class="bn-icon">⌂</span><span>Start</span></button>
+ <button data-view="inventory"><span class="bn-icon">▦</span><span>Magazyn</span></button>
+ <button class="production-main" data-view="production"><span class="bn-icon">＋</span><span>Produkcja</span></button>
+ <button data-view="sales"><span class="bn-icon">◎</span><span>Sprzedaż</span></button>
+ <button data-view="more"><span class="bn-icon">•••</span><span>Więcej</span></button>
+</nav>
+
 <div class="modal" id="modal"><div class="modal-box" id="modalBox"><div class="modal-head"><h3 id="modalTitle">Formularz</h3><button class="x" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
 
 <script>
 const DB_NAME='AquaCultureManagerLAB';
-const DB_VERSION=5;
-const STORES=['cultures','events','measurements','sanitation','harvests','recipes','clients','orders','inventory','stockMoves','productionRuns','finance','tasks','media','meta'];
+const DB_VERSION=7;
+const STORES=['cultures','events','measurements','sanitation','harvests','recipes','clients','orders','inventory','stockMoves','productionRuns','productionJobs','productionTemplates','inventoryReservations','purchaseOrders','incidents','finance','tasks','media','meta'];
 const DATA_STORES=STORES.filter(x=>!['media','meta'].includes(x));
 const OLD_KEYS=['aquaculture_manager_pro_v2','aquaculture_manager_v1'];
 let idb=null;
@@ -288,6 +438,8 @@ async function init(){
   await migrateLocalStorage();
   await loadMemory();
   await migrateWarehouseV5();
+  await migrateProductionV6();
+  await migrateUltimateV7();
   bindNav();render();
  }catch(e){
   document.getElementById('content').innerHTML='<div class="card"><h3>Błąd uruchamiania IndexedDB</h3><div class="small">'+esc(e.message)+'</div></div>';
@@ -1351,8 +1503,8 @@ async function requestPersistence(){if(!navigator.storage?.persist)return alert(
 async function saveSettingsFromUI(){const root=document.getElementById('content');db.settings.companyName=root.querySelector('[name=setCompany]').value;db.settings.companySubtitle=root.querySelector('[name=setSubtitle]').value;db.settings.labelFooter=root.querySelector('[name=setFooter]').value;db.settings.operator=root.querySelector('[name=setOperator]').value;db.settings.defaultBottleCost=Number(root.querySelector('[name=setBottle]').value||0);db.settings.defaultCapCost=Number(root.querySelector('[name=setCap]').value||0);db.settings.defaultLabelCost=Number(root.querySelector('[name=setLabel]').value||0);db.settings.measurementAlertDays=Number(root.querySelector('[name=setAlertDays]').value||3);await saveSettings();alert('Ustawienia zapisane.')}
 async function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
 function dataURLToBlob(dataURL){const [meta,b64]=dataURL.split(','),mime=(meta.match(/data:(.*?);/)||[])[1]||'application/octet-stream',bin=atob(b64),arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:mime})}
-async function exportFullBackup(){const media=[];for(const m of db.media){media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}const data={app:'AquaCulture Manager LAB',version:4,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')}
-function exportDataBackup(){const data={app:'AquaCulture Manager LAB',version:4,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')}
+async function exportFullBackup(){const media=[];for(const m of db.media){media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}const data={app:'AquaCulture Manager LAB',version:7,appVersion:'6.0',exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')}
+function exportDataBackup(){const data={app:'AquaCulture Manager LAB',version:7,appVersion:'6.0',exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')}
 async function importBackup(){const file=document.getElementById('backupFile')?.files?.[0];if(!file)return alert('Wybierz plik JSON.');if(!confirm('Import zastąpi obecną bazę. Aktualizacja plików aplikacji na GitHub Pages sama w sobie NIE usuwa IndexedDB. Kontynuować?'))return;try{const data=JSON.parse(await file.text());for(const s of STORES)await clearStore(s);for(const s of DATA_STORES)for(const rec of (data.stores?.[s]||[]))await put(s,rec);if(data.settings)await put('meta',{id:'settings',value:{...defaultSettings,...data.settings}});for(const m of (data.media||[])){await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await loadMemory();render();alert('Kopia przywrócona.')}catch(e){alert('Błąd importu: '+e.message)}}
 async function resetDatabase(){if(!confirm('Usunąć wszystkie rekordy i zdjęcia z IndexedDB?'))return;for(const s of STORES)await clearStore(s);db.settings={...defaultSettings};await saveSettings();await loadMemory();render()}
 function exportCSV(store){const rows=db[store];if(!rows.length)return alert('Brak danych.');const cols=[...new Set(rows.flatMap(x=>Object.keys(x)))].filter(c=>typeof rows.find(r=>r[c]!==undefined)?.[c]!=='object'),q=v=>'"'+String(v??'').replaceAll('"','""')+'"',csv='\ufeff'+[cols.map(q).join(';'),...rows.map(r=>cols.map(c=>q(r[c])).join(';'))].join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),store+'_'+today()+'.csv')}
@@ -1363,13 +1515,1200 @@ function closeModal(){document.getElementById('modal').classList.remove('open');
 document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
 
 
+
+/* =========================
+   v3 — pełny proces produkcyjny
+   Magazyn → pożywka → hodowla WIP → gotowa kultura → rozlew
+   Migracja jest wyłącznie dodająca.
+   ========================= */
+
+titles.production=['Produkcja','Surowce → pożywka → hodowla z terminem → gotowa kultura → rozlew. Wszystkie ilości wynikają z magazynu.'];
+titles.inventory=['Magazyn','Jedno źródło prawdy: surowce, pożywki, kultury w toku/gotowe, opakowania i produkty gotowe.'];
+
+function inferStockKind(item){
+ if(item?.kind)return item.kind;
+ const c=String(item?.category||'').toLowerCase(),n=String(item?.name||'').toLowerCase();
+ if(c.includes('pożywka przygot')||c.includes('medium przygot')||n.includes('pożywka gotowa'))return 'Pożywka / medium';
+ if(c.includes('butel')||c.includes('zakr')||c.includes('etykiet')||c.includes('wysył'))return 'Opakowanie';
+ if(c.includes('produkt got'))return 'Produkt gotowy';
+ if(c.includes('kultura')||item?.organism||item?.legacyCultureId)return 'Kultura żywa';
+ if(c.includes('woda ro')||c.includes('sól')||c.includes('nawóz')||c.includes('pasza')||c.includes('chemia'))return 'Surowiec';
+ return 'Inne';
+}
+function stockKindClass(k){
+ return k==='Kultura żywa'?'stock-live':
+        k==='Surowiec'?'stock-raw':
+        k==='Pożywka / medium'?'stock-medium':
+        k==='Opakowanie'?'stock-pack':
+        k==='Produkt gotowy'?'stock-finished':'';
+}
+function liveStock(){return db.inventory.filter(x=>inferStockKind(x)==='Kultura żywa'&&Number(x.qty||0)>0)}
+function productionReadyCultures(){
+ return liveStock().filter(x=>!['W toku','Zaplanowana','Kwarantanna','Problem','Problem / skażenie','Anulowana','Zakończona'].includes(x.status||''));
+}
+function mediumStock(){
+ return db.inventory.filter(x=>inferStockKind(x)==='Pożywka / medium'&&Number(x.qty||0)>0&& !['Wycofana','Anulowana'].includes(x.status||''));
+}
+function finishedStock(){return db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&Number(x.qty||0)>0)}
+function liveStockOptions(selected=''){
+ return productionReadyCultures().map(x=>`<option value="${x.id}" ${selected===x.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • ${stockQtyText(x)} • ${esc(x.status||'Gotowa')}</option>`).join('');
+}
+function mediumStockOptions(selected=''){
+ return mediumStock().map(x=>`<option value="${x.id}" ${selected===x.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • ${stockQtyText(x)}</option>`).join('');
+}
+function nextMediumLot(date=today()){
+ const prefix='MED-'+String(date).replaceAll('-','')+'-';
+ const nums=db.inventory.map(x=>x.lot).filter(x=>String(x||'').startsWith(prefix)).map(x=>Number(String(x).slice(prefix.length))||0);
+ return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function nextProductionJobId(date=today()){
+ const prefix='JOB-'+String(date).replaceAll('-','')+'-';
+ const nums=(db.productionJobs||[]).map(x=>x.id).filter(x=>String(x).startsWith(prefix)).map(x=>Number(String(x).slice(prefix.length))||0);
+ return prefix+String((nums.length?Math.max(...nums):0)+1).padStart(3,'0');
+}
+function dateOnly(v){return String(v||'').slice(0,10)}
+function daysUntil(d){
+ if(!d)return null;
+ const a=new Date(today()+'T00:00:00'),b=new Date(dateOnly(d)+'T00:00:00');
+ return Math.round((b-a)/86400000);
+}
+function deadlineText(d,status=''){
+ if(!d)return '—';
+ if(['Gotowa','Zakończona','Anulowana'].includes(status))return datePL(d);
+ const n=daysUntil(d);
+ if(n===null)return datePL(d);
+ if(n<0)return `${datePL(d)} • opóźnienie ${Math.abs(n)} d`;
+ if(n===0)return `${datePL(d)} • dzisiaj`;
+ if(n===1)return `${datePL(d)} • jutro`;
+ return `${datePL(d)} • za ${n} d`;
+}
+function plannedProgress(job){
+ if(!job?.startedAt||!job?.plannedReadyDate)return 0;
+ const s=new Date(dateOnly(job.startedAt)+'T00:00:00').getTime(),e=new Date(dateOnly(job.plannedReadyDate)+'T00:00:00').getTime(),n=new Date(today()+'T00:00:00').getTime();
+ if(e<=s)return 100;
+ return Math.max(0,Math.min(100,(n-s)/(e-s)*100));
+}
+function inputCost(changes){
+ return changes.filter(ch=>Number(ch.delta||0)<0).reduce((sum,ch)=>{
+   const item=getById('inventory',ch.item.id)||ch.item;
+   return sum+Math.abs(Number(ch.delta||0))*Number(item?.price||0);
+ },0);
+}
+function baseMaterial(role){
+ const inv=db.inventory||[];
+ const lc=x=>String(x||'').toLowerCase();
+ if(role==='ro')return inv.find(x=>lc(x.category).includes('woda ro')||/^woda ro\b/i.test(x.name||''));
+ if(role==='salt')return inv.find(x=>lc(x.category).includes('sól')||lc(x.name).includes('sól mors'));
+ if(role==='f2')return inv.find(x=>lc(x.name).includes('f/2')||lc(x.name).includes('f2')||lc(x.category).includes('nawóz / pożywka'));
+ return null;
+}
+async function migrateProductionV6(){
+ let meta=null;try{meta=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('productionV6'))}catch(e){}
+ if(meta?.value?.done)return;
+ // Nie zmieniaj żadnych istniejących ilości. Jedynie uzupełnij neutralne metadane.
+ for(const item of db.inventory){
+  let changed=false;
+  if(!item.kind){item.kind=inferStockKind(item);changed=true}
+  if(inferStockKind(item)==='Pożywka / medium'&&!item.category){item.category='Pożywka przygotowana';changed=true}
+  if(changed)await put('inventory',item);
+ }
+ await put('meta',{id:'productionV6',value:{
+   done:true,date:new Date().toISOString(),
+   note:'Migracja v6 wyłącznie dodająca: productionJobs + metadane. Bez zmiany stanów magazynowych.'
+ }});
+ await loadMemory();
+}
+
+async function commitProductionRun(run,changes,job=null){
+ const merged=new Map();
+ for(const ch of changes||[]){
+  if(!ch.item?.id)throw new Error('Brak ID pozycji magazynowej.');
+  const prev=merged.get(ch.item.id);
+  if(prev){prev.delta+=Number(ch.delta||0);prev.reasons.push(ch.reason||run.type)}
+  else merged.set(ch.item.id,{...ch,delta:Number(ch.delta||0),reasons:[ch.reason||run.type]});
+ }
+ for(const ch of merged.values()){
+  const current=ch.isNew?0:Number(getById('inventory',ch.item.id)?.qty??ch.item.qty??0);
+  if(current+ch.delta < -1e-9)throw new Error(`Za mały stan: ${ch.item.name}. Dostępne ${num(current,3)} ${ch.item.unit}, wymagane ${num(Math.abs(ch.delta),3)} ${ch.item.unit}.`);
+ }
+ const stores=['inventory','stockMoves','productionRuns'];
+ if(job)stores.push('productionJobs');
+ const tx=idb.transaction(stores,'readwrite');
+ const inv=tx.objectStore('inventory'),mov=tx.objectStore('stockMoves'),prs=tx.objectStore('productionRuns');
+ const jobs=job?tx.objectStore('productionJobs'):null;
+ const snapshots=[];
+ for(const ch of merged.values()){
+  const currentObj=ch.isNew?{...ch.item,qty:0}:{...getById('inventory',ch.item.id)};
+  const before=Number(currentObj.qty||0),after=before+ch.delta;
+  currentObj.qty=after;currentObj.updatedAt=new Date().toISOString();
+  if(ch.isNew&&!currentObj.createdAt)currentObj.createdAt=new Date().toISOString();
+  inv.put(currentObj);
+  const move={id:uid('RM'),date:run.dateTime||nowLocal(),item:currentObj.id,type:ch.moveType||(ch.delta>=0?'Przyjęcie':'Rozchód'),qty:ch.delta,reason:ch.reasons.join(' + '),productionRunId:run.id,before,after};
+  mov.put(move);
+  snapshots.push({itemId:currentObj.id,name:currentObj.name,kind:inferStockKind(currentObj),lot:currentObj.lot||'',unit:currentObj.unit||'',delta:ch.delta,before,after});
+ }
+ run.movements=snapshots;run.status='Zaksięgowana';run.createdAt=run.createdAt||new Date().toISOString();
+ if(job)run.productionJobId=job.id;
+ prs.put(run);
+ if(job){
+  job.runId=run.id;
+  job.movements=snapshots;
+  job.createdAt=job.createdAt||new Date().toISOString();
+  jobs.put(job);
+ }
+ await txDone(tx);await loadMemory();
+}
+
+function baseMaterialCard(role,label){
+ const x=baseMaterial(role);
+ if(!x)return `<div class="alert"><strong>${esc(label)}</strong><span class="small">Brak pozycji w magazynie.</span><div style="margin-top:6px">${btn('Dodaj do magazynu',`openBaseMaterial('${role}')`,'btn tiny')}</div></div>`;
+ return `<div class="alert"><strong>${esc(label)}</strong><span class="small">${esc(x.name)} • ${stockQtyText(x)} • ${esc(x.lot||'bez partii')}</span><div style="margin-top:6px">${btn('Przyjmij / uzupełnij',`openStockMove('${x.id}')`,'btn tiny')}${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}</div></div>`;
+}
+function openBaseMaterial(role){
+ const existing=baseMaterial(role);if(existing)return openStockMove(existing.id);
+ const defs={
+  ro:{name:'Woda RO',category:'Woda RO',unit:'ml'},
+  salt:{name:'Sól morska',category:'Sól',unit:'g'},
+  f2:{name:'F/2',category:'Nawóz / pożywka',unit:'ml'}
+ };
+ const d=defs[role];if(!d)return;
+ modalTitle.textContent=`Dodaj: ${d.name}`;modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<form id="baseMaterialForm"><div class="form-grid">
+ ${f('name','Nazwa','text',d.name)}${f('qty','Stan początkowy','number',0)}${f('unit','Jednostka','text',d.unit)}
+ ${f('lot','Partia dostawcy','text','')}${f('supplier','Dostawca / źródło','text','')}${f('price','Cena za 1 jednostkę [PLN]','number',0)}
+ ${f('min','Stan minimalny','number',0)}${f('notes','Uwagi','textarea','')}
+ </div><div class="actions" style="margin-top:12px"><button class="btn primary">Dodaj do magazynu</button></div></form>`;
+ baseMaterialForm.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.target),qty=Number(fd.get('qty')||0);
+  const item={id:uid('MAG'),name:fd.get('name')||d.name,kind:'Surowiec',category:d.category,qty:0,unit:fd.get('unit')||d.unit,min:Number(fd.get('min')||0),price:Number(fd.get('price')||0),lot:fd.get('lot')||'',supplier:fd.get('supplier')||'',status:'OK',notes:fd.get('notes')||''};
+  if(qty>0){
+   const run={id:nextProductionRunId(),type:'Przyjęcie surowca',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${item.name}: +${num(qty,3)} ${item.unit}`};
+   try{await commitProductionRun(run,[{item,delta:qty,isNew:true,moveType:'Przyjęcie',reason:'Przyjęcie surowca bazowego'}])}catch(err){return alert(err.message)}
+  }else await saveRecord('inventory',item);
+  closeModal();render();
+ };
+ modal.classList.add('open');
+}
+
+function mediumRecipeOptions(selected=''){
+ const list=db.recipes.filter(r=>r.active!=='Nie'&&(/pożyw|medium|solank/i.test(String(r.product||'')+' '+String(r.name||''))));
+ return `<option value="">— wybierz recepturę —</option>`+list.map(r=>`<option value="${r.id}" ${selected===r.id?'selected':''}>${esc(r.name)}</option>`).join('');
+}
+function openMediumRecipeBuilder(){
+ const ro=baseMaterial('ro'),salt=baseMaterial('salt'),f2=baseMaterial('f2');
+ if(!ro||!salt||!f2){
+  return alert('Najpierw dodaj do magazynu Wodę RO, Sól oraz F/2. W sekcji Produkcja są do tego trzy szybkie przyciski.');
+ }
+ modalTitle.textContent='Receptura pożywki / solanki';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="mediumRecipeForm"><div class="callout">Ilości podajesz na 1 litr gotowej pożywki. Receptura nie zmienia magazynu — dopiero „Przygotuj pożywkę” wykona rozchód.</div><div class="form-grid" style="margin-top:12px">
+ ${f('name','Nazwa receptury','text','Pożywka F/2')}
+ ${f('organism','Dla organizmu','select','Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Uniwersalna'])}
+ <div class="field"><label>Woda RO</label><select name="water"><option value="${ro.id}">${esc(ro.name)} • ${stockQtyText(ro)}</option></select></div>
+ ${f('waterQty','Woda RO na 1 L [ml]','number',1000)}
+ <div class="field"><label>Sól</label><select name="salt"><option value="${salt.id}">${esc(salt.name)} • ${stockQtyText(salt)}</option></select></div>
+ ${f('saltQty','Sól na 1 L [g]','number','')}
+ <div class="field"><label>F/2</label><select name="f2"><option value="${f2.id}">${esc(f2.name)} • ${stockQtyText(f2)}</option></select></div>
+ ${f('f2Qty','F/2 na 1 L [ml]','number','')}
+ ${f('notes','Uwagi / zasolenie docelowe','textarea','')}
+ </div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz recepturę</button></div></form>`;
+ mediumRecipeForm.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.target),w=Number(fd.get('waterQty')||0),s=Number(fd.get('saltQty')||0),f2q=Number(fd.get('f2Qty')||0);
+  if(w<=0||s<=0||f2q<=0)return alert('Podaj dodatnie ilości Wody RO, soli i F/2 na 1 litr.');
+  const rec={id:uid('REC'),name:fd.get('name')||'Pożywka F/2',product:`Pożywka / medium — ${fd.get('organism')||'Uniwersalna'}`,active:'Tak',notes:fd.get('notes')||'',ingredients:[
+    {itemId:fd.get('water'),qty:w,basis:'na 1 L'},
+    {itemId:fd.get('salt'),qty:s,basis:'na 1 L'},
+    {itemId:fd.get('f2'),qty:f2q,basis:'na 1 L'}
+  ]};
+  await saveRecord('recipes',rec);closeModal();render();
+ };
+ modal.classList.add('open');
+}
+
+function openMediumPreparation(){
+ const recipes=db.recipes.filter(r=>r.active!=='Nie'&&(/pożyw|medium|solank/i.test(String(r.product||'')+' '+String(r.name||''))));
+ if(!recipes.length)return alert('Brak receptury pożywki. Najpierw wybierz „Receptura pożywki” w Produkcji.');
+ modalTitle.textContent='Przygotowanie pożywki / solanki';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="mediumPrepForm"><div class="callout">Ta operacja pobiera surowce z magazynu i tworzy osobną partię gotowej pożywki. Stan surowców oraz pożywki jest księgowany automatycznie.</div><div class="form-grid" style="margin-top:12px">
+ ${f('dateTime','Data przygotowania','datetime-local',nowLocal())}
+ <div class="field"><label>Receptura</label><select name="recipe">${mediumRecipeOptions()}</select></div>
+ ${f('outputMl','Objętość gotowej pożywki [ml]','number',10000)}
+ ${f('name','Nazwa pozycji wynikowej','text','Pożywka F/2')}
+ ${f('lot','Partia pożywki','text',nextMediumLot())}
+ ${f('organism','Przeznaczenie','select','Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Uniwersalna'])}
+ ${f('salinity','Zasolenie docelowe [ppt]','number','')}
+ ${f('vessel','Zbiornik / naczynie','text','')}
+ ${f('bestBefore','Termin użycia — opcjonalnie','date','')}
+ ${f('notes','Uwagi','textarea','')}
+ </div><div id="mediumPreview" class="section card"></div><div class="actions" style="margin-top:12px"><button class="btn primary">Przygotuj i zaksięguj pożywkę</button></div></form>`;
+ const form=document.getElementById('mediumPrepForm');
+ const refresh=()=>{
+  const ml=Number(form.elements.outputMl.value||0),litres=ml/1000,recipe=form.elements.recipe.value;
+  const lines=productionRecipeChanges(recipe,litres,0);
+  const cost=inputCost(lines);
+  document.getElementById('mediumPreview').innerHTML=`<h3>Bilans przygotowania</h3>
+   <div class="statline"><span>Gotowa pożywka</span><strong>+${num(ml,2)} ml</strong></div>
+   <div class="statline"><span>Szacowany koszt surowców</span><strong>${money(cost)}</strong></div>
+   ${lines.length?`<hr>${lines.map(ch=>{const available=Number(ch.item.qty||0),need=Math.abs(Number(ch.delta||0));return `<div class="statline"><span>${esc(ch.item.name)}</span><strong class="${available+1e-9>=need?'ledger-ok':'ledger-bad'}">−${num(need,3)} ${esc(ch.item.unit)} / stan ${num(available,3)}</strong></div>`}).join('')}`:'<div class="alert"><strong>Wybierz recepturę.</strong></div>'}`;
+ };
+ ['recipe','outputMl'].forEach(n=>form.elements[n].addEventListener('input',refresh));refresh();
+ form.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(form),ml=Number(fd.get('outputMl')||0),recipe=fd.get('recipe');
+  if(ml<=0||!recipe)return alert('Wybierz recepturę i podaj objętość.');
+  const changes=productionRecipeChanges(recipe,ml/1000,0);
+  if(!changes.length)return alert('Receptura nie ma składników magazynowych.');
+  const cost=inputCost(changes);
+  const out={id:uid('MAG'),name:fd.get('name')||'Pożywka / medium',kind:'Pożywka / medium',category:'Pożywka przygotowana',qty:0,unit:'ml',min:0,price:ml?cost/ml:0,lot:fd.get('lot')||nextMediumLot(dateOnly(fd.get('dateTime'))),organism:fd.get('organism')||'',salinity:fd.get('salinity')||'',vessel:fd.get('vessel')||'',bestBefore:fd.get('bestBefore')||'',recipeId:recipe,status:'Gotowa',preparedAt:fd.get('dateTime')||nowLocal(),notes:fd.get('notes')||''};
+  const run={id:nextProductionRunId(dateOnly(fd.get('dateTime'))),type:'Przygotowanie pożywki / medium',dateTime:fd.get('dateTime')||nowLocal(),operator:db.settings.operator||'',summary:`${out.lot}: +${num(ml,2)} ml gotowej pożywki`,notes:out.notes};
+  changes.push({item:out,delta:ml,isNew:true,moveType:'Przyjęcie z produkcji',reason:'Gotowa pożywka / medium'});
+  try{await commitProductionRun(run,changes);closeModal();render()}catch(err){alert(err.message)}
+ };
+ modal.classList.add('open');
+}
+
+function openCultureExpansion(preset=''){
+ const sources=productionReadyCultures(),media=mediumStock();
+ if(!sources.length)return alert('Brak gotowej/aktywnej kultury źródłowej w magazynie.');
+ if(!media.length)return alert('Brak gotowej pożywki w magazynie. Najpierw wykonaj „Przygotuj pożywkę”.');
+ const jobId=nextProductionJobId();
+ modalTitle.textContent='Uruchom hodowlę / namnażanie';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="expandForm"><div class="callout">Nowa kultura od razu trafia do magazynu ze statusem „W toku”. Nie będzie dostępna do rozlewu ani jako gotowe inokulum, dopóki nie oznaczysz procesu jako gotowego.</div><div class="form-grid" style="margin-top:12px">
+ ${f('jobId','Numer procesu','text',jobId)}
+ ${f('startedAt','Start procesu','datetime-local',nowLocal())}
+ <div class="field"><label>Kultura źródłowa / inokulum</label><select name="source">${liveStockOptions(preset)}</select></div>
+ ${f('consume','Pobierz inokulum [ml]','number',200)}
+ <div class="field"><label>Gotowa pożywka</label><select name="medium">${mediumStockOptions()}</select></div>
+ ${f('mediumMl','Pobierz pożywkę [ml]','number',4800)}
+ ${f('plannedReadyDate','Planowany termin gotowości','date','')}
+ ${f('plannedBottleDate','Docelowy termin rozlewu — opcjonalnie','date','')}
+ ${f('nextCheckDate','Następna kontrola — opcjonalnie','date','')}
+ ${f('name','Nazwa nowej kultury','text','')}
+ ${f('lot','Nowy numer partii','text','')}
+ ${f('vessel','Naczynie / stanowisko','text','')}
+ ${f('targetConcentration','Docelowe stężenie / kryterium','text','')}
+ ${f('notes','Uwagi','textarea','')}
+ </div><div id="expandPreview" class="section card"></div><div class="actions" style="margin-top:12px"><button class="btn primary">Uruchom produkcję</button></div></form>`;
+ const form=document.getElementById('expandForm');
+ const refresh=()=>{
+  const src=getById('inventory',form.elements.source.value),med=getById('inventory',form.elements.medium.value);
+  const ino=Number(form.elements.consume.value||0),medMl=Number(form.elements.mediumMl.value||0),output=ino+medMl;
+  if(src){
+   if(!form.elements.name.value)form.elements.name.placeholder=`${src.organism||src.name} — produkcja`;
+   if(!form.elements.lot.value)form.elements.lot.placeholder=nextCultureLot(src.organism||'',dateOnly(form.elements.startedAt.value)||today());
+  }
+  const cost=(src?ino*Number(src.price||0):0)+(med?medMl*Number(med.price||0):0);
+  document.getElementById('expandPreview').innerHTML=`<h3>Bilans procesu</h3>
+   <div class="statline"><span>Inokulum</span><strong>−${num(ino,2)} ml</strong></div>
+   <div class="statline"><span>Pożywka</span><strong>−${num(medMl,2)} ml</strong></div>
+   <div class="statline"><span>Nowa kultura w toku</span><strong>+${num(output,2)} ml</strong></div>
+   <div class="statline"><span>Planowana gotowość</span><strong>${form.elements.plannedReadyDate.value?deadlineText(form.elements.plannedReadyDate.value,'W toku'):'—'}</strong></div>
+   <div class="statline"><span>Koszt wejść</span><strong>${money(cost)}</strong></div>`;
+ };
+ ['source','medium','consume','mediumMl','startedAt','plannedReadyDate'].forEach(n=>form.elements[n].addEventListener('input',refresh));refresh();
+ form.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(form),src=getById('inventory',fd.get('source')),med=getById('inventory',fd.get('medium')),ino=Number(fd.get('consume')||0),medMl=Number(fd.get('mediumMl')||0);
+  if(!src||!med||ino<=0||medMl<=0)return alert('Uzupełnij inokulum i pożywkę.');
+  if(!fd.get('plannedReadyDate'))return alert('Ustaw planowany termin gotowości.');
+  const output=ino+medMl,cost=ino*Number(src.price||0)+medMl*Number(med.price||0),jid=fd.get('jobId')||nextProductionJobId(dateOnly(fd.get('startedAt')));
+  const out={id:uid('MAG'),name:fd.get('name')||`${src.organism||src.name} — produkcja`,kind:'Kultura żywa',category:'Kultura biologiczna',qty:0,unit:'ml',min:0,price:output?cost/output:0,lot:fd.get('lot')||nextCultureLot(src.organism||'',dateOnly(fd.get('startedAt'))),organism:src.organism||'',strain:src.strain||'',concentration:'',vessel:fd.get('vessel')||'',status:'W toku',parentItemId:src.id,mediumItemId:med.id,productionJobId:jid,start:dateOnly(fd.get('startedAt')),plannedReadyDate:fd.get('plannedReadyDate')||'',plannedBottleDate:fd.get('plannedBottleDate')||'',targetConcentration:fd.get('targetConcentration')||'',notes:fd.get('notes')||''};
+  const run={id:nextProductionRunId(dateOnly(fd.get('startedAt'))),type:'Start hodowli / namnażania',dateTime:fd.get('startedAt')||nowLocal(),operator:db.settings.operator||'',summary:`${src.lot||src.name}: −${num(ino,2)} ml + ${med.lot||med.name}: −${num(medMl,2)} ml → ${out.lot}: +${num(output,2)} ml (W toku)`,notes:fd.get('notes')||''};
+  const job={id:jid,type:'Hodowla / namnażanie',organism:src.organism||'',status:'W toku',startedAt:fd.get('startedAt')||nowLocal(),plannedReadyDate:fd.get('plannedReadyDate')||'',plannedBottleDate:fd.get('plannedBottleDate')||'',nextCheckDate:fd.get('nextCheckDate')||'',sourceItemId:src.id,mediumItemId:med.id,outputItemId:out.id,targetConcentration:fd.get('targetConcentration')||'',vessel:fd.get('vessel')||'',notes:fd.get('notes')||''};
+  const changes=[
+   {item:src,delta:-ino,moveType:'Rozchód produkcyjny',reason:`Inokulum do procesu ${jid}`},
+   {item:med,delta:-medMl,moveType:'Rozchód produkcyjny',reason:`Pożywka do procesu ${jid}`},
+   {item:out,delta:output,isNew:true,moveType:'Przyjęcie produkcji w toku',reason:`Kultura w toku — proces ${jid}`}
+  ];
+  try{await commitProductionRun(run,changes,job);closeModal();render()}catch(err){alert(err.message)}
+ };
+ modal.classList.add('open');
+}
+
+async function updateProductionJobStatus(id,newStatus){
+ const job=getById('productionJobs',id);if(!job)return;
+ const out=getById('inventory',job.outputItemId);
+ const tx=idb.transaction(['productionJobs','inventory','productionRuns'],'readwrite');
+ const j={...job,status:newStatus,updatedAt:new Date().toISOString()};
+ if(newStatus==='Gotowa')j.actualReadyAt=nowLocal();
+ if(newStatus==='Zakończona')j.closedAt=nowLocal();
+ if(newStatus==='Problem')j.problemAt=nowLocal();
+ tx.objectStore('productionJobs').put(j);
+ if(out){
+  const x={...out};
+  if(newStatus==='Gotowa')x.status='Gotowa';
+  else if(newStatus==='Problem')x.status='Problem';
+  else if(newStatus==='Anulowana')x.status='Anulowana';
+  x.updatedAt=new Date().toISOString();
+  tx.objectStore('inventory').put(x);
+ }
+ const r={id:nextProductionRunId(),type:'Status procesu produkcyjnego',dateTime:nowLocal(),operator:db.settings.operator||'',status:'Zaksięgowana',productionJobId:id,movements:[],summary:`${id}: ${job.status} → ${newStatus}`,createdAt:new Date().toISOString()};
+ tx.objectStore('productionRuns').put(r);
+ await txDone(tx);await loadMemory();closeModal();render();
+}
+function editProductionSchedule(id){
+ const job=getById('productionJobs',id);if(!job)return;
+ modalTitle.textContent=`Terminy procesu ${id}`;modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<form id="jobScheduleForm"><div class="form-grid">
+ ${f('plannedReadyDate','Planowany termin gotowości','date',job.plannedReadyDate||'')}
+ ${f('plannedBottleDate','Docelowy termin rozlewu','date',job.plannedBottleDate||'')}
+ ${f('nextCheckDate','Następna kontrola','date',job.nextCheckDate||'')}
+ ${f('targetConcentration','Docelowe stężenie / kryterium','text',job.targetConcentration||'')}
+ ${f('notes','Uwagi','textarea',job.notes||'')}
+ </div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz terminy</button></div></form>`;
+ jobScheduleForm.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.target),j={...job};
+  ['plannedReadyDate','plannedBottleDate','nextCheckDate','targetConcentration','notes'].forEach(k=>j[k]=fd.get(k)||'');
+  j.updatedAt=new Date().toISOString();await saveRecord('productionJobs',j);
+  const out=getById('inventory',j.outputItemId);if(out){const x={...out,plannedReadyDate:j.plannedReadyDate,plannedBottleDate:j.plannedBottleDate,targetConcentration:j.targetConcentration};await saveRecord('inventory',x)}
+  closeModal();render();
+ };
+ modal.classList.add('open');
+}
+function openProductionJob(id){
+ const j=getById('productionJobs',id);if(!j)return;
+ const out=getById('inventory',j.outputItemId),src=getById('inventory',j.sourceItemId),med=getById('inventory',j.mediumItemId);
+ const runs=(db.productionRuns||[]).filter(r=>r.productionJobId===id).sort((a,b)=>(b.dateTime||'').localeCompare(a.dateTime||''));
+ modalTitle.textContent=`Proces ${j.id}`;modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="actions" style="margin-bottom:12px">
+ ${j.status==='W toku'?btn('Oznacz jako GOTOWĄ',`updateProductionJobStatus('${j.id}','Gotowa')`,'btn primary'):''}
+ ${['W toku','Gotowa'].includes(j.status)?btn('Edytuj terminy',`editProductionSchedule('${j.id}')`):''}
+ ${j.status==='W toku'?btn('Problem',`updateProductionJobStatus('${j.id}','Problem')`,'btn danger'):''}
+ ${j.status==='Gotowa'?btn('Zakończ proces',`updateProductionJobStatus('${j.id}','Zakończona')`,'btn secondary'):''}
+ ${out?btn('Karta kultury w magazynie',`openStockCard('${out.id}')`,'btn secondary'):''}
+ </div>
+ <div class="two"><div class="card"><h3>Harmonogram</h3>
+  <div class="profile">${profileBox('Status',j.status)}${profileBox('Start',datePL(j.startedAt))}${profileBox('Planowana gotowość',deadlineText(j.plannedReadyDate,j.status))}${profileBox('Rzeczywista gotowość',datePL(j.actualReadyAt))}${profileBox('Docelowy rozlew',datePL(j.plannedBottleDate))}${profileBox('Następna kontrola',datePL(j.nextCheckDate))}${profileBox('Kryterium',j.targetConcentration)}${profileBox('Naczynie',j.vessel)}</div>
+  <hr><div class="small">Postęp kalendarzowy do planowanego terminu: ${num(plannedProgress(j),0)}%. To nie jest pomiar biologicznego wzrostu.</div>
+ </div><div class="card"><h3>Przepływ materiału</h3>
+  <div class="statline"><span>Inokulum</span><strong>${src?esc(src.name)+' • '+esc(src.lot||src.id):'—'}</strong></div>
+  <div class="statline"><span>Pożywka</span><strong>${med?esc(med.name)+' • '+esc(med.lot||med.id):'—'}</strong></div>
+  <div class="statline"><span>Wynik</span><strong>${out?esc(out.name)+' • '+esc(out.lot||out.id):'—'}</strong></div>
+  <hr><div class="small">${esc(j.notes||'')}</div>
+ </div></div>
+ <div class="section card"><h3>Dziennik procesu</h3>${runs.length?table(['Data','Operacja','Opis'],runs.map(r=>`<tr><td>${datePL(r.dateTime||r.createdAt)}</td><td>${esc(r.type)}</td><td>${esc(r.summary||'')}</td></tr>`)):'<div class="empty">Brak wpisów.</div>'}</div>`;
+ modal.classList.add('open');
+}
+
+function computedAlerts(){
+ const a=[];const limit=Number(db.settings.measurementAlertDays||3);
+ liveStock().forEach(c=>{
+  const m=[...db.measurements].filter(x=>x.stockItem===c.id||x.culture===c.legacyCultureId).sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
+  if(!m||daysBetween(m.date||c.createdAt||today())>=limit)a.push({level:'warn',title:'Brak świeżego pomiaru',desc:`${c.lot||c.id} ${c.organism||''}: ${m?'ostatni '+datePL(m.date):'brak pomiarów'}`});
+  if(Math.abs(stockLedgerBalance(c.id)-Number(c.qty||0))>1e-9)a.push({level:'bad',title:'Niezgodność salda magazynowego',desc:`${c.name}: stan ${num(Number(c.qty||0),3)} ${c.unit}, ruchy ${num(stockLedgerBalance(c.id),3)} ${c.unit}`});
+ });
+ (db.productionJobs||[]).filter(j=>j.status==='W toku').forEach(j=>{
+  const d=daysUntil(j.plannedReadyDate);
+  if(d!==null&&d<0)a.push({level:'bad',title:'Przekroczony termin produkcji',desc:`${j.id} ${j.organism||''}: planowana gotowość ${datePL(j.plannedReadyDate)} (${Math.abs(d)} d po terminie)`});
+  else if(d!==null&&d<=2)a.push({level:'warn',title:'Zbliża się termin produkcji',desc:`${j.id} ${j.organism||''}: ${deadlineText(j.plannedReadyDate,j.status)}`});
+  const c=daysUntil(j.nextCheckDate);
+  if(j.nextCheckDate&&c!==null&&c<0)a.push({level:'bad',title:'Zaległa kontrola produkcji',desc:`${j.id}: kontrola była zaplanowana na ${datePL(j.nextCheckDate)}`});
+  else if(j.nextCheckDate&&c===0)a.push({level:'warn',title:'Kontrola produkcji dzisiaj',desc:`${j.id} ${j.organism||''}`});
+ });
+ db.inventory.filter(x=>Number(x.qty)<=Number(x.min||0)).forEach(x=>a.push({level:'warn',title:'Niski stan',desc:`${x.name}: ${x.qty} ${x.unit}; min. ${x.min}`}));
+ db.tasks.filter(x=>x.status!=='Zrealizowane'&&x.due&&x.due<today()).forEach(x=>a.push({level:'bad',title:'Zaległe zadanie',desc:`${x.title}: ${datePL(x.due)}`}));
+ db.harvests.filter(x=>x.bestBefore&&x.bestBefore<today()&&x.status!=='Wycofana').forEach(x=>a.push({level:'bad',title:'Partia po terminie',desc:`${x.id}: ${datePL(x.bestBefore)}`}));
+ return a;
+}
+
+function renderProduction(){
+ const jobs=[...(db.productionJobs||[])].sort((a,b)=>(a.plannedReadyDate||'9999').localeCompare(b.plannedReadyDate||'9999'));
+ const active=jobs.filter(j=>j.status==='W toku'),ready=jobs.filter(j=>j.status==='Gotowa');
+ const overdue=active.filter(j=>daysUntil(j.plannedReadyDate)!==null&&daysUntil(j.plannedReadyDate)<0);
+ const media=mediumStock(),recent=[...db.productionRuns].sort((a,b)=>(b.dateTime||b.createdAt||'').localeCompare(a.dateTime||a.createdAt||'')).slice(0,12);
+ const matRows=[
+  ['ro','Woda RO'],['salt','Sól'],['f2','F/2']
+ ].map(([role,label])=>baseMaterialCard(role,label)).join('');
+ const jobRows=active.map(j=>{
+  const out=getById('inventory',j.outputItemId),d=daysUntil(j.plannedReadyDate);
+  return `<tr><td><a class="link" onclick="openProductionJob('${j.id}')"><strong>${esc(j.id)}</strong></a><div class="mini">${esc(j.organism||'')}</div></td>
+   <td>${out?`<a class="link" onclick="openStockCard('${out.id}')">${esc(out.lot||out.name)}</a>`:'—'}</td>
+   <td>${datePL(j.startedAt)}</td><td><strong class="${d!==null&&d<0?'ledger-bad':d!==null&&d<=2?'':'ledger-ok'}">${esc(deadlineText(j.plannedReadyDate,j.status))}</strong></td>
+   <td>${datePL(j.plannedBottleDate)||'—'}</td><td>${j.nextCheckDate?deadlineText(j.nextCheckDate,j.status):'—'}</td><td>${badge(j.status)}</td>
+   <td>${btn('Karta',`openProductionJob('${j.id}')`,'btn tiny secondary')}${btn('Gotowa',`updateProductionJobStatus('${j.id}','Gotowa')`,'btn tiny')}</td></tr>`;
+ });
+ return `<div class="grid">
+  <div class="card kpi"><div class="l">Produkcje w toku</div><div class="v">${active.length}</div><div class="hint">${overdue.length} po terminie</div></div>
+  <div class="card kpi"><div class="l">Gotowe procesy</div><div class="v">${ready.length}</div><div class="hint">oczekują na dalszą operację</div></div>
+  <div class="card kpi"><div class="l">Gotowa pożywka</div><div class="v">${num(media.reduce((a,x)=>a+(x.unit==='ml'?Number(x.qty||0):0),0)/1000,2)} L</div><div class="hint">${media.length} partii medium</div></div>
+  <div class="card kpi"><div class="l">Gotowe kultury</div><div class="v">${productionReadyCultures().length}</div><div class="hint">dostępne do rozdzielenia / rozlewu</div></div>
+ </div>
+
+ <div class="section card"><h3>Łańcuch produkcyjny</h3>
+  <div class="callout"><strong>Magazyn jest źródłem prawdy.</strong> Najpierw przyjmujesz Wodę RO, sól i F/2. Z nich tworzysz partię pożywki. Dopiero z gotowej pożywki i inokulum uruchamiasz hodowlę z terminem docelowym.</div>
+  <div class="production-choice" style="margin-top:12px">
+   ${btn('① Surowce bazowe<br><span class="small">RO / sól / F/2 do magazynu</span>',"openBaseMaterial('ro')",'btn')}
+   ${btn('② Receptura pożywki<br><span class="small">ilości surowców na 1 L</span>',"openMediumRecipeBuilder()",'btn')}
+   ${btn('③ Przygotuj pożywkę<br><span class="small">RO + sól + F/2 → medium</span>',"openMediumPreparation()",'btn primary')}
+   ${btn('④ Uruchom hodowlę<br><span class="small">inokulum + medium → kultura W toku</span>',"openCultureExpansion()",'btn primary')}
+   ${btn('⑤ Rozdziel kulturę<br><span class="small">gotowa kultura → kultury potomne</span>',"openCultureSplit()",'btn')}
+   ${btn('⑥ Rozlew / pakowanie<br><span class="small">gotowa kultura + opakowania → produkt</span>',"openBottling()",'btn')}
+   ${btn('Przyjmij kulturę startową<br><span class="small">pierwsze inokulum / zakup</span>',"openInitialCultureIntake()",'btn secondary')}
+  </div>
+ </div>
+
+ <div class="two section">
+  <div class="card"><h3>Surowce bazowe</h3>${matRows}</div>
+  <div class="card"><h3>Partie gotowej pożywki</h3>${media.length?media.map(x=>`<div class="alert"><strong><a class="link" onclick="openStockCard('${x.id}')">${esc(x.name)}</a></strong><span class="small">${esc(x.lot||x.id)} • ${stockQtyText(x)}${x.salinity?' • '+esc(x.salinity)+' ppt':''}</span></div>`).join(''):'<div class="empty">Brak gotowej pożywki.</div>'}</div>
+ </div>
+
+ <div class="section card"><h3>Produkcje w toku — terminy docelowe</h3>
+  ${active.length?table(['Proces','Kultura wynikowa','Start','Gotowość','Docelowy rozlew','Kontrola','Status','Akcje'],jobRows):'<div class="empty">Brak produkcji w toku.</div>'}
+ </div>
+
+ <div class="two section">
+  <div class="card"><h3>Gotowe kultury</h3>${productionReadyCultures().length?table(['Kultura / partia','Organizm','Stan','Status','Akcje'],productionReadyCultures().map(x=>`<tr><td><a class="link" onclick="openStockCard('${x.id}')"><strong>${esc(x.name)}</strong></a><div class="mini">${esc(x.lot||x.id)}</div></td><td>${esc(x.organism||'—')}</td><td>${stockQtyText(x)}</td><td>${badge(x.status||'Gotowa')}</td><td>${btn('Namnażaj',`openCultureExpansion('${x.id}')`,'btn tiny')}${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}</td></tr>`)):'<div class="empty">Brak gotowych kultur.</div>'}</div>
+  <div class="card"><h3>Ostatnie operacje magazynowo-produkcyjne</h3>${recent.length?recent.map(r=>`<div class="alert"><strong><a class="link" onclick="openProductionRun('${r.id}')">${esc(r.id)}</a> — ${esc(r.type)}</strong><span class="small">${datePL(r.dateTime||r.createdAt)}<br>${esc(r.summary||r.notes||'')}</span></div>`).join(''):'<div class="empty">Brak operacji.</div>'}</div>
+ </div>`;
+}
+
+function renderInventory(){
+ const q=document.getElementById('warehouseSearch')?.value||'',kind=document.getElementById('warehouseKind')?.value||'';
+ const rows=db.inventory.filter(x=>findSearch(q,x)&&(!kind||inferStockKind(x)===kind)).sort((a,b)=>inferStockKind(a).localeCompare(inferStockKind(b))||String(a.name).localeCompare(String(b.name))).map(x=>{const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9;return `<tr><td><a class="link" onclick="openStockCard('${x.id}')"><strong>${esc(x.name)}</strong></a><div class="mini">${esc(x.id)}</div></td><td><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></td><td>${esc(x.lot||'—')}</td><td>${esc(x.organism||'—')}</td><td><strong>${stockQtyText(x)}</strong><div class="mini ${ok?'ledger-ok':'ledger-bad'}">ruchy: ${num(ledger,3)} ${esc(x.unit)} ${ok?'✓':'⚠'}</div></td><td>${esc(x.vessel||x.location||'—')}</td><td>${Number(x.qty)<=Number(x.min||0)?badge('Niski'):badge(x.status||'OK')}</td><td>${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Edytuj',`openWarehouseItemForm('${x.id}')`,'btn tiny')}</td></tr>`});
+ return `<div class="toolbar">${btn('+ Kultura startowa',"openInitialCultureIntake()",'btn primary')}${btn('+ Woda RO',"openBaseMaterial('ro')")}${btn('+ Sól',"openBaseMaterial('salt')")}${btn('+ F/2',"openBaseMaterial('f2')")}${btn('+ Inna pozycja',"openWarehouseItemForm()")}${btn('+ Ruch / korekta',"openStockMove()")}</div>
+ <div class="toolbar"><input id="warehouseSearch" placeholder="Szukaj nazwy, partii, organizmu..." value="${esc(q)}" oninput="render()"><select id="warehouseKind" onchange="render()"><option value="">Wszystkie typy</option>${['Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy','Inne'].map(k=>`<option ${kind===k?'selected':''}>${k}</option>`).join('')}</select></div>
+ ${table(['Pozycja','Typ','Partia','Organizm','Stan','Lokalizacja','Status','Akcje'],rows)}
+ <div class="section callout">Aktualizacja v3 nie ustawia stanów od nowa. Ilość istniejącej pozycji pozostaje bez zmian; każda nowa zmiana przechodzi przez ruch magazynowy albo Produkcję.</div>`;
+}
+function openWarehouseItemForm(id=''){
+ const old=id?getById('inventory',id):null,x=old?{...old}:{id:uid('MAG'),name:'',kind:'Surowiec',category:'Nawóz / pożywka',qty:0,unit:'ml',min:0,price:0,status:'OK'};
+ modalTitle.textContent=id?'Edytuj dane pozycji magazynowej':'Nowa pozycja magazynowa';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="warehouseForm"><div class="form-grid">
+ ${f('name','Nazwa','text',x.name)}
+ ${f('kind','Typ','select',inferStockKind(x),['Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy','Inne'])}
+ ${f('category','Kategoria','select',x.category||'Nawóz / pożywka',['Kultura biologiczna','Pożywka przygotowana','Woda RO','Produkt gotowy','Butelki','Zakrętki','Etykiety','Sól','Nawóz / pożywka','Pasza','Chemia / dezynfekcja','Wysyłka','Sprzęt','Inne'])}
+ ${f('unit','Jednostka','text',x.unit||'ml')}${f('min','Stan minimalny','number',x.min)}${f('price','Cena za 1 jednostkę [PLN]','number',x.price)}
+ ${f('lot','Partia dostawcy / partia własna','text',x.lot)}${f('organism','Organizm — jeśli dotyczy','text',x.organism)}
+ ${f('vessel','Naczynie / stanowisko','text',x.vessel)}${f('supplier','Dostawca / źródło','text',x.supplier)}
+ ${f('status','Status','text',x.status||'OK')}${f('notes','Uwagi','textarea',x.notes)}
+ ${id?`<div class="field"><label>Aktualny stan — tylko odczyt</label><input value="${num(Number(x.qty||0),3)} ${esc(x.unit||'')}" readonly><div class="help">Stan zmieniaj przez „Ruch / korekta” albo Produkcję.</div></div>`:f('initialQty','Stan początkowy','number',0)}
+ </div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button></div></form>`;
+ warehouseForm.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.target);
+  ['name','kind','category','unit','min','price','lot','organism','vessel','supplier','status','notes'].forEach(k=>x[k]=fd.get(k)||'');
+  if(['Kultura żywa','Pożywka / medium'].includes(x.kind))x.unit='ml';
+  x.min=Number(x.min||0);x.price=Number(x.price||0);
+  if(old){x.qty=old.qty;await saveRecord('inventory',x)}
+  else{
+   x.qty=0;const initial=Number(fd.get('initialQty')||0);
+   if(initial>0){
+    const run={id:nextProductionRunId(),type:'Przyjęcie magazynowe',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${x.name}: +${num(initial,3)} ${x.unit}`};
+    try{await commitProductionRun(run,[{item:x,delta:initial,isNew:true,moveType:'Przyjęcie',reason:'Stan początkowy / przyjęcie magazynowe'}])}catch(err){return alert(err.message)}
+   }else await saveRecord('inventory',x);
+  }
+  closeModal();render();
+ };
+ modal.classList.add('open');
+}
+
+function openProductionRun(id){
+ const r=getById('productionRuns',id);if(!r)return;
+ const job=r.productionJobId?getById('productionJobs',r.productionJobId):null;
+ modalTitle.textContent=`Operacja ${r.id}`;modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="two"><div class="card"><h3>${esc(r.type)}</h3>
+ <div class="statline"><span>Data</span><strong>${datePL(r.dateTime||r.createdAt)}</strong></div>
+ <div class="statline"><span>Operator</span><strong>${esc(r.operator||'—')}</strong></div>
+ <div class="statline"><span>Status</span><strong>${badge(r.status)}</strong></div>
+ ${job?`<div class="statline"><span>Proces</span><strong><a class="link" onclick="openProductionJob('${job.id}')">${esc(job.id)}</a></strong></div><div class="statline"><span>Planowana gotowość</span><strong>${esc(deadlineText(job.plannedReadyDate,job.status))}</strong></div>`:''}
+ <hr><div class="small">${esc(r.summary||'')}<br>${esc(r.notes||'')}</div></div>
+ <div class="card"><h3>Ruchy magazynowe</h3>${(r.movements||[]).length?table(['Pozycja','Zmiana','Przed','Po'],(r.movements||[]).map(m=>`<tr><td>${esc(m.name)}<div class="mini">${esc(m.lot)}</div></td><td><strong>${m.delta>=0?'+':''}${num(m.delta,3)} ${esc(m.unit)}</strong></td><td>${num(m.before,3)}</td><td>${num(m.after,3)}</td></tr>`)):'<div class="empty">Operacja bez zmiany ilości — np. zmiana statusu procesu.</div>'}</div></div>`;
+ modal.classList.add('open');
+}
+
+function quickAdd(){if(currentView==='production')return openCultureExpansion();if(currentView==='inventory')return openWarehouseItemForm();const map={dashboard:'task',events:'event',measurements:'measurement',sanitation:'sanitation',recipes:'recipe',planner:'task',clients:'client',orders:'order',finance:'finance',tasks:'task'};const t=map[currentView]||'task';if(t==='measurement')openMeasurementForm();else if(t==='recipe')openRecipeForm();else openForm(t)}
+
+
+/* =========================
+   v4 SIMPLE — warstwa użytkowa
+   Bez zmiany schematu bazy i bez rekalkulacji stanów.
+   ========================= */
+titles.dashboard=['Start','Najważniejsze informacje i rzeczy do zrobienia.'];
+titles.inventory=['Magazyn','Wszystko, co masz — kultury, pożywki, surowce, opakowania i produkty.'];
+titles.production=['Produkcja','Prosty przepływ: przygotuj → hoduj → podziel lub rozlej.'];
+titles.sales=['Sprzedaż','Zamówienia, klienci i produkty gotowe w jednym miejscu.'];
+titles.more=['Więcej','Kontrola jakości, receptury, finanse, raporty i ustawienia.'];
+
+let warehouseSimpleFilter='';
+let warehouseImportPayload=null;
+
+function simpleTabForView(view){
+ if(view==='dashboard')return'dashboard';
+ if(view==='inventory')return'inventory';
+ if(view==='production')return'production';
+ if(['sales','orders','clients'].includes(view))return'sales';
+ return'more';
+}
+function syncSimpleNav(){
+ const tab=simpleTabForView(currentView);
+ document.querySelectorAll('#bottomNav button').forEach(b=>b.classList.toggle('active',b.dataset.view===tab));
+ document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===currentView));
+}
+function setView(view){
+ currentView=view;
+ syncSimpleNav();
+ render();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+function bindNav(){
+ document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+ document.querySelectorAll('#bottomNav button').forEach(b=>b.onclick=()=>setView(b.dataset.view));
+ document.getElementById('quickAdd').onclick=quickAdd;
+ syncSimpleNav();
+}
+function render(){
+ const title=titles[currentView]||['AquaCulture',''];
+ document.getElementById('viewTitle').textContent=title[0];
+ document.getElementById('viewSub').textContent=title[1];
+ const views={
+  dashboard:renderDashboard,inventory:renderInventory,production:renderProduction,sales:renderSales,more:renderMore,
+  cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,
+  harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,
+  finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup
+ };
+ document.getElementById('content').innerHTML=(views[currentView]||renderDashboard)();
+ syncSimpleNav();
+}
+
+function simpleUpcoming(){
+ const rows=[];
+ (db.productionJobs||[]).filter(j=>j.status==='W toku').forEach(j=>{
+  if(j.nextCheckDate)rows.push({date:j.nextCheckDate,type:'Kontrola',title:`${j.id} • ${j.organism||'produkcja'}`,action:`openProductionJob('${j.id}')`});
+  if(j.plannedReadyDate)rows.push({date:j.plannedReadyDate,type:'Gotowość',title:`${j.id} • ${j.organism||'produkcja'}`,action:`openProductionJob('${j.id}')`});
+  if(j.plannedBottleDate)rows.push({date:j.plannedBottleDate,type:'Rozlew',title:`${j.id} • ${j.organism||'produkcja'}`,action:`openProductionJob('${j.id}')`});
+ });
+ db.tasks.filter(t=>t.status!=='Zrealizowane'&&t.due).forEach(t=>rows.push({date:t.due,type:'Zadanie',title:t.title,action:`openForm('task','${t.id}')`}));
+ return rows.sort((a,b)=>String(a.date).localeCompare(String(b.date))).slice(0,8);
+}
+function renderDashboard(){
+ const jobs=(db.productionJobs||[]).filter(j=>j.status==='W toku');
+ const ready=productionReadyCultures();
+ const low=db.inventory.filter(x=>Number(x.qty||0)<=Number(x.min||0));
+ const openOrders=db.orders.filter(x=>!['Dostarczone','Zrealizowane','Anulowane'].includes(x.status));
+ const upcoming=simpleUpcoming();
+ const recent=[...db.productionRuns].sort((a,b)=>(b.dateTime||b.createdAt||'').localeCompare(a.dateTime||a.createdAt||'')).slice(0,6);
+ return `<div class="simple-hero">
+  <h3>Co dziś robimy?</h3>
+  <div class="small">Magazyn jest źródłem stanów. Produkcja i sprzedaż tylko księgują ruchy.</div>
+  <div class="simple-search"><input id="globalSearchInput" placeholder="Szukaj: NAN-..., F/2, klient, zamówienie..." onkeydown="if(event.key==='Enter')openGlobalSearch(this.value)"><button class="btn" onclick="openGlobalSearch(document.getElementById('globalSearchInput').value)">Szukaj</button></div>
+ </div>
+ <div class="simple-kpis">
+  <div class="simple-kpi"><div class="t">Produkcje w toku</div><div class="n">${jobs.length}</div></div>
+  <div class="simple-kpi"><div class="t">Gotowe kultury</div><div class="n">${ready.length}</div></div>
+  <div class="simple-kpi"><div class="t">Niski stan</div><div class="n">${low.length}</div></div>
+  <div class="simple-kpi"><div class="t">Otwarte zamówienia</div><div class="n">${openOrders.length}</div></div>
+ </div>
+ <div class="section card"><h3>Szybkie działania</h3><div class="quick-actions">
+  <button class="quick-action" onclick="openMediumPreparation()"><strong>Przygotuj pożywkę</strong><span>RO + sól + F/2 → gotowe medium</span></button>
+  <button class="quick-action" onclick="openCultureExpansion()"><strong>Rozpocznij hodowlę</strong><span>Inokulum + pożywka → kultura w toku</span></button>
+  <button class="quick-action" onclick="openStockMove()"><strong>Ruch magazynowy</strong><span>Przyjęcie, zużycie albo korekta</span></button>
+  <button class="quick-action" onclick="openForm('order')"><strong>Nowe zamówienie</strong><span>Klient, produkt, płatność i wysyłka</span></button>
+ </div></div>
+ <div class="two section">
+  <div class="card"><h3>Najbliższe terminy</h3>${upcoming.length?`<div class="simple-list">${upcoming.map(x=>{const d=daysUntil(x.date);return `<div class="simple-row" onclick="${x.action}" style="cursor:pointer"><div class="main"><strong>${esc(x.title)}</strong><div class="meta">${esc(x.type)}</div></div><div class="side"><div class="big ${d<0?'ledger-bad':d<=1?'reserve-warn':''}">${esc(deadlineText(x.date,'W toku'))}</div></div></div>`}).join('')}</div>`:'<div class="empty">Brak zaplanowanych terminów.</div>'}</div>
+  <div class="card"><h3>Ostatnie operacje</h3>${recent.length?`<div class="simple-list">${recent.map(r=>`<div class="simple-row" onclick="openProductionRun('${r.id}')" style="cursor:pointer"><div class="main"><strong>${esc(r.type)}</strong><div class="meta">${esc(r.summary||'')}</div></div><div class="side"><div class="mini">${datePL(r.dateTime||r.createdAt)}</div></div></div>`).join('')}</div>`:'<div class="empty">Brak operacji.</div>'}</div>
+ </div>`;
+}
+
+function setWarehouseFilter(k){warehouseSimpleFilter=k;render()}
+function renderInventory(){
+ const q=(document.getElementById('warehouseSearchSimple')?.value||'').trim().toLowerCase();
+ const kinds=['','Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy'];
+ const items=db.inventory.filter(x=>{
+  const matchKind=!warehouseSimpleFilter||inferStockKind(x)===warehouseSimpleFilter;
+  const hay=[x.name,x.lot,x.organism,x.category,x.supplier].join(' ').toLowerCase();
+  return matchKind&&(!q||hay.includes(q));
+ }).sort((a,b)=>inferStockKind(a).localeCompare(inferStockKind(b))||String(a.name).localeCompare(String(b.name)));
+ return `<div class="toolbar">
+   ${btn('+ Dodaj / przyjmij',"openWarehouseItemForm()",'btn primary')}
+   ${btn('Ruch / korekta',"openStockMove()")}
+   ${btn('Import / eksport',"openWarehouseTransfer()",'btn secondary')}
+  </div>
+  <div class="simple-search"><input id="warehouseSearchSimple" placeholder="Szukaj w magazynie..." value="${esc(q)}" oninput="render()"><button class="btn" onclick="document.getElementById('warehouseSearchSimple').value='';warehouseSimpleFilter='';render()">Wyczyść</button></div>
+  <div class="inventory-filters section">${kinds.map(k=>`<button class="filter-pill ${warehouseSimpleFilter===k?'active':''}" onclick="setWarehouseFilter('${k.replaceAll("'","\\'")}')">${k||'Wszystko'}</button>`).join('')}</div>
+  <div class="inventory-card-grid">${items.length?items.map(x=>{
+   const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9;
+   return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.name)}</h4><div class="mini">${esc(x.lot||x.id)}${x.organism?' • '+esc(x.organism):''}</div></div><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></div>
+    <div class="qty">${stockQtyText(x)}</div>
+    <div class="mini"><span class="status-dot ${ok?'':'bad'}"></span>${ok?'saldo zgodne':'sprawdź saldo'}${x.vessel?' • '+esc(x.vessel):''}</div>
+    <div class="actions">${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Edytuj opis',`openWarehouseItemForm('${x.id}')`,'btn tiny')}</div>
+   </div>`;
+  }).join(''):'<div class="empty card">Brak pozycji dla wybranego filtra.</div>'}</div>`;
+}
+
+function renderProduction(){
+ const jobs=(db.productionJobs||[]).filter(j=>j.status==='W toku').sort((a,b)=>(a.plannedReadyDate||'9999').localeCompare(b.plannedReadyDate||'9999'));
+ return `<div class="card"><h3>Jak działa produkcja</h3><div class="flow-steps">
+  <div class="flow-step"><div class="nr">KROK 1</div><strong>Surowce</strong><span>Woda RO, sól, F/2 i opakowania są w magazynie.</span></div>
+  <div class="flow-step"><div class="nr">KROK 2</div><strong>Pożywka</strong><span>Surowce schodzą, gotowe medium trafia do magazynu.</span></div>
+  <div class="flow-step"><div class="nr">KROK 3</div><strong>Hodowla</strong><span>Inokulum + medium tworzą kulturę „W toku” z terminem.</span></div>
+  <div class="flow-step"><div class="nr">KROK 4</div><strong>Rozlew</strong><span>Gotowa kultura + opakowania tworzą produkt gotowy.</span></div>
+ </div></div>
+ <div class="section big-action-grid">
+  <button class="btn big-action" onclick="openMediumPreparation()"><strong>Przygotuj pożywkę</strong><span>RO + sól + F/2 → nowa partia medium</span></button>
+  <button class="btn primary big-action" onclick="openCultureExpansion()"><strong>Rozpocznij hodowlę</strong><span>Wybierz inokulum, pożywkę i termin gotowości</span></button>
+  <button class="btn big-action" onclick="openCultureSplit()"><strong>Podziel kulturę</strong><span>Jedna gotowa kultura → kilka pozycji potomnych</span></button>
+  <button class="btn big-action" onclick="openBottling()"><strong>Rozlej produkt</strong><span>Kultura + butelki + etykiety → produkt gotowy</span></button>
+ </div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Produkcje w toku</h3>${btn('Przyjmij kulturę startową',"openInitialCultureIntake()",'btn tiny secondary')}</div>
+ ${jobs.length?`<div class="simple-list" style="margin-top:10px">${jobs.map(j=>{const out=getById('inventory',j.outputItemId),d=daysUntil(j.plannedReadyDate);return `<div class="simple-row"><div class="main"><strong>${esc(j.organism||'Produkcja')} • ${esc(out?.lot||j.id)}</strong><div class="meta">start ${datePL(j.startedAt)}${j.vessel?' • '+esc(j.vessel):''}</div></div><div class="side"><div class="big ${d<0?'ledger-bad':d<=1?'reserve-warn':''}">${esc(deadlineText(j.plannedReadyDate,j.status))}</div><div style="margin-top:6px">${btn('Otwórz',`openProductionJob('${j.id}')`,'btn tiny')}${btn('Gotowa',`updateProductionJobStatus('${j.id}','Gotowa')`,'btn tiny primary')}</div></div></div>`}).join('')}</div>`:'<div class="empty">Brak produkcji w toku.</div>'}</div>`;
+}
+
+function renderSales(){
+ const open=db.orders.filter(x=>!['Dostarczone','Zrealizowane','Anulowane'].includes(x.status));
+ const ready=db.orders.filter(x=>x.status==='Gotowe');
+ const unpaid=db.orders.filter(x=>!['Opłacone','Zapłacone'].includes(x.payment||'')&&!['Anulowane'].includes(x.status));
+ const soldValue=db.orders.filter(x=>x.status!=='Anulowane').reduce((a,x)=>a+Number(x.total||0),0);
+ const orders=[...db.orders].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,15);
+ return `<div class="simple-kpis">
+  <div class="simple-kpi"><div class="t">Otwarte</div><div class="n">${open.length}</div></div>
+  <div class="simple-kpi"><div class="t">Gotowe do wysyłki</div><div class="n">${ready.length}</div></div>
+  <div class="simple-kpi"><div class="t">Do sprawdzenia płatności</div><div class="n">${unpaid.length}</div></div>
+  <div class="simple-kpi"><div class="t">Wartość zamówień</div><div class="n" style="font-size:18px">${money(soldValue)}</div></div>
+ </div>
+ <div class="section toolbar">${btn('+ Zamówienie',"openForm('order')",'btn primary')}${btn('+ Klient',"openForm('client')")}${btn('Wszyscy klienci',"setView('clients')",'btn secondary')}${btn('Pełny widok zamówień',"setView('orders')",'btn secondary')}</div>
+ <div class="section card"><h3>Ostatnie zamówienia</h3>${orders.length?`<div class="simple-list">${orders.map(o=>`<div class="simple-row"><div class="main"><strong>${esc(clientName(o.client)||'Klient')} • ${esc(o.product||o.id)}</strong><div class="meta">${esc(o.id)} • ${datePL(o.date)} • ${esc(o.status||'')}</div></div><div class="side"><div class="big">${money(o.total)}</div><div style="margin-top:5px">${btn('Edytuj',`openForm('order','${o.id}')`,'btn tiny')}</div></div></div>`).join('')}</div>`:'<div class="empty">Brak zamówień.</div>'}</div>`;
+}
+
+function renderMore(){
+ const tiles=[
+  ['Kontrola jakości','Pomiary, zdjęcia mikroskopowe i wyniki.','measurements'],
+  ['Receptury','Skład pożywek i zużycie materiałów.','recipes'],
+  ['Finanse','Koszty, przychody i rentowność.','finance'],
+  ['Raporty','Raporty produkcyjne i PDF.','reports'],
+  ['Kopie i dane','Pełny backup oraz ustawienia aplikacji.','backup'],
+  ['Dezynfekcja','Rejestr mycia i dezynfekcji.','sanitation'],
+  ['Zadania','Ręczne zadania i alerty.','tasks'],
+  ['Etykiety','Wydruki, QR i identyfikatory.','prints'],
+  ['Planowanie','Plan zapotrzebowania, kosztów i marży.','planner'],
+  ['Dziennik','Ręczne wpisy czynności.','events']
+ ];
+ return `<div class="more-grid">${tiles.map(t=>`<button class="more-tile" onclick="setView('${t[2]}')"><strong>${t[0]}</strong><span>${t[1]}</span></button>`).join('')}</div>
+ <div class="section card"><h3>Bezpieczeństwo danych</h3><div class="small">Aktualizacja v4 Simple nie zmienia schematu IndexedDB i nie przelicza magazynu. Stany zmieniają się wyłącznie przez zaksięgowane ruchy lub produkcję.</div><div class="actions" style="margin-top:10px">${btn('Import / eksport magazynu',"openWarehouseTransfer()",'btn secondary')}${btn('Pełna kopia aplikacji',"setView('backup')")}</div></div>`;
+}
+
+function openGlobalSearch(query=''){
+ const q=String(query||'').trim().toLowerCase();
+ modalTitle.textContent='Szukaj w AquaCulture';modalBox.classList.add('wide');
+ if(!q){
+  modalBody.innerHTML=`<div class="simple-search"><input id="modalGlobalQ" autofocus placeholder="Nazwa, partia, klient, zamówienie..."><button class="btn primary" onclick="openGlobalSearch(document.getElementById('modalGlobalQ').value)">Szukaj</button></div>`;
+  modal.classList.add('open');return;
+ }
+ const inv=db.inventory.filter(x=>[x.name,x.lot,x.organism,x.category].join(' ').toLowerCase().includes(q)).slice(0,8);
+ const ord=db.orders.filter(x=>[x.id,x.product,x.batch,clientName(x.client)].join(' ').toLowerCase().includes(q)).slice(0,8);
+ const cli=db.clients.filter(x=>[x.name,x.phone,x.email,x.city].join(' ').toLowerCase().includes(q)).slice(0,8);
+ const jobs=(db.productionJobs||[]).filter(x=>[x.id,x.organism,getById('inventory',x.outputItemId)?.lot].join(' ').toLowerCase().includes(q)).slice(0,8);
+ modalBody.innerHTML=`<div class="simple-search"><input id="modalGlobalQ" value="${esc(query)}"><button class="btn primary" onclick="openGlobalSearch(document.getElementById('modalGlobalQ').value)">Szukaj</button></div>
+ <div class="two section"><div class="card"><h3>Magazyn (${inv.length})</h3>${inv.length?inv.map(x=>`<div class="alert"><strong><a class="link" onclick="openStockCard('${x.id}')">${esc(x.name)}</a></strong><span class="small">${esc(x.lot||x.id)} • ${stockQtyText(x)}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div>
+ <div class="card"><h3>Produkcja (${jobs.length})</h3>${jobs.length?jobs.map(j=>`<div class="alert"><strong><a class="link" onclick="openProductionJob('${j.id}')">${esc(j.id)}</a></strong><span class="small">${esc(j.organism||'')} • ${esc(j.status||'')}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div></div>
+ <div class="two section"><div class="card"><h3>Zamówienia (${ord.length})</h3>${ord.length?ord.map(o=>`<div class="alert"><strong><a class="link" onclick="openForm('order','${o.id}')">${esc(o.id)} • ${esc(clientName(o.client))}</a></strong><span class="small">${esc(o.product||'')} • ${money(o.total)}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div>
+ <div class="card"><h3>Klienci (${cli.length})</h3>${cli.length?cli.map(c=>`<div class="alert"><strong><a class="link" onclick="openClientCard('${c.id}')">${esc(c.name)}</a></strong><span class="small">${esc(c.phone||'')} ${esc(c.email||'')}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div></div>`;
+ modal.classList.add('open');
+}
+
+function warehouseSnapshot(){
+ return {
+  app:'AquaCulture Manager',
+  type:'warehouse-snapshot',
+  version:4,
+  exportedAt:new Date().toISOString(),
+  inventory:clone(db.inventory),
+  stockMoves:clone(db.stockMoves),
+  note:'Import magazynu v4 domyślnie nie nadpisuje ilości istniejących pozycji. Pełną historię odtwarzaj pełnym backupem aplikacji.'
+ };
+}
+function exportWarehouseJSON(prefix='AquaCulture_MAGAZYN'){
+ const data=warehouseSnapshot();
+ downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),`${prefix}_${today()}.json`);
+}
+function csvCell(v){const s=String(v??'');return `"${s.replaceAll('"','""')}"`}
+function exportWarehouseCSV(){
+ const cols=['id','name','kind','category','qty','unit','min','price','lot','organism','vessel','supplier','status','notes'];
+ const lines=[cols.map(csvCell).join(';')];
+ for(const x of db.inventory)lines.push(cols.map(k=>csvCell(k==='kind'?inferStockKind(x):x[k])).join(';'));
+ downloadBlob(new Blob(['\ufeff'+lines.join('\n')],{type:'text/csv;charset=utf-8'}),`AquaCulture_MAGAZYN_${today()}.csv`);
+}
+function normalizedStockKey(x){
+ return `${String(x?.name||'').trim().toLowerCase()}|${String(x?.lot||'').trim().toLowerCase()}`;
+}
+function warehouseImportRecords(data){
+ if(Array.isArray(data))return data;
+ if(Array.isArray(data?.inventory))return data.inventory;
+ if(Array.isArray(data?.stores?.inventory))return data.stores.inventory;
+ return [];
+}
+function openWarehouseTransfer(){
+ warehouseImportPayload=null;
+ modalTitle.textContent='Import / eksport magazynu';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="two">
+  <div class="card"><h3>Eksport</h3><p class="small">JSON zapisuje aktualny magazyn oraz kopię ruchów. CSV jest wygodny do Excela.</p><div class="actions">${btn('Eksport JSON',"exportWarehouseJSON()",'btn primary')}${btn('Eksport CSV',"exportWarehouseCSV()")}${btn('Pobierz ostatni backup przed importem',"downloadWarehouseSafetySnapshot()",'btn secondary')}</div></div>
+  <div class="card"><h3>Import JSON</h3><input type="file" id="warehouseImportFile" accept=".json,application/json"><div class="field" style="margin-top:10px"><label>Tryb</label><select id="warehouseImportMode"><option value="add">Dodaj tylko nowe — zalecane</option><option value="merge">Połącz dane opisowe — zachowaj obecne ilości</option></select></div><div class="actions" style="margin-top:10px">${btn('Sprawdź plik',"previewWarehouseImport()",'btn primary')}</div></div>
+ </div><div id="warehouseImportPreview" class="section"></div>
+ <div class="section callout"><strong>Bezpieczna zasada:</strong> import magazynu nie obniża i nie zeruje ilości istniejących pozycji. Do pełnego odtworzenia bazy służy „Kopie i dane”.</div>`;
+ modal.classList.add('open');
+}
+async function previewWarehouseImport(){
+ const file=document.getElementById('warehouseImportFile')?.files?.[0];
+ if(!file)return alert('Wybierz plik JSON.');
+ try{
+  const data=JSON.parse(await file.text()),records=warehouseImportRecords(data);
+  if(!records.length)throw new Error('Plik nie zawiera pozycji magazynowych.');
+  const byId=new Map(db.inventory.map(x=>[x.id,x]));
+  const byKey=new Map(db.inventory.map(x=>[normalizedStockKey(x),x]));
+  let fresh=0,matched=0;
+  for(const r of records){
+   const m=(r.id&&byId.get(r.id))||byKey.get(normalizedStockKey(r));
+   if(m)matched++;else fresh++;
+  }
+  warehouseImportPayload={records,data,fileName:file.name};
+  document.getElementById('warehouseImportPreview').innerHTML=`<div class="card"><h3>Podgląd importu</h3><div class="import-summary">
+   <div class="simple-kpi"><div class="t">Pozycji w pliku</div><div class="n">${records.length}</div></div>
+   <div class="simple-kpi"><div class="t">Nowe</div><div class="n">${fresh}</div></div>
+   <div class="simple-kpi"><div class="t">Już istnieją</div><div class="n">${matched}</div></div>
+  </div><div class="small" style="margin-top:10px">Tryb „Dodaj tylko nowe” pominie ${matched} istniejących pozycji. Tryb „Połącz dane opisowe” może zaktualizować nazwę, kategorię, cenę, dostawcę, minimum i uwagi, ale zachowa aktualny stan i jednostkę.</div>
+  <div class="actions" style="margin-top:12px">${btn('Wykonaj import',"applyWarehouseImport()",'btn primary')}</div></div>`;
+ }catch(e){alert('Nie można odczytać pliku: '+e.message)}
+}
+async function saveWarehouseSafetySnapshot(){
+ const snap=warehouseSnapshot();
+ await put('meta',{id:'warehouseImportSafetySnapshot',value:snap});
+ return snap;
+}
+async function downloadWarehouseSafetySnapshot(){
+ const rec=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('warehouseImportSafetySnapshot'));
+ if(!rec?.value)return alert('Nie ma jeszcze lokalnej kopii utworzonej przed importem.');
+ downloadBlob(new Blob([JSON.stringify(rec.value,null,2)],{type:'application/json'}),`AquaCulture_MAGAZYN_PRZED_IMPORTEM_${today()}.json`);
+}
+async function applyWarehouseImport(){
+ if(!warehouseImportPayload?.records?.length)return alert('Najpierw sprawdź plik.');
+ const mode=document.getElementById('warehouseImportMode')?.value||'add';
+ if(!confirm(mode==='add'?'Dodać nowe pozycje? Istniejące nie zostaną zmienione.':'Połączyć dane opisowe? Ilości istniejących pozycji pozostaną bez zmian.'))return;
+ await saveWarehouseSafetySnapshot();
+ const byId=new Map(db.inventory.map(x=>[x.id,x]));
+ const byKey=new Map(db.inventory.map(x=>[normalizedStockKey(x),x]));
+ const newChanges=[];let added=0,updated=0,skipped=0;
+ const metadataFields=['name','kind','category','min','price','lot','organism','vessel','location','supplier','status','notes','bestBefore','salinity','strain'];
+ for(const raw of warehouseImportPayload.records){
+  const r=clone(raw||{});
+  let existing=(r.id&&byId.get(r.id))||byKey.get(normalizedStockKey(r));
+  if(existing){
+   if(mode==='merge'){
+    const x={...existing};
+    for(const k of metadataFields)if(r[k]!==undefined&&r[k]!==null&&r[k]!=='')x[k]=r[k];
+    x.id=existing.id;x.qty=existing.qty;x.unit=existing.unit;
+    x.updatedAt=new Date().toISOString();
+    await put('inventory',x);updated++;
+   }else skipped++;
+   continue;
+  }
+  const item={
+   ...r,
+   id:(r.id&&!byId.has(r.id))?r.id:uid('MAG'),
+   qty:0,
+   unit:r.unit||'szt.',
+   min:Number(r.min||0),
+   price:Number(r.price||0),
+   status:r.status||'OK',
+   createdAt:r.createdAt||new Date().toISOString()
+  };
+  item.kind=inferStockKind(item);
+  const qty=Math.max(0,Number(r.qty||0));
+  if(qty>0)newChanges.push({item,delta:qty,isNew:true,moveType:'Import magazynu',reason:`Import z ${warehouseImportPayload.fileName}`});
+  else await put('inventory',item);
+  added++;
+ }
+ if(newChanges.length){
+  const run={id:nextProductionRunId(),type:'Import magazynu',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`Import: ${added} nowych pozycji`,notes:`Źródło: ${warehouseImportPayload.fileName}`};
+  await commitProductionRun(run,newChanges);
+ }else await loadMemory();
+ closeModal();render();
+ alert(`Import zakończony. Dodano: ${added}. Zaktualizowano opis: ${updated}. Pominięto: ${skipped}. Istniejące ilości nie zostały zmniejszone.`);
+}
+
+function quickAdd(){
+ if(currentView==='dashboard'||currentView==='production')return openCultureExpansion();
+ if(currentView==='inventory')return openStockMove();
+ if(currentView==='sales'||currentView==='orders')return openForm('order');
+ if(currentView==='clients')return openForm('client');
+ if(currentView==='measurements')return openMeasurementForm();
+ if(currentView==='recipes')return openRecipeForm();
+ return openForm('task');
+}
+
+
+/* =========================
+   v5 COMMAND CENTER
+   ========================= */
+titles.dashboard=['Command Center','Co wymaga uwagi, co jest gotowe i czego może zabraknąć.'];
+titles.production=['AquaFlow','Surowce → pożywka → hodowla → rozlew → sprzedaż.'];
+
+let qrScanStream=null, qrScanTimer=null;
+
+function ageDays(date){
+ if(!date)return null;const a=new Date(dateOnly(date)+'T00:00:00'),b=new Date(today()+'T00:00:00');return Math.max(0,Math.floor((b-a)/86400000));
+}
+function recentConsumption(itemId,days=30){
+ const end=new Date(today()+'T23:59:59'),start=new Date(end.getTime()-days*86400000);
+ let total=0,events=0;
+ for(const m of db.stockMoves){
+  if(m.item!==itemId||Number(m.qty||0)>=0)continue;
+  const d=new Date(m.date||m.createdAt||0);if(isNaN(d)||d<start||d>end)continue;
+  const type=String(m.type||'').toLowerCase(),reason=String(m.reason||'').toLowerCase();
+  if(type.includes('korekt')||reason.includes('saldo migracyjne'))continue;
+  total+=Math.abs(Number(m.qty||0));events++;
+ }
+ return {total,events,avgPerDay:total/days};
+}
+function stockForecast(x,days=30){
+ const c=recentConsumption(x.id,days),qty=Math.max(0,Number(x.qty||0)),avg=c.avgPerDay;
+ const daysLeft=avg>0?qty/avg:null;
+ return {item:x,...c,daysLeft};
+}
+function forecastClass(days){return days===null?'':days<7?'bad':days<21?'warn':'good'}
+function formatDaysLeft(days){if(days===null||!isFinite(days))return 'brak trendu';if(days<1)return '< 1 dnia';if(days>365)return '> 1 roku';return `${num(days,0)} dni`}
+
+function commandTodayItems(){
+ const out=[];
+ for(const j of (db.productionJobs||[]).filter(x=>x.status==='W toku')){
+  const lot=getById('inventory',j.outputItemId)?.lot||j.id;
+  if(j.nextCheckDate){const d=daysUntil(j.nextCheckDate);if(d<=1)out.push({level:d<0?'bad':'warn',icon:'✓',title:`Kontrola ${lot}`,meta:`Proces ${j.id} • ${j.organism||''}`,when:deadlineText(j.nextCheckDate,j.status),action:`openProductionJob('${j.id}')`});}
+  if(j.plannedReadyDate){const d=daysUntil(j.plannedReadyDate);if(d<=2)out.push({level:d<0?'bad':d===0?'ok':'warn',icon:'◷',title:`Gotowość ${lot}`,meta:`Planowany termin kultury`,when:deadlineText(j.plannedReadyDate,j.status),action:`openProductionJob('${j.id}')`});}
+  if(j.plannedBottleDate){const d=daysUntil(j.plannedBottleDate);if(d<=1)out.push({level:d<0?'bad':'warn',icon:'▤',title:`Rozlew ${lot}`,meta:'Docelowy termin rozlewu',when:deadlineText(j.plannedBottleDate,j.status),action:`openProductionJob('${j.id}')`});}
+ }
+ for(const x of db.inventory.filter(i=>Number(i.qty||0)<=Number(i.min||0))){
+  out.push({level:Number(x.qty||0)<=0?'bad':'warn',icon:'▦',title:`Niski stan: ${x.name}`,meta:`${stockQtyText(x)} • minimum ${num(Number(x.min||0),2)} ${x.unit}`,when:'magazyn',action:`openStockCard('${x.id}')`});
+ }
+ for(const o of db.orders.filter(x=>['Nowe','Rezerwacja','Przygotowanie','Gotowe'].includes(x.status)).slice(0,8)){
+  if(o.status==='Gotowe')out.push({level:'ok',icon:'↗',title:`Gotowe zamówienie: ${clientName(o.client)||o.id}`,meta:o.product||o.id,when:'wysyłka',action:`openForm('order','${o.id}')`});
+ }
+ return out.slice(0,10);
+}
+
+function auditIssues(){
+ const a=[];
+ for(const x of db.inventory){
+  const qty=Number(x.qty||0),ledger=stockLedgerBalance(x.id);
+  if(qty<0)a.push({level:'bad',title:'Ujemny stan magazynowy',desc:`${x.name}: ${stockQtyText(x)}`,action:`openStockCard('${x.id}')`});
+  if(Math.abs(ledger-qty)>1e-6)a.push({level:'bad',title:'Niezgodne saldo',desc:`${x.name}: stan ${num(qty,3)} ${x.unit}, ruchy ${num(ledger,3)} ${x.unit}`,action:`openStockCard('${x.id}')`});
+  if(['Kultura żywa','Pożywka / medium','Produkt gotowy'].includes(inferStockKind(x))&&qty>0&&!x.lot)a.push({level:'warn',title:'Brak numeru partii',desc:x.name,action:`openStockCard('${x.id}')`});
+  if(inferStockKind(x)==='Kultura żywa'&&x.status==='W toku'&&!x.productionJobId)a.push({level:'warn',title:'Kultura W toku bez procesu',desc:`${x.name} • ${x.lot||x.id}`,action:`openStockCard('${x.id}')`});
+ }
+ for(const j of (db.productionJobs||[])){
+  const out=getById('inventory',j.outputItemId),src=getById('inventory',j.sourceItemId),med=getById('inventory',j.mediumItemId);
+  if(!out)a.push({level:'bad',title:'Proces bez kultury wynikowej',desc:j.id,action:`openProductionJob('${j.id}')`});
+  if(j.sourceItemId&&!src)a.push({level:'bad',title:'Brak źródła procesu',desc:j.id,action:`openProductionJob('${j.id}')`});
+  if(j.mediumItemId&&!med)a.push({level:'warn',title:'Brak partii pożywki procesu',desc:j.id,action:`openProductionJob('${j.id}')`});
+  if(j.status==='W toku'&&j.plannedReadyDate&&daysUntil(j.plannedReadyDate)<0)a.push({level:'bad',title:'Produkcja po terminie',desc:`${j.id}: ${deadlineText(j.plannedReadyDate,j.status)}`,action:`openProductionJob('${j.id}')`});
+ }
+ for(const o of db.orders.filter(x=>!['Anulowane','Zrealizowane','Dostarczone'].includes(x.status))){
+  if(!o.client)a.push({level:'warn',title:'Zamówienie bez klienta',desc:o.id,action:`openForm('order','${o.id}')`});
+  if(!o.product)a.push({level:'warn',title:'Zamówienie bez produktu',desc:o.id,action:`openForm('order','${o.id}')`});
+ }
+ return a;
+}
+function auditScore(){const issues=auditIssues(),bad=issues.filter(x=>x.level==='bad').length,warn=issues.length-bad;return Math.max(0,100-bad*12-warn*4)}
+
+function lineageAncestors(item){
+ const arr=[];let cur=item,guard=0;
+ while(cur?.parentItemId&&guard++<10){const p=getById('inventory',cur.parentItemId);if(!p)break;arr.unshift(p);cur=p}
+ return arr;
+}
+function lineageChildren(id){return db.inventory.filter(x=>x.parentItemId===id)}
+function lineageHTML(id){
+ const cur=getById('inventory',id);if(!cur)return '<div class="empty">Brak danych.</div>';
+ const ancestors=lineageAncestors(cur),children=lineageChildren(id);
+ return `<div class="lineage-tree">${ancestors.map(x=>`<div class="lineage-node"><div class="mini">ŹRÓDŁO</div><strong>${esc(x.lot||x.name)}</strong><div class="mini">${esc(x.organism||'')}</div></div><div class="flow-arrow">→</div>`).join('')}<div class="lineage-node current"><div class="mini">AKTUALNA</div><strong>${esc(cur.lot||cur.name)}</strong><div class="mini">${stockQtyText(cur)}</div></div>${children.length?`<div class="flow-arrow">→</div>${children.slice(0,4).map(x=>`<div class="lineage-node"><div class="mini">POTOMNA</div><strong>${esc(x.lot||x.name)}</strong><div class="mini">${stockQtyText(x)}</div></div>`).join('')}`:''}</div>`;
+}
+function openLineage(id){
+ const x=getById('inventory',id);if(!x)return;modalTitle.textContent=`Pochodzenie — ${x.lot||x.name}`;modalBox.classList.add('wide');
+ const relatedRuns=db.productionRuns.filter(r=>(r.movements||[]).some(m=>m.itemId===id)).sort((a,b)=>(a.dateTime||'').localeCompare(b.dateTime||''));
+ modalBody.innerHTML=`<div class="card"><h3>Genealogia partii</h3>${lineageHTML(id)}</div><div class="section card"><h3>Ślad produkcyjny</h3>${relatedRuns.length?relatedRuns.map(r=>`<div class="alert"><strong>${esc(r.type)} • ${esc(r.id)}</strong><span class="small">${datePL(r.dateTime||r.createdAt)}<br>${esc(r.summary||'')}</span></div>`).join(''):'<div class="empty">Brak powiązanych operacji.</div>'}</div>`;modal.classList.add('open');
+}
+
+function jobFlowHTML(j){
+ const src=getById('inventory',j.sourceItemId),med=getById('inventory',j.mediumItemId),out=getById('inventory',j.outputItemId);
+ const bottled=db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&x.sourceItemId===out?.id);
+ const d=daysUntil(j.plannedReadyDate),cls=j.status==='Problem'?'bad':d!==null&&d<0?'bad':j.status==='Gotowa'?'good':'warn';
+ const nodes=[];
+ if(med?.recipeId){const rec=getById('recipes',med.recipeId),ings=(rec?.ingredients||[]).map(i=>getById('inventory',i.itemId)).filter(Boolean);if(ings.length)nodes.push(`<div class="flow-node"><div class="kind">Surowce medium</div><strong>${ings.slice(0,3).map(x=>esc(x.name)).join(' + ')}</strong><div class="mini">${esc(rec?.name||'Receptura pożywki')}</div></div>`)}
+ if(src)nodes.push(`<div class="flow-node"><div class="kind">Inokulum</div><strong>${esc(src.lot||src.name)}</strong><div class="flow-qty">${stockQtyText(src)}</div><div class="mini">${esc(src.organism||'')}</div></div>`);
+ if(med)nodes.push(`<div class="flow-node"><div class="kind">Pożywka</div><strong>${esc(med.lot||med.name)}</strong><div class="flow-qty">${stockQtyText(med)}</div><div class="mini">${med.salinity?esc(med.salinity)+' ppt':''}</div></div>`);
+ if(out)nodes.push(`<div class="flow-node ${cls}" onclick="openStockCard('${out.id}')" style="cursor:pointer"><div class="kind">Hodowla • ${esc(j.status)}</div><strong>${esc(out.lot||out.name)}</strong><div class="flow-qty">${stockQtyText(out)}</div><div class="mini">${esc(deadlineText(j.plannedReadyDate,j.status))}</div></div>`);
+ if(bottled.length)nodes.push(`<div class="flow-node good"><div class="kind">Produkt gotowy</div><strong>${esc(bottled[0].name)}</strong><div class="flow-qty">${bottled.reduce((a,x)=>a+Number(x.qty||0),0)} szt.</div><div class="mini">${bottled.length} partii/pozycji</div></div>`);
+ return `<div class="aquaflow">${nodes.join('<div class="flow-arrow">→</div>')}</div>`;
+}
+
+function tankTilesHTML(){
+ const list=liveStock().sort((a,b)=>String(a.status||'').localeCompare(String(b.status||''))||String(a.lot||'').localeCompare(String(b.lot||'')));
+ if(!list.length)return '<div class="empty">Brak kultur w magazynie.</div>';
+ return `<div class="tank-grid">${list.map(x=>{
+  const j=(db.productionJobs||[]).find(k=>k.outputItemId===x.id&&['W toku','Gotowa','Problem'].includes(k.status));
+  const p=j?plannedProgress(j):(x.status==='Gotowa'?100:0),cls=x.status==='Problem'?'problem':x.status==='Gotowa'?'ready':'';
+  return `<div class="tank-card ${cls}" style="--progress:${num(p,0)}%"><div class="mini">${esc(x.vessel||'Kultura')}</div><h4>${esc(x.lot||x.name)}</h4><div class="litres">${x.unit==='ml'?num(Number(x.qty||0)/1000,2)+' L':stockQtyText(x)}</div><div class="mini">${esc(x.organism||'')} • ${esc(x.status||'Aktywna')}</div>${j?`<div class="mini" style="margin-top:5px">Gotowość: ${esc(deadlineText(j.plannedReadyDate,j.status))}</div>`:''}<div class="actions">${btn('Szybko',`openQuickStock('${x.id}')`,'btn tiny primary')}${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${btn('Pochodzenie',`openLineage('${x.id}')`,'btn tiny')}</div></div>`;
+ }).join('')}</div>`;
+}
+
+function renderDashboard(){
+ const todayItems=commandTodayItems(),issues=auditIssues(),score=auditScore();
+ const forecasts=db.inventory.filter(x=>['Surowiec','Opakowanie','Pożywka / medium'].includes(inferStockKind(x))&&Number(x.qty||0)>0).map(x=>stockForecast(x)).filter(x=>x.events>0).sort((a,b)=>(a.daysLeft??99999)-(b.daysLeft??99999)).slice(0,5);
+ const active=(db.productionJobs||[]).filter(j=>j.status==='W toku'),ready=productionReadyCultures();
+ return `<div class="command-banner"><h3>Command Center</h3><div class="clock">${datePL(nowLocal())} • ${todayItems.length?todayItems.length+' rzeczy wymagających uwagi':'brak pilnych działań'}</div><div class="command-shortcuts" style="margin-top:13px"><button class="command-shortcut" onclick="openQuickQR()"><strong>Skanuj QR</strong><span>Zbiornik, partia lub próbka</span></button><button class="command-shortcut" onclick="setView('production')"><strong>AquaFlow</strong><span>Zobacz cały przepływ produkcji</span></button><button class="command-shortcut" onclick="openAuditCenter()"><strong>Audyt</strong><span>${issues.length} wykrytych punktów</span></button><button class="command-shortcut" onclick="openForecastCenter()"><strong>Prognoza</strong><span>Na ile wystarczą zapasy</span></button></div></div>
+ <div class="simple-kpis"><div class="simple-kpi"><div class="t">Produkcje w toku</div><div class="n">${active.length}</div></div><div class="simple-kpi"><div class="t">Gotowe kultury</div><div class="n">${ready.length}</div></div><div class="simple-kpi"><div class="t">Otwarte zamówienia</div><div class="n">${db.orders.filter(x=>!['Dostarczone','Zrealizowane','Anulowane'].includes(x.status)).length}</div></div><div class="simple-kpi"><div class="t">Stan systemu</div><div class="n">${score}%</div></div></div>
+ <div class="two section"><div class="card"><h3>Dzisiaj</h3>${todayItems.length?`<div class="today-stack">${todayItems.map(x=>`<div class="today-item" onclick="${x.action}" style="cursor:pointer"><div class="today-icon ${x.level}">${x.icon}</div><div><strong>${esc(x.title)}</strong><div class="meta">${esc(x.meta)}</div></div><div class="when ${x.level==='bad'?'ledger-bad':''}">${esc(x.when)}</div></div>`).join('')}</div>`:'<div class="empty">Nic pilnego. System nie wykrywa działań wymaganych dzisiaj.</div>'}</div>
+ <div class="card"><h3>Prognoza zapasów</h3>${forecasts.length?forecasts.map(f=>`<div class="forecast-row"><div><strong>${esc(f.item.name)}</strong><div class="mini">${stockQtyText(f.item)}</div></div><div class="forecast-days ${forecastClass(f.daysLeft)}">${formatDaysLeft(f.daysLeft)}</div><div class="mini">${num(f.avgPerDay,2)} ${esc(f.item.unit)}/dzień</div><div class="forecast-cost mini">${f.events} rozchodów / 30 d</div></div>`).join(''):'<div class="empty">Za mało historii rozchodów, aby policzyć trend.</div>'}<div class="actions" style="margin-top:10px">${btn('Pełna prognoza','openForecastCenter()','btn tiny secondary')}</div></div></div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Zbiorniki i kultury</h3>${btn('+ Produkcja',"openCultureExpansion()",'btn tiny primary')}</div><div style="margin-top:10px">${tankTilesHTML()}</div></div>`;
+}
+
+function renderProduction(){
+ const active=(db.productionJobs||[]).filter(j=>['W toku','Gotowa','Problem'].includes(j.status)).sort((a,b)=>(a.plannedReadyDate||'9999').localeCompare(b.plannedReadyDate||'9999'));
+ return `<div class="command-banner"><h3>AquaFlow</h3><div class="small">Kliknij kulturę w przepływie, aby przejść do jej karty. Dane są budowane z rzeczywistych partii i ruchów magazynowych.</div><div class="command-shortcuts" style="margin-top:12px"><button class="command-shortcut" onclick="openMediumPreparation()"><strong>Pożywka</strong><span>RO + sól + F/2</span></button><button class="command-shortcut" onclick="openCultureExpansion()"><strong>Nowa hodowla</strong><span>Inokulum + medium</span></button><button class="command-shortcut" onclick="openBottling()"><strong>Rozlew</strong><span>Kultura → produkt</span></button><button class="command-shortcut" onclick="openOrderDemandCenter()"><strong>Pod zamówienia</strong><span>Sprawdź zapotrzebowanie</span></button></div></div>
+ ${active.length?active.map(j=>`<div class="section card"><div class="actions" style="justify-content:space-between"><div><strong>${esc(j.id)} • ${esc(j.organism||'Produkcja')}</strong><div class="mini">${esc(j.status)} • ${esc(deadlineText(j.plannedReadyDate,j.status))}</div></div>${btn('Proces',`openProductionJob('${j.id}')`,'btn tiny')}</div>${jobFlowHTML(j)}</div>`).join(''):'<div class="section card empty">Brak aktywnych procesów. Uruchom nową hodowlę.</div>'}
+ <div class="section card"><h3>Mapa zbiorników</h3>${tankTilesHTML()}</div>`;
+}
+
+function openAuditCenter(){
+ const issues=auditIssues(),score=auditScore(),bad=issues.filter(x=>x.level==='bad').length;
+ modalTitle.textContent='Audyt systemu';modalBox.classList.add('wide');modalBody.innerHTML=`<div class="two"><div class="card"><div class="audit-score"><div class="audit-ring" style="--score:${score*3.6}deg"><b>${score}%</b></div><div><h3 style="margin:0">Spójność danych</h3><div class="small">${bad} krytycznych • ${issues.length-bad} ostrzeżeń</div></div></div><div class="small" style="margin-top:12px">Audyt tylko odczytuje dane. Nie wykonuje automatycznych korekt stanów.</div></div><div class="card"><h3>Kontrolowane obszary</h3><div class="small">saldo magazynu • partie • procesy bez źródeł • terminy • zamówienia • kultury W toku</div></div></div><div class="section audit-list">${issues.length?issues.map(x=>`<div class="audit-issue ${x.level}" ${x.action?`onclick="${x.action}" style="cursor:pointer"`:''}><strong>${x.level==='bad'?'⚠ ':''}${esc(x.title)}</strong><span>${esc(x.desc)}</span></div>`).join(''):'<div class="card empty">Nie znaleziono niespójności.</div>'}</div>`;modal.classList.add('open');
+}
+function openForecastCenter(){
+ const list=db.inventory.filter(x=>Number(x.qty||0)>0).map(x=>stockForecast(x)).filter(x=>x.events>0).sort((a,b)=>(a.daysLeft??99999)-(b.daysLeft??99999));
+ modalTitle.textContent='Prognoza magazynu';modalBox.classList.add('wide');modalBody.innerHTML=`<div class="callout">Prognoza wykorzystuje średni rzeczywisty rozchód z ostatnich 30 dni. Nie zmienia stanów i nie zastępuje planu produkcji.</div><div class="section card"><h3>Na ile wystarczą zapasy</h3>${list.length?list.map(f=>`<div class="forecast-row" onclick="openStockCard('${f.item.id}')" style="cursor:pointer"><div><strong>${esc(f.item.name)}</strong><div class="mini">${esc(inferStockKind(f.item))} • ${stockQtyText(f.item)}</div></div><div class="forecast-days ${forecastClass(f.daysLeft)}">${formatDaysLeft(f.daysLeft)}</div><div class="mini">${num(f.avgPerDay,3)} ${esc(f.item.unit)}/dzień</div><div class="forecast-cost mini">${f.events} rozchodów</div></div>`).join(''):'<div class="empty">Brak wystarczającej historii rozchodów.</div>'}</div>`;modal.classList.add('open');
+}
+
+function orderDemandMl(o){
+ const explicit=Number(o.reservedVolumeMl||0);if(explicit>0)return explicit;
+ const text=`${o.product||''} ${o.qty||''}`.toLowerCase();
+ const ml=text.match(/(\d+(?:[.,]\d+)?)\s*ml/),l=text.match(/(\d+(?:[.,]\d+)?)\s*l\b/);
+ let pack=ml?Number(ml[1].replace(',','.')):l?Number(l[1].replace(',','.'))*1000:0;
+ const q=String(o.qty||'').match(/\d+(?:[.,]\d+)?/);let units=q?Number(q[0].replace(',','.')):1;
+ if(pack>0)return pack*Math.max(1,units);return 0;
+}
+function organismFromText(t){const s=String(t||'').toLowerCase();if(s.includes('nanno'))return'Nannochloropsis';if(s.includes('tigri')||s.includes('widł'))return'Tigriopus / widłonogi';if(s.includes('artem'))return'Artemia';if(s.includes('kieł'))return'Kiełże morskie';return''}
+function openOrderDemandCenter(){
+ const orders=db.orders.filter(x=>!['Anulowane','Zrealizowane','Dostarczone'].includes(x.status));
+ const groups={};for(const o of orders){const org=organismFromText(o.product);if(!org)continue;(groups[org]??={demand:0,orders:[]});groups[org].demand+=orderDemandMl(o);groups[org].orders.push(o)}
+ const keys=Object.keys(groups);modalTitle.textContent='Produkcja pod zamówienia';modalBox.classList.add('wide');modalBody.innerHTML=`<div class="callout">System sumuje rozpoznawalną objętość z otwartych zamówień i porównuje ją z gotowymi kulturami. Gdy zamówienie nie zawiera objętości, pozostaje do ręcznej oceny.</div><div class="section">${keys.length?keys.map(org=>{const g=groups[org],available=productionReadyCultures().filter(x=>x.organism===org&&x.unit==='ml').reduce((a,x)=>a+Number(x.qty||0),0),def=Math.max(0,g.demand-available);return `<div class="card" style="margin-bottom:9px"><div class="statline"><span><strong>${esc(org)}</strong><div class="mini">${g.orders.length} otwartych zamówień</div></span><strong>${num(g.demand/1000,2)} L popytu</strong></div><div class="statline"><span>Gotowe kultury</span><strong>${num(available/1000,2)} L</strong></div><div class="statline"><span>Brak / nadwyżka</span><strong class="${def>0?'ledger-bad':'ledger-ok'}">${def>0?'brakuje '+num(def/1000,2)+' L':'pokryte'}</strong></div><div class="actions" style="margin-top:9px">${def>0?btn('Uruchom produkcję',`closeModal();openCultureExpansion()`,'btn tiny primary'):''}${btn('Zamówienia',`closeModal();setView('sales')`,'btn tiny secondary')}</div></div>`}).join(''):'<div class="card empty">Brak otwartych zamówień z rozpoznawalnym produktem.</div>'}</div>`;modal.classList.add('open');
+}
+
+function resolveQRValue(v){
+ const parts=String(v||'').trim().split('|');if(parts.length<3)return false;const type=parts[1],id=parts.slice(2).join('|');
+ if(type==='STOCK'&&getById('inventory',id)){openQuickStock(id);return true}
+ if(type==='CULTURE'){if(getById('inventory',id)){openQuickStock(id);return true}if(getById('cultures',id)){openCultureCard(id);return true}}
+ if(type==='BATCH'&&getById('harvests',id)){openHarvestCard(id);return true}
+ if(type==='SAMPLE'){const m=db.measurements.find(x=>(x.sampleCode||x.id)===id||x.id===id);if(m){openMeasurementCard(m.id);return true}}
+ if(type==='JOB'&&getById('productionJobs',id)){openProductionJob(id);return true}
+ return false;
+}
+function stopQRScanner(){if(qrScanTimer){clearTimeout(qrScanTimer);qrScanTimer=null}if(qrScanStream){qrScanStream.getTracks().forEach(t=>t.stop());qrScanStream=null}}
+async function openQuickQR(){
+ stopQRScanner();modalTitle.textContent='Szybki QR';modalBox.classList.remove('wide');modalBody.innerHTML=`<div id="scannerSupport"><div class="scanner-box"><video id="qrVideo" playsinline muted></video><div class="scan-frame"></div></div></div><div class="section"><div class="field"><label>Lub wpisz / wklej kod</label><input id="quickQRText" placeholder="ACM|STOCK|MAG-..."></div><div class="actions" style="margin-top:8px">${btn('Otwórz kod',"const v=document.getElementById('quickQRText').value;if(!resolveQRValue(v))alert('Nie znaleziono rekordu.')",'btn primary')}${btn('Zamknij','stopQRScanner();closeModal()','btn secondary')}</div></div>`;modal.classList.add('open');
+ try{
+  if(!('BarcodeDetector'in window)||!navigator.mediaDevices?.getUserMedia)throw new Error('Automatyczne skanowanie nie jest dostępne w tej przeglądarce.');
+  const formats=await BarcodeDetector.getSupportedFormats();if(!formats.includes('qr_code'))throw new Error('Brak obsługi QR przez aparat.');
+  const det=new BarcodeDetector({formats:['qr_code']});qrScanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});const video=document.getElementById('qrVideo');video.srcObject=qrScanStream;await video.play();
+  const loop=async()=>{if(!qrScanStream||!document.getElementById('qrVideo'))return;try{const codes=await det.detect(video);if(codes?.length){const v=codes[0].rawValue;stopQRScanner();if(resolveQRValue(v))return;document.getElementById('quickQRText').value=v}}catch(e){}qrScanTimer=setTimeout(loop,350)};loop();
+ }catch(e){document.getElementById('scannerSupport').innerHTML=`<div class="callout"><strong>Skaner aparatu niedostępny.</strong><br><span class="small">${esc(e.message)} Możesz wkleić kod QR ręcznie.</span></div>`}
+}
+function closeModal(){stopQRScanner();modal.classList.remove('open')}
+
+function quickSelectSource(formId,id){const f=document.getElementById(formId);if(f?.elements?.source){f.elements.source.value=id;f.elements.source.dispatchEvent(new Event('input',{bubbles:true}))}}
+function quickMeasureStock(id){closeModal();openMeasurementForm();const f=document.getElementById('measurementForm');if(f?.elements?.stockItem)f.elements.stockItem.value=id}
+function quickSplitStock(id){closeModal();openCultureSplit();quickSelectSource('splitForm',id)}
+function quickBottleStock(id){closeModal();openBottling();quickSelectSource('bottleForm',id)}
+async function markStockProblem(id){
+ const x=getById('inventory',id);if(!x)return;if(!confirm(`Oznaczyć ${x.lot||x.name} jako PROBLEM / KWARANTANNA? Stan ilościowy nie zostanie zmieniony.`))return;
+ const copy={...x,status:'Problem',updatedAt:new Date().toISOString()};await saveRecord('inventory',copy);
+ const job=(db.productionJobs||[]).find(j=>j.outputItemId===id&&j.status==='W toku');if(job)await updateProductionJobStatus(job.id,'Problem');
+ const run={id:nextProductionRunId(),type:'Blokada jakościowa',dateTime:nowLocal(),operator:db.settings.operator||'',status:'Zaksięgowana',movements:[],summary:`${x.lot||x.name}: status → Problem / kwarantanna`,createdAt:new Date().toISOString()};await saveRecord('productionRuns',run);closeModal();render();
+}
+async function clearStockProblem(id){const x=getById('inventory',id);if(!x)return;const copy={...x,status:'Gotowa',updatedAt:new Date().toISOString()};await saveRecord('inventory',copy);const job=(db.productionJobs||[]).find(j=>j.outputItemId===id&&j.status==='Problem');if(job)await updateProductionJobStatus(job.id,'Gotowa');closeModal();render()}
+function openQuickStock(id){
+ stopQRScanner();const x=getById('inventory',id);if(!x)return;modalTitle.textContent=`Szybka operacja — ${x.lot||x.name}`;modalBox.classList.remove('wide');
+ const isLive=inferStockKind(x)==='Kultura żywa',isReady=isLive&&productionReadyCultures().some(y=>y.id===x.id);modalBody.innerHTML=`<div class="card"><div class="statline"><span>${esc(x.name)}<div class="mini">${esc(x.lot||x.id)} • ${esc(x.status||'')}</div></span><strong>${stockQtyText(x)}</strong></div></div><div class="big-action-grid section">${isLive?`<button class="btn big-action" onclick="quickMeasureStock('${x.id}')"><strong>Pomiar / zdjęcie</strong><span>Kontrola jakości tej partii</span></button>`:''}${isReady?`<button class="btn big-action" onclick="quickSplitStock('${x.id}')"><strong>Podziel</strong><span>Utwórz kultury potomne</span></button><button class="btn big-action" onclick="quickBottleStock('${x.id}')"><strong>Rozlej</strong><span>Przenieś do produktu gotowego</span></button>`:''}<button class="btn big-action" onclick="openLineage('${x.id}')"><strong>Pochodzenie</strong><span>Genealogia i ślad produkcyjny</span></button></div><div class="actions section">${x.status==='Problem'?btn('Odblokuj jako gotową',`clearStockProblem('${x.id}')`,'btn primary'):isLive?btn('Problem / kwarantanna',`markStockProblem('${x.id}')`,'btn danger'):''}${btn('Pełna karta',`closeModal();openStockCard('${x.id}')`,'btn secondary')}</div>`;modal.classList.add('open');
+}
+
+function renderMore(){
+ const tiles=[
+  ['Audyt systemu','Niespójności, terminy i brakujące powiązania.','audit'],['Prognoza zapasów','Na ile dni wystarczą obecne stany.','forecast'],['Kontrola jakości','Pomiary, zdjęcia mikroskopowe i wyniki.','measurements'],['Receptury','Skład pożywek i zużycie materiałów.','recipes'],['Finanse','Koszty, przychody i rentowność.','finance'],['Raporty','Raporty produkcyjne i PDF.','reports'],['Kopie i dane','Pełny backup oraz ustawienia aplikacji.','backup'],['Dezynfekcja','Rejestr mycia i dezynfekcji.','sanitation'],['Zadania','Ręczne zadania i alerty.','tasks'],['Etykiety','Wydruki, QR i identyfikatory.','prints'],['Planowanie','Plan zapotrzebowania, kosztów i marży.','planner'],['Dziennik','Ręczne wpisy czynności.','events']
+ ];
+ return `<div class="more-grid">${tiles.map(t=>`<button class="more-tile" onclick="${t[2]==='audit'?'openAuditCenter()':t[2]==='forecast'?'openForecastCenter()':`setView('${t[2]}')`}"><strong>${t[0]}</strong><span>${t[1]}</span></button>`).join('')}</div><div class="section card"><h3>Dane i bezpieczeństwo</h3><div class="small">Command Center analizuje istniejące dane bez automatycznego korygowania stanów. Magazyn nadal zmienia się wyłącznie przez ruchy i operacje produkcyjne.</div><div class="actions" style="margin-top:10px">${btn('Import / eksport magazynu','openWarehouseTransfer()','btn secondary')}${btn('Pełna kopia aplikacji',"setView('backup')")}</div></div>`;
+}
+
+function quickAdd(){
+ if(currentView==='dashboard')return openQuickQR();
+ if(currentView==='production')return openCultureExpansion();
+ if(currentView==='inventory')return openStockMove();
+ if(currentView==='sales'||currentView==='orders')return openForm('order');
+ if(currentView==='clients')return openForm('client');
+ if(currentView==='measurements')return openMeasurementForm();
+ if(currentView==='recipes')return openRecipeForm();
+ return openForm('task');
+}
+
+
+/* =========================
+   v6 ULTIMATE — 5.1 → 6
+   Additive stores only. Inventory quantities are never migrated/recalculated.
+   ========================= */
+
+titles.calendar=['Kalendarz','Starty, kontrole, gotowość, rozlewy i zadania w jednym widoku.'];
+titles.templates=['Szablony produkcji','Powtarzalne procesy bez ponownego wpisywania tych samych parametrów.'];
+titles.analytics=['Wydajność','Czas produkcji, wolumen, straty i koszt jednostkowy.'];
+titles.purchases=['Zakupy','Propozycje zakupów wynikające z zapasów, prognoz i planów.'];
+titles.sync=['Synchronizacja','Opcjonalna synchronizacja z własnym endpointem; aplikacja nadal działa offline.'];
+titles.quality=['Kontrola jakości','Prosta ocena partii z możliwością rozwinięcia parametrów.'];
+titles.incidents=['Incydenty','Skażenia, problemy i partie potencjalnie powiązane.'];
+titles.smartplan=['Chcę wyprodukować','Kalkulator materiałów, terminu, kosztu i braków.'];
+
+let calendarCursor=new Date();
+
+async function migrateUltimateV7(){
+ let m=null;try{m=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('ultimateV7'))}catch(e){}
+ if(m?.value?.done)return;
+ if(!(db.productionTemplates||[]).length){
+  const defs=[
+   {id:'TPL-NAN-5L',name:'Nannochloropsis 5 L',organism:'Nannochloropsis',targetMl:5000,inoculumMl:500,plannedDays:7,bottleMl:500,active:'Tak',notes:'Szablon roboczy — parametry można zmienić.'},
+   {id:'TPL-NAN-10L',name:'Nannochloropsis 10 L',organism:'Nannochloropsis',targetMl:10000,inoculumMl:1000,plannedDays:7,bottleMl:500,active:'Tak',notes:'Szablon roboczy — parametry można zmienić.'},
+   {id:'TPL-NAN-20L',name:'Nannochloropsis 20 L',organism:'Nannochloropsis',targetMl:20000,inoculumMl:2000,plannedDays:8,bottleMl:500,active:'Tak',notes:'Szablon roboczy — parametry można zmienić.'}
+  ];
+  for(const x of defs)await put('productionTemplates',x);
+ }
+ await put('meta',{id:'ultimateV7',value:{done:true,date:new Date().toISOString(),note:'Additive schema only. No inventory quantity changes.'}});
+ await loadMemory();
+}
+
+function reservedStockQty(itemId){return (db.inventoryReservations||[]).filter(r=>r.itemId===itemId&&!['Anulowana','Zrealizowana'].includes(r.status)).reduce((a,r)=>a+Number(r.qty||0),0)}
+function freeStockQty(x){return Math.max(0,Number(x?.qty||0)-reservedStockQty(x?.id))}
+function reservationSummary(x){const r=reservedStockQty(x.id);return r>0?`${num(r,3)} ${x.unit} zarezerwowane • ${num(freeStockQty(x),3)} ${x.unit} wolne`:`${num(Number(x.qty||0),3)} ${x.unit} wolne`}
+function bestBeforeSort(a,b){const aa=a.bestBefore||'9999-12-31',bb=b.bestBefore||'9999-12-31';return aa.localeCompare(bb)||String(a.createdAt||'').localeCompare(String(b.createdAt||''))}
+function fefoCandidates(kind=''){return db.inventory.filter(x=>Number(x.qty||0)>0&&(!kind||inferStockKind(x)===kind)).sort(bestBeforeSort)}
+function reservationOptions(){return db.inventory.filter(x=>Number(x.qty||0)>0).sort(bestBeforeSort).map(x=>`<option value="${x.id}">${esc(x.name)} • ${esc(x.lot||x.id)} • wolne ${num(freeStockQty(x),3)} ${esc(x.unit)}</option>`).join('')}
+function nextId(store,prefix){return uid(prefix)}
+
+function stockMeasurements(id){return db.measurements.filter(m=>m.stockItem===id||m.culture===id).sort((a,b)=>(b.date||'').localeCompare(a.date||''))}
+function stockPhotos(id){const mids=new Set(stockMeasurements(id).map(m=>m.id));return db.media.filter(p=>p.cultureId===id||mids.has(p.measurementId)).sort((a,b)=>(b.createdAt||'').localeCompare(a.createdAt||''))}
+function tankJob(id){return (db.productionJobs||[]).find(j=>j.outputItemId===id&&!['Zakończona','Anulowana'].includes(j.status))}
+function readinessPct(x){const j=tankJob(x.id);if(j?.status==='Gotowa'||x.status==='Gotowa')return 100;if(j)return plannedProgress(j);return x.status==='Problem'?0:50}
+function latestQuality(id){return stockMeasurements(id)[0]||null}
+
+function openTankPanel(id){
+ const x=getById('inventory',id);if(!x)return;const j=tankJob(id),m=latestQuality(id),photos=stockPhotos(id),p=Math.round(readinessPct(x)),problem=['Problem','Kwarantanna'].includes(x.status)||j?.status==='Problem';
+ modalTitle.textContent=`Zbiornik — ${x.lot||x.name}`;modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="device-panel"><div class="card"><div class="readiness-ring ${problem?'problem':p>=100?'ready':''}" style="--p:${p}"><div class="inside"><strong>${p}%</strong><span>${problem?'BLOKADA':p>=100?'GOTOWA':'DO TERMINU'}</span></div></div><div style="text-align:center;margin-top:10px"><strong>${esc(x.lot||x.id)}</strong><div class="mini">${esc(x.vessel||'bez stanowiska')} • ${esc(x.status||'')}</div></div></div><div class="card"><div class="metric-strip"><div class="metric-box"><span>STAN</span><b>${stockQtyText(x)}</b></div><div class="metric-box"><span>GOTOWOŚĆ</span><b>${j?.plannedReadyDate?datePL(j.plannedReadyDate):(p>=100?'Gotowa':'—')}</b></div><div class="metric-box"><span>OSTATNIA KONTROLA</span><b>${m?datePL(m.date):'brak'}</b></div><div class="metric-box"><span>OCENA</span><b>${esc(m?.rating||'—')}</b></div></div><hr><div class="profile">${profileBox('Organizm',x.organism)}${profileBox('Szczep',x.strain)}${profileBox('Stężenie / obsada',x.concentration)}${profileBox('Start',datePL(j?.startedAt||x.start))}${profileBox('Następna kontrola',datePL(j?.nextCheckDate))}${profileBox('Docelowy rozlew',datePL(j?.plannedBottleDate))}</div></div></div>
+ <div class="section device-actions">${btn('Kontrola jakości',`openQuickQuality('${id}')`,'btn primary')}${productionReadyCultures().some(y=>y.id===id)?btn('Podziel kulturę',`quickSplitStock('${id}')`,'btn'):''}${productionReadyCultures().some(y=>y.id===id)?btn('Rozlej produkt',`quickBottleStock('${id}')`,'btn'):''}${btn('AquaFlow 2.0',`openAquaFlowTree('${id}')`,'btn secondary')}${btn('QR / etykieta',`printCultureID('${id}')`,'btn secondary')}${problem?btn('Odblokuj',`clearStockProblem('${id}')`,'btn primary'):btn('Incydent / problem',`openIncidentForm('${id}')`,'btn danger')}</div>
+ <div class="two section"><div class="card"><h3>Ostatnie kontrole</h3>${stockMeasurements(id).slice(0,6).length?stockMeasurements(id).slice(0,6).map(q=>`<div class="alert"><strong>${esc(q.rating||'')} • ${esc(q.param||'Kontrola')}</strong><span class="small">${datePL(q.date)}${q.value?' • '+esc(q.value)+' '+esc(q.unit||''):''}<br>${esc(q.notes||'')}</span></div>`).join(''):'<div class="empty">Brak kontroli.</div>'}</div><div class="card"><h3>Ostatnie zdjęcie</h3>${photos[0]?`<div class="photo"><img src="${mediaURLs.get(photos[0].id)||''}" onclick="openPhoto('${photos[0].id}')"><div class="meta">${esc(photos[0].name||'Zdjęcie')}</div></div>`:'<div class="empty">Brak zdjęć.</div>'}</div></div>`;
+ modal.classList.add('open');
+}
+
+function openQuickQuality(id){
+ stopQRScanner();const x=getById('inventory',id);if(!x)return;modalTitle.textContent=`Kontrola jakości — ${x.lot||x.name}`;modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="quickQualityForm"><div class="callout">W codziennej pracy wystarczy ocena, zdjęcie i krótka notatka. Parametry zaawansowane są opcjonalne.</div><div class="form-grid" style="margin-top:12px">${f('date','Data','datetime-local',nowLocal())}${f('rating','Ocena','select','OK',['OK','Do obserwacji','Problem / odrzucić'])}${f('notes','Co widzisz?','textarea','')}<div class="field wide"><label>Zdjęcie</label><input id="qqPhoto" type="file" accept="image/*" capture="environment"></div><div class="field wide"><details><summary>Pokaż parametry zaawansowane</summary><div class="form-grid" style="margin-top:10px">${f('param','Parametr','select','Wygląd / barwa',['Wygląd / barwa','Gęstość komórek','OD / absorbancja','Temperatura','Zasolenie','pH','Liczba osobników/ml','Inny'])}${f('value','Wartość','text','')}${f('unit','Jednostka','text','')}${f('method','Metoda / sprzęt','text','')}</div></details></div></div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz kontrolę</button></div></form>`;
+ quickQualityForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),m={id:uid('POM'),date:fd.get('date')||nowLocal(),stockItem:id,culture:'',param:fd.get('param')||'Kontrola jakości',value:fd.get('value')||'',unit:fd.get('unit')||'',method:fd.get('method')||'',sampleCode:nextSampleCode(today()),rating:fd.get('rating')||'OK',notes:fd.get('notes')||''};await saveRecord('measurements',m);const file=document.getElementById('qqPhoto').files?.[0];if(file)await storeImage(file,m.id,id);if(m.rating==='Problem / odrzucić'){const xx={...x,status:'Problem',updatedAt:new Date().toISOString()};await saveRecord('inventory',xx)}closeModal();render()};modal.classList.add('open');
+}
+function quickMeasureStock(id){closeModal();openQuickQuality(id)}
+
+function openReservationForm(itemId=''){
+ modalTitle.textContent='Rezerwacja magazynu';modalBox.classList.remove('wide');modalBody.innerHTML=`<form id="reservationForm"><div class="form-grid"><div class="field wide"><label>Pozycja</label><select name="itemId">${reservationOptions()}</select></div>${f('qty','Ilość','number','')}${f('neededDate','Potrzebne na','date','')}${f('sourceType','Dla','select','Produkcja',['Produkcja','Zamówienie','Inne'])}${f('sourceId','Numer procesu / zamówienia','text','')}${f('notes','Uwagi','textarea','')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zarezerwuj</button></div></form>`;
+ if(itemId)reservationForm.elements.itemId.value=itemId;reservationForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),x=getById('inventory',fd.get('itemId')),q=Number(fd.get('qty')||0);if(!x||q<=0)return alert('Wybierz pozycję i ilość.');if(q>freeStockQty(x))return alert(`Brak wolnego stanu. Dostępne ${num(freeStockQty(x),3)} ${x.unit}.`);await saveRecord('inventoryReservations',{id:uid('REZ'),itemId:x.id,qty:q,unit:x.unit,neededDate:fd.get('neededDate')||'',sourceType:fd.get('sourceType')||'',sourceId:fd.get('sourceId')||'',status:'Aktywna',createdAt:new Date().toISOString(),notes:fd.get('notes')||''});closeModal();render()};modal.classList.add('open');
+}
+async function cancelReservation(id){const r=getById('inventoryReservations',id);if(!r)return;await saveRecord('inventoryReservations',{...r,status:'Anulowana',updatedAt:new Date().toISOString()});render()}
+function openInventoryCount(){
+ const items=[...db.inventory].sort((a,b)=>String(a.name).localeCompare(String(b.name)));modalTitle.textContent='Inwentaryzacja magazynu';modalBox.classList.add('wide');modalBody.innerHTML=`<form id="countForm"><div class="callout">Wpisz stan rzeczywisty tylko tam, gdzie chcesz wykonać korektę. System utworzy jawny ruch różnicowy — nie nadpisze historii.</div><div class="section">${items.map(x=>`<div class="fefo-row"><div><strong>${esc(x.name)}</strong><div class="mini">${esc(x.lot||x.id)}</div></div><div>${num(Number(x.qty||0),3)} ${esc(x.unit)}</div><div><input name="cnt_${x.id}" type="number" step="any" placeholder="stan rzeczywisty"></div><div class="mini">${esc(x.unit)}</div></div>`).join('')}</div><div class="actions"><button class="btn primary">Zaksięguj różnice</button></div></form>`;
+ countForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),changes=[];for(const x of items){const raw=fd.get('cnt_'+x.id);if(raw===null||raw==='')continue;const actual=Number(raw),delta=actual-Number(x.qty||0);if(Math.abs(delta)>1e-9)changes.push({item:x,delta,moveType:'Korekta inwentaryzacyjna',reason:'Inwentaryzacja — stan rzeczywisty'})}if(!changes.length)return alert('Brak różnic do zaksięgowania.');if(!confirm(`Zaksięgować ${changes.length} korekt magazynowych?`))return;const run={id:nextProductionRunId(),type:'Inwentaryzacja',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`Inwentaryzacja: ${changes.length} korekt`};try{await commitProductionRun(run,changes);closeModal();render()}catch(err){alert(err.message)}};modal.classList.add('open');
+}
+
+function renderInventory(){
+ const q=(document.getElementById('warehouseSearchSimple')?.value||'').trim().toLowerCase();const kinds=['','Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy'];
+ const items=db.inventory.filter(x=>{const match=!warehouseSimpleFilter||inferStockKind(x)===warehouseSimpleFilter,hay=[x.name,x.lot,x.organism,x.category,x.supplier].join(' ').toLowerCase();return match&&(!q||hay.includes(q))}).sort(bestBeforeSort);
+ const expiring=fefoCandidates().filter(x=>x.bestBefore&&daysUntil(x.bestBefore)<=30).slice(0,5);
+ return `<div class="toolbar">${btn('+ Dodaj / przyjmij','openWarehouseItemForm()','btn primary')}${btn('Ruch / korekta','openStockMove()')}${btn('Rezerwacja','openReservationForm()')}${btn('Inwentaryzacja','openInventoryCount()')}${btn('Import / eksport','openWarehouseTransfer()','btn secondary')}</div><div class="simple-search"><input id="warehouseSearchSimple" placeholder="Szukaj w magazynie..." value="${esc(q)}" oninput="render()"><button class="btn" onclick="document.getElementById('warehouseSearchSimple').value='';warehouseSimpleFilter='';render()">Wyczyść</button></div><div class="inventory-filters section">${kinds.map(k=>`<button class="filter-pill ${warehouseSimpleFilter===k?'active':''}" onclick="setWarehouseFilter('${k.replaceAll("'","\\'")}')">${k||'Wszystko'}</button>`).join('')}</div>${expiring.length?`<div class="card"><h3>FEFO — użyj najpierw</h3>${expiring.map(x=>`<div class="fefo-row"><div><strong>${esc(x.name)}</strong><div class="mini">${esc(x.lot||x.id)}</div></div><div>${stockQtyText(x)}</div><div>${datePL(x.bestBefore)}</div><div>${btn('Karta',`openStockCard('${x.id}')`,'btn tiny')}</div></div>`).join('')}</div>`:''}<div class="inventory-card-grid section">${items.length?items.map(x=>{const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9,r=reservedStockQty(x.id);return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.name)}</h4><div class="mini">${esc(x.lot||x.id)}${x.organism?' • '+esc(x.organism):''}</div></div><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></div><div class="qty">${stockQtyText(x)}</div><div class="mini">${r>0?`zarezerwowane ${num(r,3)} ${esc(x.unit)} • wolne ${num(freeStockQty(x),3)}`:'całość wolna'}${x.bestBefore?' • FEFO '+datePL(x.bestBefore):''}</div><div class="mini"><span class="status-dot ${ok?'':'bad'}"></span>${ok?'saldo zgodne':'sprawdź saldo'}</div><div class="actions">${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${inferStockKind(x)==='Kultura żywa'?btn('Panel',`openTankPanel('${x.id}')`,'btn tiny primary'):''}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Rezerwuj',`openReservationForm('${x.id}')`,'btn tiny')}</div></div>`}).join(''):'<div class="empty card">Brak pozycji.</div>'}</div>`;
+}
+
+function templateOptions(selected=''){return (db.productionTemplates||[]).filter(t=>t.active!=='Nie').map(t=>`<option value="${t.id}" ${selected===t.id?'selected':''}>${esc(t.name)} • ${num(Number(t.targetMl||0)/1000,1)} L</option>`).join('')}
+function openTemplateForm(id=''){
+ const t=id?getById('productionTemplates',id):{id:uid('TPL'),name:'',organism:'Nannochloropsis',targetMl:10000,inoculumMl:1000,plannedDays:7,bottleMl:500,active:'Tak'};modalTitle.textContent=id?'Edytuj szablon':'Nowy szablon';modalBox.classList.remove('wide');modalBody.innerHTML=`<form id="templateForm"><div class="form-grid">${f('name','Nazwa','text',t.name)}${f('organism','Organizm','select',t.organism||'Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Inne'])}${f('targetMl','Docelowa objętość [ml]','number',t.targetMl)}${f('inoculumMl','Inokulum [ml]','number',t.inoculumMl)}${f('plannedDays','Planowany czas [dni]','number',t.plannedDays)}${f('bottleMl','Domyślny rozlew [ml]','number',t.bottleMl)}${f('vessel','Domyślne stanowisko','text',t.vessel||'')}${f('active','Aktywny','select',t.active||'Tak',['Tak','Nie'])}${f('notes','Uwagi','textarea',t.notes||'')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz</button></div></form>`;templateForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),x={...t};['name','organism','vessel','active','notes'].forEach(k=>x[k]=fd.get(k)||'');['targetMl','inoculumMl','plannedDays','bottleMl'].forEach(k=>x[k]=Number(fd.get(k)||0));await saveRecord('productionTemplates',x);closeModal();render()};modal.classList.add('open');
+}
+function renderTemplates(){return `<div class="toolbar">${btn('+ Szablon','openTemplateForm()','btn primary')}${btn('Kalkulator produkcji',"setView('smartplan')")}</div><div class="template-grid">${(db.productionTemplates||[]).map(t=>`<div class="template-card"><h4>${esc(t.name)}</h4><div class="mini">${esc(t.organism)} • ${t.active}</div><div class="vol">${num(Number(t.targetMl||0)/1000,1)} L</div><div class="small">Inokulum ${num(Number(t.inoculumMl||0)/1000,2)} L • ${num(t.plannedDays,0)} dni • rozlew ${num(t.bottleMl,0)} ml</div><div class="actions" style="margin-top:10px">${btn('Uruchom',`startTemplate('${t.id}')`,'btn tiny primary')}${btn('Edytuj',`openTemplateForm('${t.id}')`,'btn tiny')}</div></div>`).join('')}</div>`}
+function addDaysISO(date,days){const d=new Date((date||today())+'T00:00:00');d.setDate(d.getDate()+Number(days||0));return d.toISOString().slice(0,10)}
+function startTemplate(id){const t=getById('productionTemplates',id);if(!t)return;const src=productionReadyCultures().find(x=>x.organism===t.organism),med=mediumStock().find(x=>!x.organism||x.organism===t.organism)||mediumStock()[0];if(!src)return alert('Brak gotowej kultury źródłowej dla tego szablonu.');if(!med)return alert('Brak gotowej pożywki.');openCultureExpansion(src.id);const form=document.getElementById('expandForm');if(!form)return;form.elements.source.value=src.id;form.elements.medium.value=med.id;form.elements.consume.value=t.inoculumMl||0;form.elements.mediumMl.value=Math.max(0,Number(t.targetMl||0)-Number(t.inoculumMl||0));form.elements.plannedReadyDate.value=addDaysISO(today(),t.plannedDays||0);form.elements.plannedBottleDate.value=addDaysISO(today(),Number(t.plannedDays||0)+1);form.elements.vessel.value=t.vessel||'';['source','medium','consume','mediumMl','plannedReadyDate'].forEach(n=>form.elements[n].dispatchEvent(new Event('input',{bubbles:true})))}
+
+function productionPlanData(templateId,targetMl){
+ const t=getById('productionTemplates',templateId)||(db.productionTemplates||[])[0]||{};targetMl=Number(targetMl||t.targetMl||0);const ratio=t.targetMl?Number(t.inoculumMl||0)/Number(t.targetMl):0.1,inoc=Math.round(targetMl*ratio),medium=Math.max(0,targetMl-inoc);const org=t.organism||'Nannochloropsis';const ready=productionReadyCultures().filter(x=>x.organism===org).reduce((a,x)=>a+freeStockQty(x),0),med=mediumStock().filter(x=>!x.organism||x.organism===org||x.organism==='Uniwersalna').reduce((a,x)=>a+freeStockQty(x),0);const mediumRecipe=db.recipes.find(r=>r.active!=='Nie'&&(/pożyw|medium|solank/i.test(String(r.product||'')+' '+String(r.name||'')))&&(String(r.product||'').includes(org)||true));const raw=mediumRecipe?productionRecipeChanges(mediumRecipe.id,medium/1000,0):[];const rawDef=raw.map(ch=>({item:ch.item,need:Math.abs(Number(ch.delta||0)),available:freeStockQty(ch.item),deficit:Math.max(0,Math.abs(Number(ch.delta||0))-freeStockQty(ch.item))}));return {t,targetMl,inoc,medium,org,ready,med,rawDef,readyDate:addDaysISO(today(),t.plannedDays||7),bottleMl:Number(t.bottleMl||500)}
+}
+function refreshSmartPlan(){const form=document.getElementById('smartPlanForm');if(!form)return;const p=productionPlanData(form.elements.template.value,Number(form.elements.targetMl.value||0)),box=document.getElementById('smartPlanResult'),missingCulture=Math.max(0,p.inoc-p.ready),missingMedium=Math.max(0,p.medium-p.med),units=p.bottleMl?Math.floor(p.targetMl/p.bottleMl):0;box.innerHTML=`<div class="plan-result"><div class="simple-kpi"><div class="t">Docelowo</div><div class="n">${num(p.targetMl/1000,2)} L</div></div><div class="simple-kpi"><div class="t">Inokulum</div><div class="n">${num(p.inoc/1000,2)} L</div></div><div class="simple-kpi"><div class="t">Pożywka</div><div class="n">${num(p.medium/1000,2)} L</div></div><div class="simple-kpi"><div class="t">Najwcześniej</div><div class="n">${datePL(p.readyDate)}</div></div></div><div class="section card"><h3>Dostępność</h3><div class="statline"><span>Gotowa kultura źródłowa</span><strong class="${missingCulture?'ledger-bad':'ledger-ok'}">${missingCulture?'brakuje '+num(missingCulture/1000,2)+' L':'OK'}</strong></div><div class="statline"><span>Gotowa pożywka</span><strong class="${missingMedium?'ledger-bad':'ledger-ok'}">${missingMedium?'brakuje '+num(missingMedium/1000,2)+' L':'OK'}</strong></div>${p.rawDef.length?`<hr><div class="mini">Gdy trzeba przygotować pożywkę:</div>${p.rawDef.map(r=>`<div class="statline"><span>${esc(r.item.name)}</span><strong class="${r.deficit?'ledger-bad':'ledger-ok'}">potrzeba ${num(r.need,3)} ${esc(r.item.unit)}${r.deficit?' • brak '+num(r.deficit,3):' • OK'}</strong></div>`).join('')}`:''}<hr><div class="statline"><span>Potencjalny rozlew</span><strong>${units} × ${num(p.bottleMl,0)} ml</strong></div></div><div class="actions section">${btn('Uruchom z tego planu','startSmartPlan()','btn primary')}${missingMedium?btn('Przygotuj pożywkę','openMediumPreparation()'):''}</div>`}
+function renderSmartPlan(){const templates=db.productionTemplates||[];return `<div class="two"><div class="card"><h3>Chcę wyprodukować…</h3><form id="smartPlanForm"><div class="form-grid"><div class="field wide"><label>Szablon</label><select name="template" onchange="const t=getById('productionTemplates',this.value);if(t)smartPlanForm.elements.targetMl.value=t.targetMl;refreshSmartPlan()">${templateOptions()}</select></div>${f('targetMl','Docelowa objętość [ml]','number',templates[0]?.targetMl||10000)}</div></form></div><div class="card"><h3>Co policzy system?</h3><div class="small">Inokulum, pożywkę, dostępne zapasy, braki surowców, przewidywany termin oraz potencjalny rozlew. Kalkulator niczego nie księguje, dopóki nie uruchomisz procesu.</div></div></div><div id="smartPlanResult" class="section"></div><script>setTimeout(refreshSmartPlan,0)<\/script>`}
+function startSmartPlan(){const f=document.getElementById('smartPlanForm');if(!f)return;const p=productionPlanData(f.elements.template.value,f.elements.targetMl.value),src=productionReadyCultures().find(x=>x.organism===p.org&&freeStockQty(x)>=p.inoc),med=mediumStock().find(x=>(!x.organism||x.organism===p.org||x.organism==='Uniwersalna')&&freeStockQty(x)>=p.medium);if(!src)return alert('Brak wystarczającej gotowej kultury źródłowej.');if(!med)return alert('Brak wystarczającej gotowej pożywki.');openCultureExpansion(src.id);const form=document.getElementById('expandForm');form.elements.source.value=src.id;form.elements.medium.value=med.id;form.elements.consume.value=p.inoc;form.elements.mediumMl.value=p.medium;form.elements.plannedReadyDate.value=p.readyDate;form.elements.plannedBottleDate.value=addDaysISO(p.readyDate,1);['source','medium','consume','mediumMl','plannedReadyDate'].forEach(n=>form.elements[n].dispatchEvent(new Event('input',{bubbles:true})))}
+
+function calendarEvents(){const e=[];(db.productionJobs||[]).forEach(j=>{const lot=getById('inventory',j.outputItemId)?.lot||j.id;if(j.startedAt)e.push({date:dateOnly(j.startedAt),label:`Start ${lot}`,type:'start',action:`openProductionJob('${j.id}')`});if(j.nextCheckDate)e.push({date:j.nextCheckDate,label:`Kontrola ${lot}`,type:'warn',action:`openProductionJob('${j.id}')`});if(j.plannedReadyDate)e.push({date:j.plannedReadyDate,label:`Gotowa ${lot}`,type:'ready',action:`openProductionJob('${j.id}')`});if(j.plannedBottleDate)e.push({date:j.plannedBottleDate,label:`Rozlew ${lot}`,type:'ready',action:`openProductionJob('${j.id}')`})});db.tasks.filter(t=>t.due&&t.status!=='Zrealizowane').forEach(t=>e.push({date:t.due,label:t.title,type:'warn',action:`openForm('task','${t.id}')`}));return e}
+function calendarShift(n){calendarCursor=new Date(calendarCursor.getFullYear(),calendarCursor.getMonth()+n,1);render()}
+function renderCalendar(){const y=calendarCursor.getFullYear(),m=calendarCursor.getMonth(),first=new Date(y,m,1),start=new Date(y,m,1-((first.getDay()+6)%7)),events=calendarEvents(),names=['Pn','Wt','Śr','Cz','Pt','So','Nd'];let cells='';for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const iso=d.toISOString().slice(0,10),mine=d.getMonth()===m,ev=events.filter(x=>x.date===iso).slice(0,4);cells+=`<div class="calendar-cell ${mine?'':'out'} ${iso===today()?'today':''}"><div class="calendar-date">${d.getDate()}</div>${ev.map(x=>`<span class="cal-event ${x.type}" onclick="${x.action}">${esc(x.label)}</span>`).join('')}</div>`}return `<div class="card"><div class="calendar-head"><button class="btn" onclick="calendarShift(-1)">←</button><h3 style="margin:0">${new Date(y,m,1).toLocaleDateString('pl-PL',{month:'long',year:'numeric'})}</h3><button class="btn" onclick="calendarShift(1)">→</button></div><div class="calendar-grid section">${names.map(n=>`<div class="calendar-dayname">${n}</div>`).join('')}${cells}</div></div>`}
+
+function descendantsOf(id){const out=[],seen=new Set();function walk(x){for(const c of db.inventory.filter(i=>i.parentItemId===x||i.sourceItemId===x)){if(seen.has(c.id))continue;seen.add(c.id);out.push(c);walk(c.id)}}walk(id);return out}
+function ancestorsOf(id){const arr=[],seen=new Set();let x=getById('inventory',id);while(x&&!seen.has(x.id)){seen.add(x.id);const p=getById('inventory',x.parentItemId||x.sourceItemId);if(!p)break;arr.unshift(p);x=p}return arr}
+function openAquaFlowTree(id){const cur=getById('inventory',id);if(!cur)return;const anc=ancestorsOf(id),kids=descendantsOf(id),job=tankJob(id),med=job?getById('inventory',job.mediumItemId):null,rec=med?.recipeId?getById('recipes',med.recipeId):null,ings=(rec?.ingredients||[]).map(i=>getById('inventory',i.itemId)).filter(Boolean);modalTitle.textContent=`AquaFlow 2.0 — ${cur.lot||cur.name}`;modalBox.classList.add('wide');const row=[];if(ings.length)row.push(`<div class="tree2-node"><div class="mini">SUROWCE</div><strong>${ings.slice(0,4).map(x=>esc(x.name)).join(' + ')}</strong></div>`);if(med)row.push(`<div class="tree2-node"><div class="mini">POŻYWKA</div><strong>${esc(med.lot||med.name)}</strong><div class="mini">${stockQtyText(med)}</div></div>`);anc.forEach(a=>row.push(`<div class="tree2-node"><div class="mini">ŹRÓDŁO</div><strong>${esc(a.lot||a.name)}</strong><div class="mini">${esc(a.status||'')}</div></div>`));row.push(`<div class="tree2-node current ${cur.status==='Problem'?'problem':''}"><div class="mini">AKTUALNA</div><strong>${esc(cur.lot||cur.name)}</strong><div class="mini">${stockQtyText(cur)} • ${esc(cur.status||'')}</div></div>`);if(kids.length)row.push(`<div class="tree2-children">${kids.slice(0,10).map(k=>`<div class="tree2-node ${k.status==='Problem'||k.status==='Kwarantanna'?'problem':''}" onclick="openTankPanel('${k.id}')" style="cursor:pointer"><div class="mini">POTOMNA / PRODUKT</div><strong>${esc(k.lot||k.name)}</strong><div class="mini">${esc(inferStockKind(k))} • ${stockQtyText(k)}</div></div>`).join('')}</div>`);modalBody.innerHTML=`<div class="tree2"><div class="tree2-row">${row.join('<div class="tree2-arrow">→</div>')}</div></div><div class="section callout">Kliknięcie partii potomnej otwiera jej panel. Przy incydencie system może objąć kwarantanną powiązane pozycje bez zmiany ich ilości.</div>`;modal.classList.add('open')}
+
+function openIncidentForm(sourceId=''){const source=getById('inventory',sourceId),affected=source?descendantsOf(sourceId):[];modalTitle.textContent='Nowy incydent / skażenie';modalBox.classList.add('wide');modalBody.innerHTML=`<form id="incidentForm"><div class="form-grid"><div class="field wide"><label>Partia źródłowa</label><select name="sourceItemId"><option value="">— wybierz —</option>${liveStock().map(x=>`<option value="${x.id}" ${x.id===sourceId?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)}</option>`).join('')}</select></div>${f('date','Data','datetime-local',nowLocal())}${f('type','Typ','select','Podejrzenie skażenia',['Podejrzenie skażenia','Problem jakościowy','Awaria sprzętu','Błąd procesu','Inne'])}${f('severity','Poziom','select','Wysoki',['Niski','Średni','Wysoki'])}${f('description','Opis','textarea','')}<div class="field wide"><label><input type="checkbox" name="quarantine" checked> Oznacz partię źródłową i pozycje potomne jako kwarantanna/problem</label><div class="help">Zmienia tylko status, nigdy ilość. ${affected.length?`Aktualnie wykryto ${affected.length} pozycji potomnych.`:''}</div></div></div><div class="actions" style="margin-top:12px"><button class="btn danger">Zarejestruj incydent</button></div></form>`;incidentForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),sid=fd.get('sourceItemId'),src=getById('inventory',sid);if(!src)return alert('Wybierz partię źródłową.');const affectedIds=[sid,...descendantsOf(sid).map(x=>x.id)],inc={id:uid('INC'),date:fd.get('date')||nowLocal(),sourceItemId:sid,type:fd.get('type')||'',severity:fd.get('severity')||'',description:fd.get('description')||'',status:'Otwarty',affectedIds,createdAt:new Date().toISOString()};await saveRecord('incidents',inc);if(fd.get('quarantine')){for(const aid of affectedIds){const x=getById('inventory',aid);if(!x)continue;await put('inventory',{...x,status:aid===sid?'Problem':'Kwarantanna',incidentId:inc.id,updatedAt:new Date().toISOString()})}await loadMemory()}closeModal();render()};modal.classList.add('open')}
+async function closeIncident(id){const inc=getById('incidents',id);if(!inc)return;if(!confirm('Zamknąć incydent? Statusów partii nie zmienię automatycznie — odblokuj je świadomie z karty partii.'))return;await saveRecord('incidents',{...inc,status:'Zamknięty',closedAt:new Date().toISOString()});render()}
+function renderIncidents(){const list=[...(db.incidents||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));return `<div class="toolbar">${btn('+ Incydent','openIncidentForm()','btn danger')}</div>${list.length?list.map(i=>{const src=getById('inventory',i.sourceItemId);return `<div class="card incident-card" style="margin-bottom:10px"><div class="statline"><span><strong>${esc(i.type)}</strong><div class="mini">${datePL(i.date)} • ${esc(i.severity)} • ${esc(i.status)}</div></span><strong>${src?esc(src.lot||src.name):esc(i.sourceItemId)}</strong></div><div class="small">${esc(i.description||'')}<br>Powiązane pozycje: ${(i.affectedIds||[]).length}</div><div class="actions" style="margin-top:8px">${src?btn('AquaFlow',`openAquaFlowTree('${src.id}')`,'btn tiny'):''}${i.status!=='Zamknięty'?btn('Zamknij',`closeIncident('${i.id}')`,'btn tiny secondary'):''}</div></div>`}).join(''):'<div class="empty card">Brak incydentów.</div>'}`}
+
+function jobDurationDays(j){if(!j.startedAt)return null;const end=j.actualReadyAt||j.closedAt||(j.status==='Gotowa'?j.updatedAt:null);if(!end)return null;return Math.max(0,(new Date(end)-new Date(j.startedAt))/86400000)}
+function renderAnalytics(){const jobs=(db.productionJobs||[]).filter(j=>jobDurationDays(j)!==null),dur=jobs.map(jobDurationDays),avg=dur.length?dur.reduce((a,x)=>a+x,0)/dur.length:0,liveOutputs=jobs.map(j=>getById('inventory',j.outputItemId)).filter(Boolean),litres=liveOutputs.filter(x=>x.unit==='ml').reduce((a,x)=>a+Number(x.qty||0),0)/1000,inc=(db.incidents||[]).filter(i=>i.status!=='Zamknięty').length,products=db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'),costL=liveOutputs.filter(x=>x.unit==='ml'&&Number(x.price||0)>0),avgCost=costL.length?costL.reduce((a,x)=>a+Number(x.price||0)*1000,0)/costL.length:0;const byOrg={};jobs.forEach(j=>{const k=j.organism||'Inne';(byOrg[k]??=[]).push(jobDurationDays(j))});return `<div class="simple-kpis"><div class="simple-kpi"><div class="t">Śr. czas do gotowości</div><div class="n">${num(avg,1)} d</div></div><div class="simple-kpi"><div class="t">Procesy z wynikiem</div><div class="n">${jobs.length}</div></div><div class="simple-kpi"><div class="t">Aktywne incydenty</div><div class="n">${inc}</div></div><div class="simple-kpi"><div class="t">Śr. koszt ewid. 1 L</div><div class="n" style="font-size:18px">${money(avgCost)}</div></div></div><div class="two section"><div class="card"><h3>Czas produkcji wg organizmu</h3><div class="analysis-bars">${Object.entries(byOrg).map(([k,v])=>{const a=v.reduce((s,x)=>s+x,0)/v.length,w=Math.min(100,a/14*100);return `<div class="analysis-bar"><span>${esc(k)}</span><div class="analysis-track"><div class="analysis-fill" style="width:${w}%"></div></div><strong>${num(a,1)} d</strong></div>`}).join('')||'<div class="empty">Za mało danych.</div>'}</div></div><div class="card"><h3>Produkcja / sprzedaż</h3><div class="statline"><span>Aktualny wolumen kultur z zakończonych procesów</span><strong>${num(litres,2)} L</strong></div><div class="statline"><span>Pozycje produktu gotowego</span><strong>${products.length}</strong></div><div class="statline"><span>Wartość otwartych zamówień</span><strong>${money(db.orders.filter(o=>!['Anulowane','Zrealizowane'].includes(o.status)).reduce((a,o)=>a+Number(o.total||0),0))}</strong></div></div></div><div class="section callout">Wskaźniki uczą się z danych zapisanych w aplikacji. Przy małej liczbie zakończonych procesów traktuj je jako orientacyjne, nie jako model biologiczny.</div>`}
+
+function demandRecommendations(){const groups={};for(const o of db.orders.filter(x=>!['Anulowane','Zrealizowane','Dostarczone'].includes(x.status))){const org=organismFromText(o.product);if(!org)continue;(groups[org]??={orders:[],demand:0});groups[org].orders.push(o);groups[org].demand+=orderDemandMl(o)}return Object.entries(groups).map(([org,g])=>{const ready=productionReadyCultures().filter(x=>x.organism===org).reduce((a,x)=>a+freeStockQty(x),0),wip=(db.productionJobs||[]).filter(j=>j.organism===org&&j.status==='W toku').reduce((a,j)=>a+Number(getById('inventory',j.outputItemId)?.qty||0),0),def=Math.max(0,g.demand-ready-wip);return {org,...g,ready,wip,def}})}
+function startDemandPlan(org,def){const t=(db.productionTemplates||[]).filter(x=>x.organism===org&&x.active!=='Nie').sort((a,b)=>Number(a.targetMl)-Number(b.targetMl)).find(x=>Number(x.targetMl)>=def)||(db.productionTemplates||[]).find(x=>x.organism===org);if(!t)return setView('smartplan');startTemplate(t.id)}
+
+function purchaseSuggestions(){const out=[];for(const x of db.inventory.filter(i=>['Surowiec','Opakowanie'].includes(inferStockKind(i)))){const f=stockForecast(x),reserve=reservedStockQty(x.id),free=Math.max(0,Number(x.qty||0)-reserve),target=Math.max(Number(x.min||0)*2,f.avgPerDay*30),need=Math.max(0,target-free);if(need>0||Number(x.qty||0)<=Number(x.min||0))out.push({x,need:Math.max(need,Number(x.min||0)-free),days:f.daysLeft})}return out.sort((a,b)=>(a.days??9999)-(b.days??9999))}
+function createPurchaseOrderFromSuggestions(){const sug=purchaseSuggestions().filter(s=>s.need>0);if(!sug.length)return alert('Brak bieżących propozycji zakupów.');const po={id:uid('ZAK'),date:today(),status:'Planowane',supplier:'',items:sug.map(s=>({itemId:s.x.id,name:s.x.name,qty:s.need,unit:s.x.unit,lastPrice:s.x.price||0})),notes:'Wygenerowano z prognozy zapasów',createdAt:new Date().toISOString()};saveRecord('purchaseOrders',po).then(()=>render())}
+function renderPurchases(){const sug=purchaseSuggestions(),pos=[...(db.purchaseOrders||[])].sort((a,b)=>(b.date||'').localeCompare(a.date||''));return `<div class="toolbar">${btn('Utwórz plan zakupów','createPurchaseOrderFromSuggestions()','btn primary')}</div><div class="two"><div class="card"><h3>Propozycje</h3>${sug.length?sug.map(s=>`<div class="purchase-row"><div><strong>${esc(s.x.name)}</strong><div class="mini">${esc(s.x.supplier||'bez dostawcy')} • stan ${stockQtyText(s.x)}</div></div><div>${s.days===null?'—':num(s.days,0)+' d'}</div><div><strong>+${num(s.need,2)} ${esc(s.x.unit)}</strong></div><div>${money(Number(s.x.price||0)*s.need)}</div><div>${btn('Karta',`openStockCard('${s.x.id}')`,'btn tiny')}</div></div>`).join(''):'<div class="empty">Brak pilnych zakupów.</div>'}</div><div class="card"><h3>Plany zakupów</h3>${pos.length?pos.map(p=>`<div class="alert"><strong>${esc(p.id)} • ${esc(p.status)}</strong><span class="small">${datePL(p.date)} • ${(p.items||[]).length} pozycji • ${esc(p.supplier||'')}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div></div>`}
+
+async function getSyncSettings(){const r=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('syncSettings'));return r?.value||{endpoint:'',token:'',revision:0,lastSyncAt:''}}
+async function saveSyncSettings(v){await put('meta',{id:'syncSettings',value:v})}
+async function buildSyncPayload(includeMedia=false){const stores=Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),payload={app:'AquaCulture Manager',appVersion:'6.0',schema:7,generatedAt:new Date().toISOString(),settings:db.settings,stores};if(includeMedia){payload.media=[];for(const m of db.media)payload.media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}return payload}
+async function syncPush(){const s=await getSyncSettings();if(!s.endpoint||!s.token)return alert('Najpierw zapisz endpoint i klucz synchronizacji.');try{const payload=await buildSyncPayload(false),res=await fetch(s.endpoint.replace(/\/$/,'')+'/state',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.token},body:JSON.stringify({baseRevision:Number(s.revision||0),payload})});const data=await res.json();if(res.status===409)return alert(`Konflikt synchronizacji. Serwer ma rewizję ${data.revision}. Najpierw pobierz stan z serwera albo świadomie rozwiąż konflikt.`);if(!res.ok)throw new Error(data.error||res.statusText);await saveSyncSettings({...s,revision:data.revision,lastSyncAt:new Date().toISOString()});alert(`Wysłano. Rewizja serwera: ${data.revision}`);render()}catch(e){alert('Błąd synchronizacji: '+e.message)}}
+async function syncPull(){const s=await getSyncSettings();if(!s.endpoint||!s.token)return alert('Najpierw zapisz endpoint i klucz.');try{const res=await fetch(s.endpoint.replace(/\/$/,'')+'/state',{headers:{'Authorization':'Bearer '+s.token}}),data=await res.json();if(!res.ok)throw new Error(data.error||res.statusText);if(!data.payload)return alert('Serwer nie ma jeszcze danych.');if(!confirm(`Pobrać rewizję ${data.revision} i zastąpić lokalne dane strukturalne? Najpierw zostanie automatycznie pobrana lokalna kopia bezpieczeństwa. Zdjęcia lokalne pozostaną, jeśli serwer ich nie zawiera.`))return;const backup=await buildSyncPayload(true);downloadBlob(new Blob([JSON.stringify(backup)],{type:'application/json'}),`AquaCulture_PRZED_SYNC_${today()}.json`);for(const store of DATA_STORES){await clearStore(store);for(const rec of (data.payload.stores?.[store]||[]))await put(store,rec)}if(data.payload.settings){db.settings={...defaultSettings,...data.payload.settings};await saveSettings()}if(Array.isArray(data.payload.media)){await clearStore('media');for(const m of data.payload.media)await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await saveSyncSettings({...s,revision:data.revision,lastSyncAt:new Date().toISOString()});await loadMemory();render();alert('Synchronizacja pobrana.')}catch(e){alert('Błąd synchronizacji: '+e.message)}}
+async function saveSyncForm(){const s=await getSyncSettings(),endpoint=document.getElementById('syncEndpoint').value.trim(),token=document.getElementById('syncToken').value.trim();await saveSyncSettings({...s,endpoint,token});alert('Ustawienia synchronizacji zapisane lokalnie na tym urządzeniu.');render()}
+function renderSync(){setTimeout(async()=>{const s=await getSyncSettings();const e=document.getElementById('syncEndpoint');if(e)e.value=s.endpoint||'';const t=document.getElementById('syncToken');if(t)t.value=s.token||'';const r=document.getElementById('syncRevision');if(r)r.textContent=String(s.revision||0);const l=document.getElementById('syncLast');if(l)l.textContent=s.lastSyncAt?datePL(s.lastSyncAt):'nigdy'},0);return `<div class="two"><div class="card"><h3>Połączenie</h3><div class="field"><label>Endpoint synchronizacji</label><input id="syncEndpoint" placeholder="https://twoj-worker.example.workers.dev"></div><div class="field"><label>Tajny klucz</label><input id="syncToken" type="password" placeholder="nie zapisuj go w GitHub"></div><div class="actions" style="margin-top:10px">${btn('Zapisz','saveSyncForm()','btn primary')}</div></div><div class="card"><h3>Stan</h3><div class="sync-state"><div class="simple-kpi"><div class="t">Rewizja</div><div class="n" id="syncRevision">0</div></div><div class="simple-kpi"><div class="t">Ostatnia synchronizacja</div><div class="n" id="syncLast" style="font-size:13px">—</div></div><div class="simple-kpi"><div class="t">Tryb</div><div class="n" style="font-size:15px">ręczny</div></div></div><div class="actions section">${btn('Wyślij na serwer','syncPush()','btn primary')}${btn('Pobierz z serwera','syncPull()','btn secondary')}</div></div></div><div class="section callout"><strong>Offline-first:</strong> bez endpointu aplikacja działa dokładnie jak wcześniej. Synchronizacja używa kontroli rewizji — gdy serwer zmienił się na innym urządzeniu, zwykły push zostanie zatrzymany konfliktem zamiast nadpisać dane.</div>`}
+
+function renderProduction(){const jobs=(db.productionJobs||[]).filter(j=>j.status==='W toku').sort((a,b)=>(a.plannedReadyDate||'9999').localeCompare(b.plannedReadyDate||'9999')),recs=demandRecommendations();return `<div class="toolbar">${btn('Chcę wyprodukować…',"setView('smartplan')",'btn primary')}${btn('Szablony',"setView('templates')")}${btn('Kalendarz',"setView('calendar')")}${btn('Pod zamówienia','openOrderDemandCenter()','btn secondary')}</div><div class="section big-action-grid"><button class="btn big-action" onclick="openMediumPreparation()"><strong>Przygotuj pożywkę</strong><span>RO + sól + F/2 → medium</span></button><button class="btn primary big-action" onclick="openCultureExpansion()"><strong>Rozpocznij hodowlę</strong><span>Inokulum + medium → kultura W toku</span></button><button class="btn big-action" onclick="openCultureSplit()"><strong>Podziel kulturę</strong><span>Gotowa kultura → potomne</span></button><button class="btn big-action" onclick="openBottling()"><strong>Rozlej produkt</strong><span>Kultura + opakowania → produkt</span></button></div>${recs.some(r=>r.def>0)?`<div class="section card"><h3>Produkcja wynikająca ze sprzedaży</h3>${recs.map(r=>`<div class="statline"><span><strong>${esc(r.org)}</strong><div class="mini">popyt ${num(r.demand/1000,2)} L • gotowe ${num(r.ready/1000,2)} L • w toku ${num(r.wip/1000,2)} L</div></span><strong class="${r.def?'ledger-bad':'ledger-ok'}">${r.def?'brakuje '+num(r.def/1000,2)+' L':'pokryte'}</strong>${r.def?btn('Zaplanuj',`startDemandPlan('${r.org}',${r.def})`,'btn tiny primary'):''}</div>`).join('')}</div>`:''}<div class="section card"><h3>Mapa zbiorników</h3>${tankTilesHTML()}</div><div class="section card"><h3>Produkcje w toku</h3>${jobs.length?jobs.map(j=>`<div class="simple-row"><div class="main"><strong>${esc(j.organism||'Produkcja')} • ${esc(getById('inventory',j.outputItemId)?.lot||j.id)}</strong><div class="meta">${deadlineText(j.plannedReadyDate,j.status)}</div></div><div class="side">${btn('Panel',`openTankPanel('${j.outputItemId}')`,'btn tiny primary')}${btn('Proces',`openProductionJob('${j.id}')`,'btn tiny')}</div></div>`).join(''):'<div class="empty">Brak.</div>'}</div>`}
+
+function tankTilesHTML(){const list=liveStock().sort((a,b)=>String(a.status||'').localeCompare(String(b.status||''))||String(a.lot||'').localeCompare(String(b.lot||'')));if(!list.length)return '<div class="empty">Brak kultur.</div>';return `<div class="tank-grid">${list.map(x=>{const j=tankJob(x.id),p=readinessPct(x),cls=['Problem','Kwarantanna'].includes(x.status)?'problem':p>=100?'ready':'';return `<div class="tank-card ${cls}" style="--progress:${num(p,0)}%"><div class="mini">${esc(x.vessel||'Kultura')}</div><h4>${esc(x.lot||x.name)}</h4><div class="litres">${x.unit==='ml'?num(Number(x.qty||0)/1000,2)+' L':stockQtyText(x)}</div><div class="mini">${esc(x.organism||'')} • ${esc(x.status||'')}</div>${j?`<div class="mini" style="margin-top:5px">${esc(deadlineText(j.plannedReadyDate,j.status))}</div>`:''}<div class="actions">${btn('Panel',`openTankPanel('${x.id}')`,'btn tiny primary')}${btn('QR',`openQuickStock('${x.id}')`,'btn tiny')}</div></div>`}).join('')}</div>`}
+
+function renderDashboard(){const todayItems=commandTodayItems(),score=auditScore(),recs=demandRecommendations(),shortages=recs.filter(r=>r.def>0),purchases=purchaseSuggestions().slice(0,3),inc=(db.incidents||[]).filter(i=>i.status!=='Zamknięty');return `<div class="command-hero"><div><div class="mini">AQUACULTURE COMMAND CENTER v6</div><h3>Dzisiaj</h3><p>${todayItems.length?`Masz ${todayItems.length} rzeczy wymagających uwagi.`:'Brak pilnych działań.'} ${inc.length?`Aktywne incydenty: ${inc.length}.`:''}</p><div class="actions">${btn('Skanuj QR','openQuickQR()','btn primary')}${btn('Chcę wyprodukować…',"setView('smartplan')")}${btn('Kalendarz',"setView('calendar')")}</div></div><div class="health-dial ${score<60?'bad':score<85?'warn':''}"><strong>${score}</strong><span>audyt / 100</span></div></div><div class="command-grid section"><div class="card"><h3>Do zrobienia</h3>${todayItems.length?`<div class="today-list">${todayItems.map(x=>`<div class="today-item ${x.level}" onclick="${x.action}"><div class="today-icon">${x.icon}</div><div class="today-main"><strong>${esc(x.title)}</strong><span>${esc(x.meta)}</span></div><div class="today-time">${esc(x.when)}</div></div>`).join('')}</div>`:'<div class="empty">Brak pilnych działań.</div>'}</div><div class="card"><h3>Sprzedaż → produkcja</h3>${shortages.length?shortages.map(r=>`<div class="alert"><strong>${esc(r.org)}: brakuje ${num(r.def/1000,2)} L</strong><span class="small">popyt ${num(r.demand/1000,2)} L • gotowe + WIP ${num((r.ready+r.wip)/1000,2)} L</span><div style="margin-top:5px">${btn('Zaplanuj',`startDemandPlan('${r.org}',${r.def})`,'btn tiny primary')}</div></div>`).join(''):'<div class="empty">Otwarte zamówienia są pokryte albo brak danych objętościowych.</div>'}<hr><h3>Zakupy</h3>${purchases.length?purchases.map(s=>`<div class="statline"><span>${esc(s.x.name)}</span><strong>+${num(s.need,2)} ${esc(s.x.unit)}</strong></div>`).join(''):'<div class="mini">Brak pilnych zakupów.</div>'}</div></div><div class="section card"><h3>Mapa produkcji</h3>${tankTilesHTML()}</div>`}
+
+function renderMore(){const tiles=[['Chcę wyprodukować','Materiały, termin i braki.','smartplan'],['Kalendarz','Starty, kontrole i rozlewy.','calendar'],['Szablony produkcji','Powtarzalne procesy.','templates'],['Wydajność','Czas, koszt i wyniki.','analytics'],['Zakupy','Prognozy i propozycje zamówień.','purchases'],['Incydenty','Skażenia i kwarantanny.','incidents'],['Kontrola jakości','Prosta ocena + parametry.','quality'],['Synchronizacja','Opcjonalnie komputer ↔ iPhone.','sync'],['Audyt systemu','Niespójności i terminy.','audit'],['Prognoza zapasów','Na ile wystarczą zapasy.','forecast'],['Receptury','Pożywki i materiały.','recipes'],['Finanse','Koszty i przychody.','finance'],['Raporty','Raporty i PDF.','reports'],['Kopie i dane','Backup i ustawienia.','backup'],['Dezynfekcja','Mycie i dezynfekcja.','sanitation'],['Etykiety','QR i wydruki.','prints']];return `<div class="more-grid">${tiles.map(t=>`<button class="more-tile" onclick="${t[2]==='audit'?'openAuditCenter()':t[2]==='forecast'?'openForecastCenter()':`setView('${t[2]}')`}"><strong>${t[0]}</strong><span>${t[1]}</span></button>`).join('')}</div>`}
+function renderQuality(){const items=liveStock().sort((a,b)=>String(a.lot||'').localeCompare(String(b.lot||'')));return `<div class="toolbar">${btn('+ Kontrola jakości',`openQuickQuality('${items[0]?.id||''}')`,'btn primary')}${btn('Pełna tabela pomiarów',"setView('measurements')")}</div><div class="inventory-card-grid">${items.map(x=>{const m=latestQuality(x.id);return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.lot||x.name)}</h4><div class="mini">${esc(x.organism||'')}</div></div>${badge(m?.rating||'Brak kontroli')}</div><div class="qty" style="font-size:16px">${m?datePL(m.date):'Brak kontroli'}</div><div class="mini">${esc(m?.notes||'')}</div><div class="actions">${btn('Kontrola',`openQuickQuality('${x.id}')`,'btn tiny primary')}${btn('Panel',`openTankPanel('${x.id}')`,'btn tiny')}</div></div>`}).join('')}</div>`}
+
+function render(){const title=titles[currentView]||['AquaCulture',''];document.getElementById('viewTitle').textContent=title[0];document.getElementById('viewSub').textContent=title[1];const views={dashboard:renderDashboard,inventory:renderInventory,production:renderProduction,sales:renderSales,more:renderMore,calendar:renderCalendar,templates:renderTemplates,analytics:renderAnalytics,purchases:renderPurchases,sync:renderSync,quality:renderQuality,incidents:renderIncidents,smartplan:renderSmartPlan,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup};document.getElementById('content').innerHTML=(views[currentView]||renderDashboard)();syncSimpleNav()}
+function quickAdd(){if(currentView==='dashboard')return openQuickQR();if(currentView==='production'||currentView==='smartplan')return openCultureExpansion();if(currentView==='inventory')return openStockMove();if(currentView==='sales'||currentView==='orders')return openForm('order');if(currentView==='quality'||currentView==='measurements')return liveStock()[0]?openQuickQuality(liveStock()[0].id):alert('Brak kultury.');if(currentView==='templates')return openTemplateForm();if(currentView==='incidents')return openIncidentForm();return openForm('task')}
+function openQuickStock(id){const x=getById('inventory',id);if(!x)return;if(inferStockKind(x)==='Kultura żywa')return openTankPanel(id);return openStockCard(id)}
+
+
+/* v6 final hardening */
+function openWarehouseItemForm(id=''){
+ const old=id?getById('inventory',id):null,x=old?{...old}:{id:uid('MAG'),name:'',kind:'Surowiec',category:'Nawóz / pożywka',qty:0,unit:'ml',min:0,price:0,status:'OK'};
+ modalTitle.textContent=id?'Edytuj dane pozycji magazynowej':'Nowa pozycja magazynowa';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="warehouseForm"><div class="form-grid">${f('name','Nazwa','text',x.name)}${f('kind','Typ','select',inferStockKind(x),['Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy','Inne'])}${f('category','Kategoria','select',x.category||'Nawóz / pożywka',['Kultura biologiczna','Pożywka przygotowana','Woda RO','Produkt gotowy','Butelki','Zakrętki','Etykiety','Sól','Nawóz / pożywka','Pasza','Chemia / dezynfekcja','Wysyłka','Sprzęt','Inne'])}${f('unit','Jednostka','text',x.unit||'ml')}${f('min','Stan minimalny','number',x.min)}${f('price','Cena za 1 jednostkę [PLN]','number',x.price)}${f('lot','Partia','text',x.lot)}${f('bestBefore','Termin użycia / ważności','date',x.bestBefore||'')}${f('organism','Organizm — jeśli dotyczy','text',x.organism)}${f('vessel','Naczynie / lokalizacja','text',x.vessel||x.location)}${f('supplier','Dostawca / źródło','text',x.supplier)}${f('reorderLeadDays','Czas dostawy [dni]','number',x.reorderLeadDays||0)}${f('status','Status','text',x.status||'OK')}${f('notes','Uwagi','textarea',x.notes)}${id?`<div class="field"><label>Stan — tylko odczyt</label><input value="${num(Number(x.qty||0),3)} ${esc(x.unit||'')}" readonly><div class="help">Stan zmieniaj ruchem magazynowym, produkcją albo inwentaryzacją.</div></div>`:f('initialQty','Stan początkowy','number',0)}</div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button></div></form>`;
+ warehouseForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target);['name','kind','category','unit','lot','bestBefore','organism','vessel','supplier','status','notes'].forEach(k=>x[k]=fd.get(k)||'');x.min=Number(fd.get('min')||0);x.price=Number(fd.get('price')||0);x.reorderLeadDays=Number(fd.get('reorderLeadDays')||0);if(['Kultura żywa','Pożywka / medium'].includes(x.kind))x.unit='ml';if(old){x.qty=old.qty;await saveRecord('inventory',x)}else{x.qty=0;const initial=Number(fd.get('initialQty')||0);if(initial>0){const run={id:nextProductionRunId(),type:'Przyjęcie magazynowe',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${x.name}: +${num(initial,3)} ${x.unit}`};try{await commitProductionRun(run,[{item:x,delta:initial,isNew:true,moveType:'Przyjęcie',reason:'Stan początkowy / przyjęcie magazynowe'}])}catch(err){return alert(err.message)}}else await saveRecord('inventory',x)}closeModal();render()};modal.classList.add('open');
+}
+function openStockCard(id){const x=getById('inventory',id);if(!x)return;const moves=[...db.stockMoves].filter(m=>m.item===id).sort((a,b)=>(b.date||'').localeCompare(a.date||'')),runs=db.productionRuns.filter(r=>(r.movements||[]).some(m=>m.itemId===id)),res=(db.inventoryReservations||[]).filter(r=>r.itemId===id&&!['Anulowana','Zrealizowana'].includes(r.status));modalTitle.textContent=`Magazyn — ${x.name}`;modalBox.classList.add('wide');modalBody.innerHTML=`<div class="actions" style="margin-bottom:12px">${inferStockKind(x)==='Kultura żywa'?btn('Panel zbiornika',`openTankPanel('${x.id}')`,'btn primary'):''}${btn('Ruch / korekta',`closeModal();openStockMove('${x.id}')`,'btn')}${btn('Rezerwuj',`openReservationForm('${x.id}')`,'btn')}${btn('Edytuj dane',`closeModal();openWarehouseItemForm('${x.id}')`,'btn secondary')}${Number(x.qty||0)>0?btn('Odpad / strata',`openWasteForm('${x.id}')`,'btn danger'):''}</div><div class="two"><div class="card"><h3>Stan</h3><div class="profile">${profileBox('Typ',inferStockKind(x))}${profileBox('Stan',stockQtyText(x))}${profileBox('Wolne',`${num(freeStockQty(x),3)} ${x.unit}`)}${profileBox('Zarezerwowane',`${num(reservedStockQty(x.id),3)} ${x.unit}`)}${profileBox('Partia',x.lot)}${profileBox('Termin / FEFO',datePL(x.bestBefore))}${profileBox('Status',x.status)}${profileBox('Dostawca',x.supplier)}${profileBox('Cena jednostkowa',money(x.price))}</div><hr><div class="statline"><span>Saldo z ruchów</span><strong class="${Math.abs(stockLedgerBalance(x.id)-Number(x.qty||0))<1e-9?'ledger-ok':'ledger-bad'}">${num(stockLedgerBalance(x.id),3)} ${esc(x.unit)}</strong></div></div><div class="card"><h3>Rezerwacje</h3>${res.length?res.map(r=>`<div class="alert"><strong>${num(r.qty,3)} ${esc(r.unit)} • ${esc(r.sourceType||'')}</strong><span class="small">${esc(r.sourceId||'')} ${r.neededDate?'• '+datePL(r.neededDate):''}</span><div style="margin-top:5px">${btn('Anuluj',`cancelReservation('${r.id}');closeModal()`,'btn tiny danger')}</div></div>`).join(''):'<div class="empty">Brak aktywnych rezerwacji.</div>'}<hr><h3>Operacje produkcyjne</h3>${runs.length?runs.slice(-6).reverse().map(r=>`<div class="alert"><strong><a class="link" onclick="openProductionRun('${r.id}')">${esc(r.id)}</a> — ${esc(r.type)}</strong><span class="small">${datePL(r.dateTime||r.createdAt)}</span></div>`).join(''):'<div class="empty">Brak.</div>'}</div></div><div class="section card"><h3>Historia ruchów</h3>${table(['Data','Typ','Zmiana','Przed','Po','Powód'],moves.map(m=>`<tr><td>${datePL(m.date)}</td><td>${badge(m.type)}</td><td><strong>${m.qty>=0?'+':''}${num(m.qty,3)} ${esc(x.unit)}</strong></td><td>${m.before!==undefined?num(m.before,3):'—'}</td><td>${m.after!==undefined?num(m.after,3):'—'}</td><td>${esc(m.reason)}</td></tr>`))}</div>`;modal.classList.add('open')}
+function openWasteForm(id){const x=getById('inventory',id);if(!x)return;modalTitle.textContent=`Odpad / strata — ${x.name}`;modalBox.classList.remove('wide');modalBody.innerHTML=`<form id="wasteForm"><div class="callout">Operacja zmniejszy magazyn jawnie i pozostawi ślad w historii. Nie można jej wykonać ponad dostępny stan.</div><div class="form-grid" style="margin-top:10px">${f('qty','Ilość straty','number','')}${f('reason','Powód','select','Strata produkcyjna',['Strata produkcyjna','Skażenie','Przeterminowanie','Uszkodzenie opakowania','Rozlanie','Inne'])}${f('notes','Uwagi','textarea','')}</div><div class="actions" style="margin-top:10px"><button class="btn danger">Zaksięguj stratę</button></div></form>`;wasteForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),q=Number(fd.get('qty')||0);if(q<=0||q>Number(x.qty||0))return alert(`Podaj ilość 0–${num(Number(x.qty||0),3)} ${x.unit}.`);const run={id:nextProductionRunId(),type:'Odpad / strata',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${x.name}: −${num(q,3)} ${x.unit} • ${fd.get('reason')}`,notes:fd.get('notes')||''};await commitProductionRun(run,[{item:x,delta:-q,moveType:'Odpad / strata',reason:fd.get('reason')||'Strata'}]);closeModal();render()};modal.classList.add('open')}
+function lossStats(){const moves=db.stockMoves.filter(m=>Number(m.qty||0)<0&&(String(m.type||'').toLowerCase().includes('odpad')||/strata|skaż|przetermin|rozlan/i.test(String(m.reason||''))));const value=moves.reduce((a,m)=>{const x=getById('inventory',m.item);return a+Math.abs(Number(m.qty||0))*Number(x?.price||0)},0);return {count:moves.length,value,moves}}
+function renderAnalytics(){const jobs=(db.productionJobs||[]).filter(j=>jobDurationDays(j)!==null),dur=jobs.map(jobDurationDays),avg=dur.length?dur.reduce((a,x)=>a+x,0)/dur.length:0,inc=(db.incidents||[]).filter(i=>i.status!=='Zamknięty').length,costL=jobs.map(j=>getById('inventory',j.outputItemId)).filter(x=>x?.unit==='ml'&&Number(x.price||0)>0),avgCost=costL.length?costL.reduce((a,x)=>a+Number(x.price||0)*1000,0)/costL.length:0,loss=lossStats();const byOrg={};jobs.forEach(j=>{const k=j.organism||'Inne';(byOrg[k]??=[]).push(jobDurationDays(j))});return `<div class="simple-kpis"><div class="simple-kpi"><div class="t">Śr. czas do gotowości</div><div class="n">${num(avg,1)} d</div></div><div class="simple-kpi"><div class="t">Zakończone / gotowe procesy</div><div class="n">${jobs.length}</div></div><div class="simple-kpi"><div class="t">Odpad / straty</div><div class="n">${loss.count}</div><div class="mini">${money(loss.value)}</div></div><div class="simple-kpi"><div class="t">Śr. koszt ewid. 1 L</div><div class="n" style="font-size:18px">${money(avgCost)}</div></div></div><div class="two section"><div class="card"><h3>Czas produkcji</h3><div class="analysis-bars">${Object.entries(byOrg).map(([k,v])=>{const a=v.reduce((s,x)=>s+x,0)/v.length,w=Math.min(100,a/14*100);return `<div class="analysis-bar"><span>${esc(k)}</span><div class="analysis-track"><div class="analysis-fill" style="width:${w}%"></div></div><strong>${num(a,1)} d</strong></div>`}).join('')||'<div class="empty">Za mało danych.</div>'}</div></div><div class="card"><h3>Ostatnie straty</h3>${loss.moves.slice(-8).reverse().map(m=>`<div class="statline"><span>${esc(getById('inventory',m.item)?.name||m.item)}<div class="mini">${datePL(m.date)} • ${esc(m.reason||'')}</div></span><strong>−${num(Math.abs(m.qty),2)}</strong></div>`).join('')||'<div class="empty">Brak zaksięgowanych strat.</div>'}</div></div>`}
+function render(){const title=titles[currentView]||['AquaCulture',''];document.getElementById('viewTitle').textContent=title[0];document.getElementById('viewSub').textContent=title[1];const views={dashboard:renderDashboard,inventory:renderInventory,production:renderProduction,sales:renderSales,more:renderMore,calendar:renderCalendar,templates:renderTemplates,analytics:renderAnalytics,purchases:renderPurchases,sync:renderSync,quality:renderQuality,incidents:renderIncidents,smartplan:renderSmartPlan,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup};document.getElementById('content').innerHTML=(views[currentView]||renderDashboard)();syncSimpleNav();if(currentView==='smartplan')setTimeout(refreshSmartPlan,0)}
+async function resetDatabase(){if(!confirm('Usunąć wszystkie rekordy i zdjęcia z IndexedDB?'))return;for(const st of STORES)await clearStore(st);db.settings={...defaultSettings};await saveSettings();await loadMemory();await migrateUltimateV7();render()}
+
 function isStandalonePWA(){
  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone===true;
 }
 function registerPWA(){
  if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-   navigator.serviceWorker.register('./sw.js').catch(err=>console.warn('Service Worker:',err));
+  let refreshing=false;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{
+   if(refreshing)return;refreshing=true;
+   if(!sessionStorage.getItem('acm-sw-reloaded')){sessionStorage.setItem('acm-sw-reloaded','1');location.reload();}
+  });
+  window.addEventListener('load',async()=>{
+   try{
+    const reg=await navigator.serviceWorker.register('./sw.js');
+    await reg.update();
+    setTimeout(()=>sessionStorage.removeItem('acm-sw-reloaded'),4000);
+   }catch(err){console.warn('Service Worker:',err)}
   });
  }
 }

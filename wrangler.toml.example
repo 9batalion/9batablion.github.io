@@ -1,0 +1,10 @@
+name = "aquaculture-sync"
+main = "worker.js"
+compatibility_date = "2026-08-12"
+
+# Utwórz namespace KV i wpisz jego ID:
+[[kv_namespaces]]
+binding = "AQUA_SYNC"
+id = "TU_WPISZ_KV_NAMESPACE_ID"
+
+# Tajny SYNC_TOKEN ustaw jako sekret środowiska, NIE w tym pliku.

@@ -1,7 +1,7 @@
 {
-  "name": "AquaCulture Manager Mobile — Magazyn i Produkcja",
+  "name": "AquaCulture Manager v6 Ultimate",
   "short_name": "AquaCulture",
-  "description": "Magazyn jako centralny stan: kultury, surowce, opakowania i produkty; produkcja księguje wejścia i wyjścia.",
+  "description": "Command Center: magazyn, AquaFlow 2.0, produkcja, kalendarz, jakość, sprzedaż, zakupy i opcjonalna synchronizacja.",
   "id": "./",
   "start_url": "./index.html",
   "scope": "./",

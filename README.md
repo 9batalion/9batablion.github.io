@@ -1,25 +1,35 @@
-# AquaCulture Manager Mobile v2 — Magazyn → Produkcja
+# AquaCulture Manager v6 Ultimate
 
-Ta wersja zmienia model ewidencji: magazyn jest jedynym źródłem prawdy o ilościach.
+Wersja v6 scala cały plan rozwoju 5.1–6.
 
-## Bezpieczna aktualizacja z poprzedniej wersji
+## Nowe moduły
 
-Jeżeli aplikacja jest już opublikowana pod tym samym adresem GitHub Pages, zastąp pliki `index.html`, `sw.js`, `manifest.webmanifest` i folder `icons/` plikami z tego pakietu.
+- Panel zbiornika jak panel urządzenia: gotowość, ostatnia kontrola, zdjęcie, szybkie operacje.
+- Inteligentny magazyn: rezerwacje, wolny stan, FEFO i inwentaryzacja przez ruchy korekcyjne.
+- Kalkulator „Chcę wyprodukować…” z materiałami, brakami i terminem.
+- Kalendarz produkcji.
+- Szablony produkcji.
+- AquaFlow 2.0 z pochodzeniem i partiami potomnymi.
+- Incydenty / skażenia i kwarantanna bez zmiany ilości.
+- Uproszczona kontrola jakości.
+- Analiza wydajności.
+- Produkcja wynikająca z otwartych zamówień.
+- Zakupy i sugestie zapasów.
+- Opcjonalna synchronizacja urządzeń z kontrolą rewizji.
 
-**Nie zmieniaj adresu strony/repozytorium**, jeżeli chcesz zachować lokalne IndexedDB na iPhonie. Nazwa bazy pozostaje `AquaCultureManagerLAB`. Aktualizacja podnosi tylko wersję schematu i dodaje magazyn operacji `productionRuns`; istniejące stores nie są usuwane.
+## Bezpieczeństwo aktualizacji
 
-Przed aktualizacją wykonaj w aplikacji pełny backup JSON.
+IndexedDB nadal nazywa się `AquaCultureManagerLAB`. Schemat rośnie **6 → 7** wyłącznie przez dodanie czterech store'ów:
 
-## Nowy model
+- `productionTemplates`
+- `inventoryReservations`
+- `purchaseOrders`
+- `incidents`
 
-- Magazyn: kultura żywa, surowce, opakowania, produkty gotowe.
-- Produkcja: przyjęcie kultury startowej, namnażanie, rozdzielenie, rozlew/pakowanie.
-- Każda operacja tworzy ruchy magazynowe.
-- Ilości istniejącej pozycji nie edytuje się ręcznie; służy do tego ruch/korekta albo produkcja.
-- Stare rekordy `cultures` i `harvests` pozostają w bazie i backupie dla zgodności.
-- Aktywne kultury v4 są jednorazowo kopiowane do centralnego magazynu tylko wtedy, gdy nie ma już odpowiadającej pozycji.
-- Istniejące stany magazynowe są uzgadniane dodatnim/ujemnym ruchem migracyjnym bez zmiany ich ilości.
+Migracja v7 nie zmienia `inventory.qty`, nie kasuje istniejących produktów i nie przelicza starych ruchów.
 
-## Instalacja PWA na iPhone
+Przed podmianą plików na GitHub Pages wykonaj pełny backup JSON. Podmień cały pakiet: `index.html`, `sw.js`, `manifest.webmanifest`, `icons/`.
 
-Hostuj cały katalog przez HTTPS, otwórz stronę w Safari i wybierz Udostępnij → Dodaj do ekranu początkowego.
+## Synchronizacja
+
+Synchronizacja jest opcjonalna. Bez konfiguracji aplikacja pozostaje offline-first. Folder `sync-server/` zawiera referencyjny backend. Nie publikuj sekretu synchronizacji w repozytorium.
