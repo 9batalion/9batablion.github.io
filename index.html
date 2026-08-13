@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" sizes="192x192" href="./icon-192.png">
-<title>AquaCulture Manager v6 Ultimate</title>
+<title>AquaCulture Manager v6.1 Hotfix</title>
 <style>
 :root{
  --bg:#07111f;--panel:#0d1a2b;--panel2:#13243a;--panel3:#18304d;--text:#eef6ff;--muted:#91a4bb;
@@ -2692,6 +2692,207 @@ function lossStats(){const moves=db.stockMoves.filter(m=>Number(m.qty||0)<0&&(St
 function renderAnalytics(){const jobs=(db.productionJobs||[]).filter(j=>jobDurationDays(j)!==null),dur=jobs.map(jobDurationDays),avg=dur.length?dur.reduce((a,x)=>a+x,0)/dur.length:0,inc=(db.incidents||[]).filter(i=>i.status!=='Zamknięty').length,costL=jobs.map(j=>getById('inventory',j.outputItemId)).filter(x=>x?.unit==='ml'&&Number(x.price||0)>0),avgCost=costL.length?costL.reduce((a,x)=>a+Number(x.price||0)*1000,0)/costL.length:0,loss=lossStats();const byOrg={};jobs.forEach(j=>{const k=j.organism||'Inne';(byOrg[k]??=[]).push(jobDurationDays(j))});return `<div class="simple-kpis"><div class="simple-kpi"><div class="t">Śr. czas do gotowości</div><div class="n">${num(avg,1)} d</div></div><div class="simple-kpi"><div class="t">Zakończone / gotowe procesy</div><div class="n">${jobs.length}</div></div><div class="simple-kpi"><div class="t">Odpad / straty</div><div class="n">${loss.count}</div><div class="mini">${money(loss.value)}</div></div><div class="simple-kpi"><div class="t">Śr. koszt ewid. 1 L</div><div class="n" style="font-size:18px">${money(avgCost)}</div></div></div><div class="two section"><div class="card"><h3>Czas produkcji</h3><div class="analysis-bars">${Object.entries(byOrg).map(([k,v])=>{const a=v.reduce((s,x)=>s+x,0)/v.length,w=Math.min(100,a/14*100);return `<div class="analysis-bar"><span>${esc(k)}</span><div class="analysis-track"><div class="analysis-fill" style="width:${w}%"></div></div><strong>${num(a,1)} d</strong></div>`}).join('')||'<div class="empty">Za mało danych.</div>'}</div></div><div class="card"><h3>Ostatnie straty</h3>${loss.moves.slice(-8).reverse().map(m=>`<div class="statline"><span>${esc(getById('inventory',m.item)?.name||m.item)}<div class="mini">${datePL(m.date)} • ${esc(m.reason||'')}</div></span><strong>−${num(Math.abs(m.qty),2)}</strong></div>`).join('')||'<div class="empty">Brak zaksięgowanych strat.</div>'}</div></div>`}
 function render(){const title=titles[currentView]||['AquaCulture',''];document.getElementById('viewTitle').textContent=title[0];document.getElementById('viewSub').textContent=title[1];const views={dashboard:renderDashboard,inventory:renderInventory,production:renderProduction,sales:renderSales,more:renderMore,calendar:renderCalendar,templates:renderTemplates,analytics:renderAnalytics,purchases:renderPurchases,sync:renderSync,quality:renderQuality,incidents:renderIncidents,smartplan:renderSmartPlan,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup};document.getElementById('content').innerHTML=(views[currentView]||renderDashboard)();syncSimpleNav();if(currentView==='smartplan')setTimeout(refreshSmartPlan,0)}
 async function resetDatabase(){if(!confirm('Usunąć wszystkie rekordy i zdjęcia z IndexedDB?'))return;for(const st of STORES)await clearStore(st);db.settings={...defaultSettings};await saveSettings();await loadMemory();await migrateUltimateV7();render()}
+
+
+/* =========================
+   v6.1 HOTFIX — formularz magazynu
+   Typ steruje kategorią. Bez migracji bazy.
+   ========================= */
+function warehouseCategoriesForKind(kind){
+ if(kind==='Kultura żywa')return ['Kultura biologiczna'];
+ if(kind==='Pożywka / medium')return ['Pożywka przygotowana'];
+ if(kind==='Produkt gotowy')return ['Produkt gotowy'];
+ if(kind==='Opakowanie')return ['Butelki','Zakrętki','Etykiety','Wysyłka','Inne opakowanie'];
+ if(kind==='Surowiec')return ['Woda RO','Sól','Nawóz / pożywka','Pasza','Chemia / dezynfekcja','Inny surowiec'];
+ return ['Sprzęt','Inne'];
+}
+function warehouseDefaultUnit(kind){
+ if(kind==='Kultura żywa'||kind==='Pożywka / medium')return 'ml';
+ if(kind==='Opakowanie'||kind==='Produkt gotowy')return 'szt.';
+ return '';
+}
+function warehouseDefaultStatus(kind){
+ if(kind==='Kultura żywa')return 'Aktywna';
+ if(kind==='Pożywka / medium')return 'Gotowa';
+ if(kind==='Produkt gotowy')return 'Dostępny';
+ return 'OK';
+}
+function refreshWarehouseFormByKind(forceDefaults=false){
+ const form=document.getElementById('warehouseForm');if(!form)return;
+ const kind=form.elements.kind?.value||'Surowiec';
+ const cat=form.elements.category;
+ const previous=cat?.value||'';
+ const opts=warehouseCategoriesForKind(kind);
+ if(cat){
+  cat.innerHTML=opts.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');
+  cat.value=opts.includes(previous)?previous:opts[0];
+ }
+ const cultureOnly=document.getElementById('warehouseCultureFields');
+ if(cultureOnly)cultureOnly.style.display=kind==='Kultura żywa'?'contents':'none';
+ const mediumHelp=document.getElementById('warehouseMediumHelp');
+ if(mediumHelp)mediumHelp.style.display=kind==='Pożywka / medium'?'block':'none';
+
+ const unit=form.elements.unit;
+ const editing=form.dataset.editing==='1';
+ const auto=warehouseDefaultUnit(kind);
+ if(unit){
+  if(!editing&&forceDefaults&&auto)unit.value=auto;
+  unit.readOnly=editing||['Kultura żywa','Pożywka / medium','Opakowanie','Produkt gotowy'].includes(kind);
+ }
+ if(!editing&&forceDefaults&&form.elements.status)form.elements.status.value=warehouseDefaultStatus(kind);
+
+ const help=document.getElementById('warehouseCategoryHelp');
+ if(help)help.textContent=['Kultura żywa','Pożywka / medium','Produkt gotowy'].includes(kind)
+   ?'Ustawiane automatycznie na podstawie typu.'
+   :'Wybierz kategorię pasującą do typu pozycji.';
+}
+
+function openWarehouseItemForm(id='',presetKind='Surowiec'){
+ const old=id?getById('inventory',id):null;
+ const x=old?{...old}:{id:uid('MAG'),name:'',kind:presetKind||'Surowiec',category:'',qty:0,unit:warehouseDefaultUnit(presetKind)||'ml',min:0,price:0,status:warehouseDefaultStatus(presetKind)};
+ const kind=inferStockKind(x)||presetKind||'Surowiec';
+ const kinds=['Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy','Inne'];
+ const cats=warehouseCategoriesForKind(kind);
+ const currentCat=cats.includes(x.category)?x.category:cats[0];
+
+ modalTitle.textContent=id?'Edytuj dane pozycji magazynowej':'Nowa pozycja magazynowa';
+ modalBox.classList.add('wide');
+
+ const kindField=old
+ ? `<div class="field"><label>Typ</label><select name="kind"><option value="${esc(kind)}">${esc(kind)}</option></select><div class="help">Typ jest zablokowany dla istniejącej pozycji.</div></div>`
+ : `<div class="field"><label>Typ</label><select name="kind">${kinds.map(k=>`<option value="${esc(k)}" ${k===kind?'selected':''}>${esc(k)}</option>`).join('')}</select></div>`;
+
+ modalBody.innerHTML=`<form id="warehouseForm" data-editing="${old?'1':'0'}"><div class="form-grid">
+  ${f('name','Nazwa','text',x.name)}
+  ${kindField}
+  <div class="field"><label>Kategoria</label><select name="category">${cats.map(c=>`<option value="${esc(c)}" ${c===currentCat?'selected':''}>${esc(c)}</option>`).join('')}</select><div class="help" id="warehouseCategoryHelp"></div></div>
+  ${f('unit','Jednostka','text',x.unit||warehouseDefaultUnit(kind)||'ml')}
+  ${f('min','Stan minimalny','number',x.min)}
+  ${f('price','Cena za 1 jednostkę [PLN]','number',x.price)}
+  ${f('lot','Partia / oznaczenie','text',x.lot)}
+  ${f('bestBefore','Termin użycia / ważności','date',x.bestBefore||'')}
+
+  <div id="warehouseCultureFields" style="display:contents">
+   ${f('organism','Organizm','select',x.organism||'Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Inne'])}
+   ${f('strain','Szczep / źródło kultury','text',x.strain||'')}
+   ${f('concentration','Stężenie / obsada','text',x.concentration||'')}
+  </div>
+
+  ${f('vessel','Naczynie / lokalizacja','text',x.vessel||x.location)}
+  ${f('supplier','Dostawca / źródło','text',x.supplier)}
+  ${f('reorderLeadDays','Czas dostawy [dni]','number',x.reorderLeadDays||0)}
+  ${f('status','Status','text',x.status||warehouseDefaultStatus(kind))}
+  ${f('notes','Uwagi','textarea',x.notes)}
+
+  <div id="warehouseMediumHelp" class="field wide callout" style="display:none">
+   Pożywkę najlepiej tworzyć przez <strong>Produkcja → Przygotuj pożywkę</strong>, bo wtedy RO, sól i F/2 są rozchodowane automatycznie.
+  </div>
+
+  ${id
+   ? `<div class="field"><label>Stan — tylko odczyt</label><input value="${num(Number(x.qty||0),3)} ${esc(x.unit||'')}" readonly><div class="help">Stan zmieniaj ruchem magazynowym, produkcją albo inwentaryzacją.</div></div>`
+   : f('initialQty','Stan początkowy','number',0)}
+ </div>
+ <div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button></div></form>`;
+
+ const form=document.getElementById('warehouseForm');
+ if(!old)form.elements.kind.addEventListener('change',()=>refreshWarehouseFormByKind(true));
+ refreshWarehouseFormByKind(false);
+
+ form.onsubmit=async e=>{
+  e.preventDefault();
+  const fd=new FormData(form);
+  const newKind=old?kind:(fd.get('kind')||'Surowiec');
+
+  x.name=fd.get('name')||'';
+  x.kind=newKind;
+  x.category=fd.get('category')||warehouseCategoriesForKind(newKind)[0];
+  x.unit=old?old.unit:(warehouseDefaultUnit(newKind)||fd.get('unit')||'szt.');
+  x.lot=fd.get('lot')||'';
+  x.bestBefore=fd.get('bestBefore')||'';
+  x.vessel=fd.get('vessel')||'';
+  x.supplier=fd.get('supplier')||'';
+  x.status=fd.get('status')||warehouseDefaultStatus(newKind);
+  x.notes=fd.get('notes')||'';
+  x.min=Number(fd.get('min')||0);
+  x.price=Number(fd.get('price')||0);
+  x.reorderLeadDays=Number(fd.get('reorderLeadDays')||0);
+
+  if(newKind==='Kultura żywa'){
+   x.organism=fd.get('organism')||'Nannochloropsis';
+   x.strain=fd.get('strain')||'';
+   x.concentration=fd.get('concentration')||'';
+   x.category='Kultura biologiczna';
+   x.unit='ml';
+  }else if(newKind==='Pożywka / medium'){
+   x.category='Pożywka przygotowana';
+   x.unit='ml';
+  }else if(newKind==='Produkt gotowy'){
+   x.category='Produkt gotowy';
+   x.unit='szt.';
+  }else if(newKind==='Opakowanie'){
+   x.unit='szt.';
+  }
+
+  if(old){
+   x.qty=old.qty;
+   x.unit=old.unit;
+   await saveRecord('inventory',x);
+  }else{
+   x.qty=0;
+   const initial=Number(fd.get('initialQty')||0);
+   if(initial>0){
+    const run={
+     id:nextProductionRunId(),
+     type:newKind==='Kultura żywa'?'Przyjęcie kultury startowej':'Przyjęcie magazynowe',
+     dateTime:nowLocal(),operator:db.settings.operator||'',
+     summary:`${x.name}: +${num(initial,3)} ${x.unit}`
+    };
+    try{
+     await commitProductionRun(run,[{
+      item:x,delta:initial,isNew:true,moveType:'Przyjęcie',
+      reason:newKind==='Kultura żywa'?'Przyjęcie kultury żywej do magazynu':'Stan początkowy / przyjęcie magazynowe'
+     }]);
+    }catch(err){return alert(err.message)}
+   }else await saveRecord('inventory',x);
+  }
+  closeModal();render();
+ };
+ modal.classList.add('open');
+}
+
+function renderInventory(){
+ const q=(document.getElementById('warehouseSearchSimple')?.value||'').trim().toLowerCase();
+ const kinds=['','Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy'];
+ const items=db.inventory.filter(x=>{
+  const match=!warehouseSimpleFilter||inferStockKind(x)===warehouseSimpleFilter;
+  const hay=[x.name,x.lot,x.organism,x.category,x.supplier].join(' ').toLowerCase();
+  return match&&(!q||hay.includes(q));
+ }).sort(bestBeforeSort);
+ const expiring=fefoCandidates().filter(x=>x.bestBefore&&daysUntil(x.bestBefore)<=30).slice(0,5);
+
+ return `<div class="toolbar">
+  ${btn('+ Kultura żywa',"openInitialCultureIntake()",'btn primary')}
+  ${btn('+ Surowiec / opakowanie',"openWarehouseItemForm('','Surowiec')")}
+  ${btn('+ Inna pozycja',"openWarehouseItemForm('','Inne')")}
+  ${btn('Ruch / korekta','openStockMove()')}
+  ${btn('Rezerwacja','openReservationForm()')}
+  ${btn('Inwentaryzacja','openInventoryCount()')}
+  ${btn('Import / eksport','openWarehouseTransfer()','btn secondary')}
+ </div>
+
+ <div class="callout section"><strong>Kulturę startową dodawaj przez „+ Kultura żywa”.</strong> Typ, kategoria „Kultura biologiczna” i jednostka ml ustawią się automatycznie.</div>
+
+ <div class="simple-search"><input id="warehouseSearchSimple" placeholder="Szukaj w magazynie..." value="${esc(q)}" oninput="render()"><button class="btn" onclick="document.getElementById('warehouseSearchSimple').value='';warehouseSimpleFilter='';render()">Wyczyść</button></div>
+
+ <div class="inventory-filters section">${kinds.map(k=>`<button class="filter-pill ${warehouseSimpleFilter===k?'active':''}" onclick="setWarehouseFilter('${k.replaceAll("'","\\'")}')">${k||'Wszystko'}</button>`).join('')}</div>
+
+ ${expiring.length?`<div class="card"><h3>FEFO — użyj najpierw</h3>${expiring.map(x=>`<div class="fefo-row"><div><strong>${esc(x.name)}</strong><div class="mini">${esc(x.lot||x.id)}</div></div><div>${stockQtyText(x)}</div><div>${datePL(x.bestBefore)}</div><div>${btn('Karta',`openStockCard('${x.id}')`,'btn tiny')}</div></div>`).join('')}</div>`:''}
+
+ <div class="inventory-card-grid section">${items.length?items.map(x=>{
+  const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9,r=reservedStockQty(x.id);
+  return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.name)}</h4><div class="mini">${esc(x.lot||x.id)}${x.organism?' • '+esc(x.organism):''}</div></div><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></div><div class="qty">${stockQtyText(x)}</div><div class="mini">${r>0?`zarezerwowane ${num(r,3)} ${esc(x.unit)} • wolne ${num(freeStockQty(x),3)}`:'całość wolna'}${x.bestBefore?' • FEFO '+datePL(x.bestBefore):''}</div><div class="mini"><span class="status-dot ${ok?'':'bad'}"></span>${ok?'saldo zgodne':'sprawdź saldo'}</div><div class="actions">${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${inferStockKind(x)==='Kultura żywa'?btn('Panel',`openTankPanel('${x.id}')`,'btn tiny primary'):''}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Rezerwuj',`openReservationForm('${x.id}')`,'btn tiny')}</div></div>`;
+ }).join(''):'<div class="empty card">Brak pozycji.</div>'}</div>`;
+}
 
 function isStandalonePWA(){
  return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone===true;
