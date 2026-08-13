@@ -2,6 +2,9 @@
 <html lang="pl">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#07111f">
 <meta name="color-scheme" content="dark">
@@ -4186,6 +4189,197 @@ init = async function(){
  document.title='AquaCulture Manager v7.2 Full Production Cost';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.2 • Full Production Cost • AquaFlow');titles.costing=['Koszty produkcji','Pełny koszt: materiały + energia urządzeń + praca + inne, z przeliczeniem na litr.'];render();
 };
 
+
+/* =========================================================
+   v7.3 IMPORT + COST ACCOUNTING FIX
+   - import starszych JSON automatycznie przebudowuje koszty
+   - rekonstrukcja kosztu medium z rzeczywistych rozchodów
+   - pełny koszt aktywnych kultur = materiały + energia + praca + inne
+   - automatyczny podział wspólnego sprzętu między równoległe hodowle
+   - ważony koszt 1 L; kultura startowa nie zawyża średniej aktywnej produkcji
+   - prawidłowy appVersion w eksporcie
+   ========================================================= */
+
+const V73_APP_VERSION='7.3';
+
+function v73DateOnly(v){return String(v||'').slice(0,10)}
+function v73DayMs(v){const s=v73DateOnly(v);if(!s)return NaN;return new Date(s+'T00:00:00').getTime()}
+function v73JobStart(job){const run=getById('productionRuns',job?.runId);return job?.startedAt||run?.dateTime||run?.createdAt||today()}
+function v73JobEnd(job){
+ if(v72IsClosedJob(job))return job.actualReadyAt||job.closedAt||job.updatedAt||job.plannedReadyDate||nowLocal();
+ return job?.plannedReadyDate||nowLocal();
+}
+function v73DeviceAuto(d){return String(d?.allocationMode||'auto')!=='manual'}
+function v73RelevantJobsForDevice(d){
+ return (db.productionJobs||[]).filter(j=>!v72IsCancelledJob(j)&&v71IsCultivationRun(getById('productionRuns',j.runId)||{type:j.type})&&v71DeviceMatches(d,j.organism||getById('inventory',j.outputItemId)?.organism||''));
+}
+function v73JobOverlapsDay(job,dayMs){
+ const a=v73DayMs(v73JobStart(job)),b=v73DayMs(v73JobEnd(job));
+ if(!Number.isFinite(a)||!Number.isFinite(b))return false;
+ const end=Math.max(a+86400000,b);return a<dayMs+86400000&&end>dayMs;
+}
+function v73AutoCapacityForDay(d,dayMs){
+ const n=v73RelevantJobsForDevice(d).filter(j=>v73JobOverlapsDay(j,dayMs)).length;return Math.max(1,n);
+}
+function v73CurrentAutoCapacity(d){
+ const active=v73RelevantJobsForDevice(d).filter(j=>!v72IsClosedJob(j));return Math.max(1,active.length);
+}
+function v73EnergySnapshotForJob(job,actual=false){
+ const price=v71EnergyPrice(),start=v73JobStart(job),end=v73JobEnd(job),a=v73DayMs(start),b=v73DayMs(end);
+ let days=Math.max(0,v71CalendarDays(start,end));
+ if(actual&&days===0)days=v71ActualDays(start,end);
+ const devices=v71EnergyDevices().filter(d=>v71DeviceMatches(d,job?.organism||getById('inventory',job?.outputItemId)?.organism||'')).map(d=>{
+  const totalKwhDay=v71DeviceKwhDay(d);let kwh=0,capacitySamples=[];
+  if(v73DeviceAuto(d)&&Number.isFinite(a)&&Number.isFinite(b)&&b>a){
+   for(let day=a;day<b;day+=86400000){const cap=v73AutoCapacityForDay(d,day);capacitySamples.push(cap);kwh+=totalKwhDay/cap;}
+  }else{
+   const cap=v73DeviceAuto(d)?v73CurrentAutoCapacity(d):v71DeviceCapacity(d);capacitySamples=[cap];kwh=(days||0)*totalKwhDay/cap;
+  }
+  const avgCapacity=capacitySamples.length?capacitySamples.reduce((x,y)=>x+y,0)/capacitySamples.length:1;
+  return {id:d.id||'',name:d.name||d.type||'Urządzenie',type:d.type||'Inne',watts:v71N(d.watts),qty:v71N(d.qty,1),hoursPerDay:v71N(d.hoursPerDay),allocationMode:v73DeviceAuto(d)?'auto':'manual',capacity:avgCapacity,organism:d.organism||'Wszystkie',totalKwhDay,allocatedKwhDay:days>0?kwh/days:0,kwh,cost:kwh*price};
+ });
+ return {version:'7.3',pricePerKwh:price,durationDays:days,mode:actual?'actual':'planned',allocation:'overlap-aware',devices,totalKwh:devices.reduce((s,x)=>s+x.kwh,0),cost:devices.reduce((s,x)=>s+x.cost,0)};
+}
+
+// v7.3: aktywne partie są zawsze liczone dynamicznie na podstawie bieżących urządzeń.
+v72JobEnergy = function(job){
+ if(!job)return {version:'7.3',pricePerKwh:v71EnergyPrice(),durationDays:0,mode:'none',devices:[],totalKwh:0,cost:0};
+ const run=getById('productionRuns',job.runId),saved=run?.energySnapshot||job.energySnapshot;
+ if(v72IsClosedJob(job)&&saved&&['7.2','7.3'].includes(String(saved.version||''))&&Number.isFinite(Number(saved.cost)))return {...saved,mode:saved.mode||'actual'};
+ return v73EnergySnapshotForJob(job,v72IsClosedJob(job));
+};
+
+function v73InputUnitCost(item){
+ if(!item)return 0;
+ const pp=v71N(item.purchasePrice),pq=v71N(item.purchaseQty);if(pp>0&&pq>0)return pp/pq;
+ if(Number.isFinite(Number(item.fullCostUnit))&&Number(item.fullCostUnit)>0)return Number(item.fullCostUnit);
+ return Math.max(0,v71N(item.price));
+}
+function v73RebuildBreakdown(run){
+ return (run?.movements||[]).filter(m=>v71N(m.delta)<0).map(m=>{const x=getById('inventory',m.itemId),qty=Math.abs(v71N(m.delta)),p=v73InputUnitCost(x);return {itemId:m.itemId,name:m.name||x?.name||m.itemId,qty,unit:m.unit||x?.unit||'',unitPrice:p,cost:qty*p,priceSource:(x?.purchasePrice&&x?.purchaseQty)?'zakup':'koszt przeniesiony/ewidencyjny',lot:x?.lot||m.lot||''};});
+}
+async function v73SaveOutputCost(run,total,material,energy){
+ const positives=(run?.movements||[]).filter(m=>v71N(m.delta)>0);if(!positives.length)return;
+ const totalOut=positives.reduce((s,m)=>s+v71N(m.delta),0);if(totalOut<=0)return;
+ for(const m of positives){const x=getById('inventory',m.itemId);if(!x)continue;const unitShare=v71N(m.delta)/totalOut,allocatedTotal=total*unitShare,allocatedMaterial=material*unitShare,allocatedEnergy=energy*unitShare,qty=v71N(m.delta);const xx={...x,price:qty>0?allocatedTotal/qty:x.price,materialUnitCost:qty>0?allocatedMaterial/qty:0,energyUnitCost:qty>0?allocatedEnergy/qty:0,fullCostUnit:qty>0?allocatedTotal/qty:0,costRunId:run.id,costSource:'v7.3 pełny koszt po migracji',updatedAt:new Date().toISOString()};await saveRecord('inventory',xx)}
+}
+async function v73RecalculateCosts(opts={}){
+ const activeOnly=!!opts.activeOnly,runs=[...(db.productionRuns||[])].sort((a,b)=>String(a.dateTime||a.createdAt||'').localeCompare(String(b.dateTime||b.createdAt||'')));
+ let mediumFixed=0,jobsFixed=0;
+ // 1) Najpierw odbuduj koszt przygotowanych pożywek z faktycznych rozchodów.
+ for(const run of runs){
+  if(!/pożywk|medium/i.test(String(run.type||''))||!/przygot/i.test(String(run.type||'')))continue;
+  const breakdown=v73RebuildBreakdown(run),material=breakdown.reduce((s,x)=>s+v71N(x.cost),0),positives=(run.movements||[]).filter(m=>v71N(m.delta)>0),outQty=positives.reduce((s,m)=>s+v71N(m.delta),0);
+  const rr={...run,costBreakdown:breakdown,materialCost:material,energyCost:0,laborCost:0,otherCost:0,overheadCost:0,totalCost:material,costSnapshotVersion:'7.3-medium',costMethod:'v7.3 reconstructed medium cost from recorded ingredient withdrawals',costMigratedAt:new Date().toISOString()};await saveRecord('productionRuns',rr);
+  if(outQty>0)await v73SaveOutputCost(rr,material,material,0);mediumFixed++;
+ }
+ // 2) Potem przelicz hodowle, już z poprawnym kosztem medium.
+ for(const job0 of (db.productionJobs||[])){
+  if(v72IsCancelledJob(job0))continue;if(activeOnly&&v72IsClosedJob(job0))continue;
+  const run0=getById('productionRuns',job0.runId);if(!run0||!v71IsCultivationRun(run0))continue;
+  const breakdown=v73RebuildBreakdown(run0),material=breakdown.reduce((s,x)=>s+v71N(x.cost),0),es=v73EnergySnapshotForJob(job0,v72IsClosedJob(job0)),energy=Math.max(0,v71N(es.cost)),labor=Math.max(0,v71N(db.settings.laborCostPerProductionRun)),other=Math.max(0,v71N(db.settings.otherCostPerProductionRun)),overhead=energy+labor+other,total=material+overhead;
+  const tag=v72IsClosedJob(job0)?'7.3':'7.3-planned',rr={...run0,costBreakdown:breakdown,materialCost:material,energyCost:energy,laborCost:labor,otherCost:other,overheadCost:overhead,totalCost:total,energySnapshot:es,costSnapshotVersion:tag,costMethod:'v7.3 full production cost after import: materials + overlap-allocated equipment electricity + operating costs',costMigratedAt:new Date().toISOString()};await saveRecord('productionRuns',rr);
+  const job=getById('productionJobs',job0.id)||job0,jj={...job,materialCost:material,energyCost:energy,laborCost:labor,otherCost:other,overheadCost:overhead,totalCost:total,energySnapshot:es,costSnapshotVersion:tag,costMigratedAt:new Date().toISOString()};await saveRecord('productionJobs',jj);await v73SaveOutputCost(rr,total,material,energy);jobsFixed++;
+ }
+ await loadMemory();return {mediumFixed,jobsFixed};
+}
+
+async function v73NormalizeImportedSettings(sourceVersion=''){
+ let changed=false;db.settings={...defaultSettings,...db.settings};
+ if(!Array.isArray(db.settings.energyDevices)){db.settings.energyDevices=[];changed=true}
+ db.settings.energyDevices=db.settings.energyDevices.map(d=>{
+  if(d.allocationMode)return d;
+  changed=true;return {...d,allocationMode:'auto',legacyCapacity:v71DeviceCapacity(d)};
+ });
+ if(!Number.isFinite(Number(db.settings.electricityPricePerKwh))){db.settings.electricityPricePerKwh=0;changed=true}
+ db.settings.v73ImportMigration={date:new Date().toISOString(),sourceVersion:String(sourceVersion||'legacy'),allocation:'auto dla urządzeń bez jawnego trybu alokacji',note:'Koszty medium i aktywnych partii odbudowane z ruchów magazynowych; energia rozdzielana między równoległe hodowle.'};changed=true;
+ if(changed)await saveSettings();return changed;
+}
+
+function v73ImportedSummary(){
+ const a=v72ActiveJobSummary();return {jobs:a.jobs.length,total:a.total,perL:a.fullCostPerL,material:a.material,energy:a.energy,volumeMl:a.volumeMl};
+}
+
+// Import v7.3: po przywróceniu bazy natychmiast wykonuje migrację kosztów.
+importBackup = async function(){
+ const file=document.getElementById('backupFile')?.files?.[0];if(!file)return alert('Wybierz plik JSON.');
+ if(!confirm('Import zastąpi obecną bazę. Po imporcie v7.3 automatycznie odbuduje koszty medium, kultur i energii z zapisanych ruchów. Kontynuować?'))return;
+ try{
+  const data=JSON.parse(await file.text());if(!data||typeof data!=='object'||!data.stores)throw new Error('Plik nie ma struktury kopii AquaCulture.');
+  for(const s of STORES)await clearStore(s);
+  for(const s of DATA_STORES)for(const rec of (data.stores?.[s]||[]))await put(s,rec);
+  await put('meta',{id:'settings',value:{...defaultSettings,...(data.settings||{})}});
+  for(const m of (data.media||[]))await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob});
+  await loadMemory();await v73NormalizeImportedSettings(data.appVersion||data.version||'legacy');const mig=await v73RecalculateCosts();const sum=v73ImportedSummary();
+  await put('meta',{id:'importV73',value:{date:new Date().toISOString(),sourceName:file.name,sourceVersion:data.appVersion||'',migration:mig,summary:sum}});
+  currentView='costing';render();
+  alert(`Import zakończony i przeliczony przez v7.3.\n\nPartie hodowlane: ${mig.jobsFixed}\nMedium: ${mig.mediumFixed}\nPełny koszt aktywnej produkcji: ${money(sum.total)}\nŚr. pełny koszt 1 L: ${money(sum.perL)}`);
+ }catch(e){console.error(e);alert('Błąd importu: '+e.message)}
+};
+
+// Ustawienia i urządzenia odświeżają prognozowane koszty aktywnych partii.
+saveCostingSettings = async function(){const f=document.getElementById('costSettingsForm');if(!f)return;const fd=new FormData(f);db.settings.electricityPricePerKwh=Math.max(0,v71N(fd.get('electricity')));db.settings.laborCostPerProductionRun=Math.max(0,v71N(fd.get('labor')));db.settings.otherCostPerProductionRun=Math.max(0,v71N(fd.get('other')));db.settings.targetGrossMargin=Math.max(0,Math.min(95,v71N(fd.get('margin'),50)));await saveSettings();await v73RecalculateCosts({activeOnly:true});render()};
+
+function openEnergyDeviceForm(id=''){
+ const old=v71EnergyDevices().find(x=>x.id===id),d=old?{...old}:{id:uid('DEV'),name:'',type:'LED',watts:18,qty:1,hoursPerDay:16,capacity:1,allocationMode:'auto',organism:'Wszystkie',active:true};
+ modalTitle.textContent=old?'Edytuj urządzenie':'Dodaj urządzenie';modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<form id="energyDeviceForm"><div class="form-grid">${f('name','Nazwa urządzenia','text',d.name)}${f('type','Typ','select',d.type,['LED','Napowietrzacz','Pompa','Grzałka','Sterylizator','Inne'])}${f('watts','Moc jednego urządzenia [W]','number',d.watts)}${f('qty','Liczba urządzeń [szt.]','number',d.qty)}${f('hoursPerDay','Praca [h/dobę]','number',d.hoursPerDay)}${f('allocationMode','Podział kosztu','select',d.allocationMode||'auto',['auto','manual'])}${f('capacity','Ręcznie: ile kultur obsługuje','number',d.capacity||1)}${f('organism','Przypisz do','select',d.organism,['Wszystkie','Nannochloropsis','Tigriopus / widłonogi','Kiełże morskie','Artemia'])}<div class="field wide"><label class="qc-check"><input name="active" type="checkbox" value="1" ${d.active!==false?'checked':''} style="width:auto"> Aktywne — uwzględniaj w kosztach energii</label></div></div><div class="callout section"><strong>AUTO jest zalecane.</strong> System sam dzieli koszt urządzenia między równoległe hodowle, które ono obsługuje. Tryb ręczny służy np. do urządzenia stale przypisanego do dokładnie 4 kultur.</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz urządzenie</button></div></form>`;
+ energyDeviceForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),obj={id:d.id,name:String(fd.get('name')||fd.get('type')||'Urządzenie'),type:String(fd.get('type')||'Inne'),watts:Math.max(0,v71N(fd.get('watts'))),qty:Math.max(1,Math.round(v71N(fd.get('qty'),1))),hoursPerDay:Math.max(0,Math.min(24,v71N(fd.get('hoursPerDay')))),allocationMode:String(fd.get('allocationMode')||'auto'),capacity:Math.max(1,Math.round(v71N(fd.get('capacity'),1))),organism:String(fd.get('organism')||'Wszystkie'),active:fd.get('active')==='1'};const arr=v71EnergyDevices().slice(),i=arr.findIndex(x=>x.id===obj.id);if(i>=0)arr[i]=obj;else arr.push(obj);db.settings.energyDevices=arr;await saveSettings();await v73RecalculateCosts({activeOnly:true});closeModal();render()};modal.classList.add('open');
+}
+async function deleteEnergyDevice(id){if(!confirm('Usunąć urządzenie z kalkulatora energii? Zakończone snapshoty pozostaną, aktywne partie zostaną przeliczone.'))return;db.settings.energyDevices=v71EnergyDevices().filter(x=>x.id!==id);await saveSettings();await v73RecalculateCosts({activeOnly:true});render()}
+
+v71DeviceListHTML = function(){
+ const price=v71EnergyPrice(),rows=v71EnergyDevices();if(!rows.length)return '<div class="empty">Brak urządzeń. Dodaj np. lampę LED i napowietrzacz.</div>';
+ return `<div class="energy-device-row head"><div>Urządzenie</div><div>Zakres</div><div>Moc</div><div>Ilość</div><div>h/d</div><div>Podział</div><div>Koszt/d</div><div></div></div>${rows.map(d=>{const cap=v73DeviceAuto(d)?v73CurrentAutoCapacity(d):v71DeviceCapacity(d),kwh=v71DeviceKwhDay(d)/cap;return `<div class="energy-device-row"><div class="name">${esc(d.name||d.type||'Urządzenie')}<div class="muted">${esc(d.type||'Inne')}</div></div><div>${esc(d.organism||'Wszystkie')}</div><div>${num(v71N(d.watts),1)} W</div><div>${num(v71N(d.qty,1),0)} szt.</div><div>${num(v71N(d.hoursPerDay),1)}</div><div>${v73DeviceAuto(d)?`AUTO • ${cap} aktywne`:`Ręcznie • ${cap}`}</div><div><strong>${money(kwh*price)}</strong><div class="muted">${num(kwh,3)} kWh/kulturę</div></div><div class="energy-actions">${btn('Edytuj',`openEnergyDeviceForm('${d.id}')`,'btn tiny')}${btn('Usuń',`deleteEnergyDevice('${d.id}')`,'btn tiny danger')}</div></div>`}).join('')}`;
+};
+
+const v73RenderCostingBase=renderCosting;
+renderCosting = function(){
+ const html=v73RenderCostingBase(),m=db.settings?.v73ImportMigration;if(!m)return html;
+ const s=v73ImportedSummary();return `<div class="callout section"><strong>v7.3 • koszty po migracji/importcie</strong><div class="mini" style="margin-top:6px">Urządzenia bez jawnego trybu podziału zostały ustawione na AUTO. Koszt energii jest dzielony między równoległe hodowle. Aktywne partie: ${s.jobs}; pełny koszt: ${money(s.total)}; ważony koszt 1 L: ${money(s.perL)}.</div></div>`+html;
+};
+
+// v7.3 rozpoznaje własne snapshoty kosztowe.
+const v73RunCostBase=acRunCost;
+acRunCost = function(run){
+ if(run&&String(run.costSnapshotVersion||'').startsWith('7.3')){const breakdown=Array.isArray(run.costBreakdown)?run.costBreakdown:[],material=Math.max(0,v71N(run.materialCost,breakdown.reduce((s,x)=>s+v71N(x.cost),0))),energy=Math.max(0,v71N(run.energyCost)),labor=Math.max(0,v71N(run.laborCost)),other=Math.max(0,v71N(run.otherCost)),overhead=energy+labor+other,total=material+overhead;return {material,energy,labor,other,overhead,total,estimated:String(run.costSnapshotVersion).includes('planned'),breakdown,energySnapshot:run.energySnapshot||null};}
+ return v73RunCostBase(run);
+};
+
+// Eksporty nie są już oznaczane jako 7.0.
+exportFullBackup = async function(){const media=[];for(const m of db.media)media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null});const data={app:'AquaCulture Manager LAB',version:7,appVersion:V73_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')};
+exportDataBackup = function(){const data={app:'AquaCulture Manager LAB',version:7,appVersion:V73_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')};
+buildSyncPayload = async function(includeMedia=false){const stores=Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),payload={app:'AquaCulture Manager',appVersion:V73_APP_VERSION,schema:7,generatedAt:new Date().toISOString(),settings:db.settings,stores};if(includeMedia){payload.media=[];for(const m of db.media)payload.media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}return payload};
+
+const v73FinalizeBase=v72FinalizeJobEnergyCost;
+v72FinalizeJobEnergyCost = async function(jobId){
+ const job=getById('productionJobs',jobId);if(!job?.runId)return;const run=getById('productionRuns',job.runId);if(!run||!v71IsCultivationRun(run))return;
+ const breakdown=v73RebuildBreakdown(run),material=breakdown.reduce((s,x)=>s+v71N(x.cost),0),es=v73EnergySnapshotForJob(job,true),energy=es.cost,labor=Math.max(0,v71N(db.settings.laborCostPerProductionRun)),other=Math.max(0,v71N(db.settings.otherCostPerProductionRun)),overhead=energy+labor+other,total=material+overhead;
+ const rr={...run,costBreakdown:breakdown,materialCost:material,energyCost:energy,laborCost:labor,otherCost:other,overheadCost:overhead,totalCost:total,energySnapshot:es,costSnapshotVersion:'7.3',costMethod:'v7.3 finalized full production cost',energyFinalizedAt:new Date().toISOString()};await saveRecord('productionRuns',rr);
+ const jj={...job,materialCost:material,energyCost:energy,laborCost:labor,otherCost:other,overheadCost:overhead,totalCost:total,energySnapshot:es,costSnapshotVersion:'7.3',energyFinalizedAt:new Date().toISOString()};await saveRecord('productionJobs',jj);await v73SaveOutputCost(rr,total,material,energy);await loadMemory();
+};
+
+const v73TestsBase=acRunV70Tests;
+acRunV70Tests = function(){const t=v73TestsBase(),add=(name,ok)=>t.push({name,ok:!!ok});const led={watts:18,qty:2,hoursPerDay:16,allocationMode:'auto',active:true},air={watts:8.5,qty:1,hoursPerDay:24,allocationMode:'auto',active:true};add('2×LED 18 W + 8,5 W napowietrzacz = 0,78 kWh/d',Math.abs(v71DeviceKwhDay(led)+v71DeviceKwhDay(air)-0.78)<1e-12);add('Przy 2 równoległych kulturach energia = 0,39 kWh/kulturę/d',Math.abs((v71DeviceKwhDay(led)+v71DeviceKwhDay(air))/2-0.39)<1e-12);add('7 dni energii przy 1 zł/kWh = 2,73 zł/kulturę',Math.abs(0.39*7-2.73)<1e-12);return t};
+
+const v73InitBase=init;
+init = async function(){
+ await v73InitBase();
+ // Jednorazowa migracja danych już obecnych w IndexedDB po podmianie pliku aplikacji.
+ if(!db.settings.v73ImportMigration){await v73NormalizeImportedSettings('local-pre-v7.3');await v73RecalculateCosts();}
+ try{await put('meta',{id:'costAccountingV73',value:{done:true,date:new Date().toISOString(),note:'v7.3: post-import cost migration, reconstructed medium cost, overlap-aware automatic equipment allocation, weighted full cost per liter, export version fixed.'}})}catch(e){console.warn('v7.3 meta',e)}
+ document.title='AquaCulture Manager v7.3 Cost Accounting Fix';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.3 • Cost Accounting Fix • AquaFlow');titles.costing=['Koszty produkcji','Pełny koszt po imporcie: materiały + energia urządzeń + praca + inne; automatyczny podział sprzętu i koszt 1 L.'];render();
+};
+
+
+
+// v7.3: wymuś sprawdzenie nowego service workera z pominięciem cache HTTP.
+registerPWA = function(){
+ if(!('serviceWorker' in navigator))return;
+ let refreshing=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v73-sw-reloaded')){sessionStorage.setItem('acm-v73-sw-reloaded','1');location.reload();}});
+ window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.3',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v73-sw-reloaded'),5000);}catch(err){console.warn('Service Worker v7.3:',err)}});
+};
 
 registerPWA();
 
