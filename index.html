@@ -356,6 +356,18 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 @media(max-width:900px){.energy-kpis{grid-template-columns:repeat(2,1fr)}.energy-device-row{grid-template-columns:1fr 1fr 1fr}.energy-device-row.head{display:none}.energy-device-row .energy-actions{grid-column:1/-1}.cost-detail-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.energy-kpis,.cost-detail-grid{grid-template-columns:1fr 1fr}.energy-device-row{grid-template-columns:1fr 1fr}.energy-device-row .name{grid-column:1/-1}}
 </style>
+
+<style>
+.storage-zone-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:10px}
+.storage-zone-card{display:flex;align-items:center;gap:10px;text-align:left;background:#0c192a;border:1px solid var(--line);border-radius:15px;padding:13px;color:var(--text);cursor:pointer;min-height:74px}
+.storage-zone-card.active{outline:2px solid #32d7b1;border-color:#32d7b1}
+.storage-zone-card.cold,.inventory-card.cold-stock,.storage-card-banner.cold{background:linear-gradient(135deg,#0c192a,#0d233a)}
+.zone-icon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#12283d;font-weight:900;flex:none}
+.zone-main{display:flex;flex-direction:column;gap:4px;min-width:0}.zone-main strong{font-size:14px}.zone-main small{color:var(--muted);font-size:11px;line-height:1.3}
+.zone-line{margin-top:9px;padding:6px 8px;border-radius:9px;background:#0a1524;border:1px solid rgba(111,163,214,.18);font-size:11px;color:#bcd0e8}
+.storage-card-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:#0c192a}
+@media(max-width:620px){.storage-zone-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.storage-zone-card{padding:10px;min-height:68px}.zone-icon{width:30px;height:30px}.zone-main strong{font-size:12px}.zone-main small{font-size:10px}}
+</style>
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -4380,6 +4392,184 @@ registerPWA = function(){
  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v73-sw-reloaded')){sessionStorage.setItem('acm-v73-sw-reloaded','1');location.reload();}});
  window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.3',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v73-sw-reloaded'),5000);}catch(err){console.warn('Service Worker v7.3:',err)}});
 };
+
+/* =========================================================
+   v7.4 STORAGE ZONES / LODÓWKA
+   - strefy magazynowe bez zmiany schematu IndexedDB
+   - Magazyn główny / Produkcja / Lodówka / Kwarantanna / Wysyłka
+   - pełny transfer lokalizacji i częściowy transfer partii
+   - częściowy transfer tworzy drugi rekord tej samej partii w nowej strefie
+   - koszt jednostkowy i genealogia są zachowywane
+   ========================================================= */
+
+const V74_APP_VERSION='7.4';
+let warehouseZoneFilter='';
+
+function v74DefaultZones(){return [
+ {id:'main',name:'Magazyn główny',type:'ambient',locked:true},
+ {id:'production',name:'Produkcja',type:'process',locked:true},
+ {id:'fridge',name:'Lodówka',type:'cold',locked:true},
+ {id:'quarantine',name:'Kwarantanna',type:'quarantine',locked:true},
+ {id:'dispatch',name:'Gotowe do wysyłki',type:'dispatch',locked:true}
+]}
+function v74Zones(){
+ const arr=Array.isArray(db.settings?.storageZones)?db.settings.storageZones:[];
+ const defs=v74DefaultZones(),out=[];
+ for(const d of defs){const x=arr.find(z=>z.id===d.id);out.push({...d,...(x||{})})}
+ for(const x of arr)if(!out.some(z=>z.id===x.id))out.push(x);
+ return out;
+}
+function v74Zone(id){return v74Zones().find(z=>z.id===id)||v74Zones()[0]}
+function v74ZoneIcon(z){const t=typeof z==='string'?v74Zone(z).type:z?.type;return t==='cold'?'❄':t==='process'?'▶':t==='quarantine'?'!':t==='dispatch'?'→':'▦'}
+function v74DefaultZoneId(item){
+ const st=String(item?.status||'').toLowerCase(),k=inferStockKind(item||{});
+ if(st.includes('kwarant'))return 'quarantine';
+ if(st.includes('w toku')||st.includes('zaplan'))return 'production';
+ if(st.includes('zapas chł')||st.includes('chłod'))return 'fridge';
+ if(k==='Produkt gotowy'&&st.includes('wysył'))return 'dispatch';
+ return 'main';
+}
+function v74ZoneIdOf(item){return item?.storageZone||v74DefaultZoneId(item)}
+function v74ZoneOf(item){return v74Zone(v74ZoneIdOf(item))}
+function v74RootId(item){return item?.storageRootId||item?.transferRootId||item?.id||''}
+function v74StatusForZone(src,destId){
+ const current=src?.status||'OK',k=inferStockKind(src||{});
+ if(destId==='quarantine')return 'Kwarantanna';
+ if(destId==='fridge'&&k==='Kultura żywa')return 'Zapas chłodniczy';
+ if(destId==='dispatch'&&k==='Produkt gotowy')return 'Gotowe do wysyłki';
+ if(destId==='production'&&['Zapas chłodniczy','Przechowywanie'].includes(current))return 'Aktywna';
+ return current;
+}
+function v74ZoneSummary(zoneId){
+ const active=(db.inventory||[]).filter(x=>Number(x.qty||0)>0&&v74ZoneIdOf(x)===zoneId);
+ const culturesMl=active.filter(x=>inferStockKind(x)==='Kultura żywa'&&x.unit==='ml').reduce((s,x)=>s+Number(x.qty||0),0);
+ const mediumMl=active.filter(x=>inferStockKind(x)==='Pożywka / medium'&&x.unit==='ml').reduce((s,x)=>s+Number(x.qty||0),0);
+ const pieces=active.filter(x=>x.unit==='szt.').reduce((s,x)=>s+Number(x.qty||0),0);
+ return {items:active.length,culturesMl,mediumMl,pieces};
+}
+function v74StorageAgeText(x){
+ if(v74ZoneIdOf(x)!=='fridge'||!x.storageEnteredAt)return '';
+ const a=new Date(String(x.storageEnteredAt).slice(0,10)+'T00:00:00'),b=new Date(today()+'T00:00:00');
+ const d=Math.max(0,Math.round((b-a)/86400000));return ` • w lodówce ${d} d`;
+}
+async function v74EnsureStorageZones(){
+ let changed=false;
+ const arr=Array.isArray(db.settings.storageZones)?db.settings.storageZones.slice():[];
+ for(const d of v74DefaultZones())if(!arr.some(z=>z.id===d.id)){arr.push(d);changed=true}
+ if(changed||!Array.isArray(db.settings.storageZones)){db.settings.storageZones=arr;db.settings.storageZonesVersion='7.4';await saveSettings()}
+}
+async function v74MigrateStorageZones(){
+ await v74EnsureStorageZones();let n=0;
+ for(const item0 of db.inventory||[]){
+  if(item0.storageZone)continue;
+  const item={...item0,storageZone:v74DefaultZoneId(item0),storageRootId:v74RootId(item0)||item0.id};
+  item.location=v74Zone(item.storageZone).name;
+  if(item.storageZone==='fridge'&&!item.storageEnteredAt)item.storageEnteredAt=item.updatedAt||item.createdAt||new Date().toISOString();
+  await saveRecord('inventory',item);n++;
+ }
+ if(n)await loadMemory();
+ try{await put('meta',{id:'storageZonesV74',value:{done:true,date:new Date().toISOString(),itemsMigrated:n,note:'v7.4: strefy magazynowe i Lodówka; migracja wyłącznie metadanych lokalizacji.'}})}catch(e){console.warn('v7.4 storage meta',e)}
+ return n;
+}
+
+const v74SaveRecordBase=saveRecord;
+saveRecord=async function(store,obj){
+ if(store==='inventory'&&obj){obj={...obj};if(!obj.storageZone)obj.storageZone=v74DefaultZoneId(obj);if(!obj.storageRootId)obj.storageRootId=v74RootId(obj)||obj.id;obj.location=v74Zone(obj.storageZone).name}
+ return v74SaveRecordBase(store,obj);
+};
+const v74CommitBase=commitProductionRun;
+commitProductionRun=async function(run,changes,job=null){
+ const cc=(changes||[]).map(ch=>{if(!ch?.item)return ch;const item={...ch.item};if(!item.storageZone)item.storageZone=v74DefaultZoneId(item);if(!item.storageRootId)item.storageRootId=v74RootId(item)||item.id;item.location=v74Zone(item.storageZone).name;return {...ch,item}});
+ return v74CommitBase(run,cc,job);
+};
+
+function v74FindDestinationStock(src,destId){
+ const root=v74RootId(src),kind=inferStockKind(src);
+ return (db.inventory||[]).find(x=>x.id!==src.id&&v74RootId(x)===root&&v74ZoneIdOf(x)===destId&&inferStockKind(x)===kind&&String(x.unit||'')===String(src.unit||'')&&String(x.lot||'')===String(src.lot||''));
+}
+function v74Weighted(aQty,aVal,bQty,bVal){const q=Number(aQty||0)+Number(bQty||0);return q>0?(Number(aQty||0)*Number(aVal||0)+Number(bQty||0)*Number(bVal||0))/q:Number(bVal||aVal||0)}
+
+async function v74WholeLocationTransfer(src,destId,slot='',notes=''){
+ const from=v74ZoneOf(src),to=v74Zone(destId),now=nowLocal(),updated={...src,storageZone:destId,location:to.name,storageSlot:slot||src.storageSlot||'',status:v74StatusForZone(src,destId),storageRootId:v74RootId(src)||src.id,updatedAt:new Date().toISOString()};
+ if(destId==='fridge')updated.storageEnteredAt=now;else if(v74ZoneIdOf(src)==='fridge')updated.storageLeftAt=now;
+ const tx=idb.transaction(['inventory','stockMoves','productionRuns'],'readwrite'),inv=tx.objectStore('inventory'),mov=tx.objectStore('stockMoves'),prs=tx.objectStore('productionRuns');
+ inv.put(updated);
+ const run={id:nextProductionRunId(),type:'Transfer lokalizacji',dateTime:now,operator:db.settings.operator||'',summary:`${src.name}: ${from.name} → ${to.name}`,notes:notes||'',movements:[{itemId:src.id,name:src.name,kind:inferStockKind(src),lot:src.lot||'',unit:src.unit||'',delta:0,before:Number(src.qty||0),after:Number(src.qty||0),fromZone:from.id,toZone:to.id}],status:'Zaksięgowana',createdAt:new Date().toISOString()};
+ prs.put(run);mov.put({id:uid('RM'),date:now,item:src.id,type:'Transfer lokalizacji',qty:0,reason:`${from.name} → ${to.name}${notes?' • '+notes:''}`,productionRunId:run.id,before:Number(src.qty||0),after:Number(src.qty||0),fromZone:from.id,toZone:to.id});
+ await txDone(tx);await loadMemory();return run;
+}
+
+async function v74PartialLocationTransfer(src,qty,destId,slot='',notes=''){
+ const from=v74ZoneOf(src),to=v74Zone(destId),root=v74RootId(src)||src.id;let dest=v74FindDestinationStock(src,destId),isNew=!dest;
+ if(dest){
+  const oldQty=Number(dest.qty||0);dest={...dest,price:v74Weighted(oldQty,dest.price,qty,src.price),materialUnitCost:v74Weighted(oldQty,dest.materialUnitCost,qty,src.materialUnitCost),energyUnitCost:v74Weighted(oldQty,dest.energyUnitCost,qty,src.energyUnitCost),fullCostUnit:v74Weighted(oldQty,dest.fullCostUnit,qty,src.fullCostUnit),storageSlot:slot||dest.storageSlot||'',status:v74StatusForZone(src,destId),storageZone:destId,location:to.name,storageRootId:root};
+ }else{
+  dest={...src,id:uid('MAG'),qty:0,storageZone:destId,location:to.name,storageSlot:slot||'',storageRootId:root,transferRootId:root,transferSourceId:src.id,status:v74StatusForZone(src,destId),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+  if(dest.productionJobId){dest.originProductionJobId=dest.productionJobId;delete dest.productionJobId}
+ }
+ if(destId==='fridge')dest.storageEnteredAt=nowLocal();
+ const run={id:nextProductionRunId(),type:'Transfer magazynowy między strefami',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${src.name}: ${num(qty,3)} ${src.unit} • ${from.name} → ${to.name}`,notes:notes||'',storageTransfer:{from:from.id,to:to.id,rootId:root}};
+ const changes=[{item:src,delta:-qty,moveType:'Transfer wychodzący',reason:`Przeniesienie do: ${to.name}`},{item:dest,delta:qty,isNew,moveType:'Transfer przychodzący',reason:`Przeniesienie z: ${from.name}`}];
+ await commitProductionRun(run,changes);
+ if(!isNew){const current=getById('inventory',dest.id);if(current){await saveRecord('inventory',{...current,price:dest.price,materialUnitCost:dest.materialUnitCost,energyUnitCost:dest.energyUnitCost,fullCostUnit:dest.fullCostUnit,storageSlot:dest.storageSlot,status:dest.status,storageZone:dest.storageZone,location:dest.location,storageRootId:dest.storageRootId,storageEnteredAt:dest.storageEnteredAt||current.storageEnteredAt});await loadMemory()}}
+ return run;
+}
+
+function openStorageTransfer(itemId='',preferredZone='fridge'){
+ const positive=(db.inventory||[]).filter(x=>Number(x.qty||0)>0);if(!positive.length)return alert('Brak dodatnich stanów do przeniesienia.');
+ let src=getById('inventory',itemId)||positive[0],destId=preferredZone&&preferredZone!==v74ZoneIdOf(src)?preferredZone:(v74ZoneIdOf(src)==='fridge'?'production':'fridge');
+ modalTitle.textContent='Przenieś między strefami';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="storageTransferForm"><div class="form-grid"><div class="field wide"><label>Pozycja / partia</label><select name="item">${positive.map(x=>`<option value="${x.id}" ${x.id===src.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • ${stockQtyText(x)} • ${esc(v74ZoneOf(x).name)}</option>`).join('')}</select></div>${f('qty','Ilość do przeniesienia','number',Number(src.qty||0))}<div class="field"><label>Strefa docelowa</label><select name="dest">${v74Zones().map(z=>`<option value="${z.id}" ${z.id===destId?'selected':''}>${esc(v74ZoneIcon(z)+' '+z.name)}</option>`).join('')}</select></div>${f('slot','Miejsce / półka / pojemnik','text',src.storageSlot||'')}${f('notes','Uwagi','textarea','')}</div><div id="storageTransferPreview" class="callout section"></div><div class="actions"><button class="btn primary">Przenieś</button></div></form>`;
+ const form=document.getElementById('storageTransferForm');
+ const refresh=()=>{const x=getById('inventory',form.elements.item.value);if(!x)return;const free=typeof freeStockQty==='function'?freeStockQty(x):Number(x.qty||0),z=v74Zone(form.elements.dest.value);document.getElementById('storageTransferPreview').innerHTML=`<strong>${esc(v74ZoneIcon(v74ZoneOf(x))+' '+v74ZoneOf(x).name)} → ${esc(v74ZoneIcon(z)+' '+z.name)}</strong><div class="mini" style="margin-top:5px">Stan: ${stockQtyText(x)} • wolne do przeniesienia: ${num(free,3)} ${esc(x.unit)}. Pełne przeniesienie zmienia tylko lokalizację rekordu; częściowe tworzy drugi stan tej samej partii w strefie docelowej.</div>`};
+ form.elements.item.onchange=()=>{const x=getById('inventory',form.elements.item.value);if(x){form.elements.qty.value=Math.max(0,typeof freeStockQty==='function'?freeStockQty(x):Number(x.qty||0));if(form.elements.dest.value===v74ZoneIdOf(x))form.elements.dest.value=v74ZoneIdOf(x)==='fridge'?'production':'fridge'}refresh()};form.elements.dest.onchange=refresh;form.elements.qty.oninput=refresh;refresh();
+ form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),x=getById('inventory',fd.get('item')),qty=Number(fd.get('qty')||0),dest=String(fd.get('dest')||'');if(!x||qty<=0)return alert('Podaj prawidłową ilość.');if(dest===v74ZoneIdOf(x))return alert('Pozycja jest już w tej strefie.');const free=typeof freeStockQty==='function'?freeStockQty(x):Number(x.qty||0);if(qty>free+1e-9)return alert(`Można przenieść maksymalnie ${num(free,3)} ${x.unit}. Część stanu jest zarezerwowana.`);try{const whole=Math.abs(qty-Number(x.qty||0))<1e-9&&Math.abs(free-Number(x.qty||0))<1e-9;if(whole)await v74WholeLocationTransfer(x,dest,String(fd.get('slot')||''),String(fd.get('notes')||''));else await v74PartialLocationTransfer(x,qty,dest,String(fd.get('slot')||''),String(fd.get('notes')||''));closeModal();render()}catch(err){alert('Błąd transferu: '+err.message)}};
+ modal.classList.add('open');
+}
+function setWarehouseZoneFilter(id=''){warehouseZoneFilter=id;render()}
+
+function openStorageZoneManager(){
+ modalTitle.textContent='Strefy magazynowe';modalBox.classList.add('wide');
+ const renderBody=()=>{const zones=v74Zones();modalBody.innerHTML=`<div class="two"><div class="card"><h3>Strefy</h3>${zones.map(z=>{const s=v74ZoneSummary(z.id);return `<div class="simple-row"><div class="main"><strong>${esc(v74ZoneIcon(z)+' '+z.name)}</strong><div class="meta">${s.items} pozycji${s.culturesMl?' • kultury '+num(s.culturesMl/1000,2)+' L':''}${s.pieces?' • '+num(s.pieces,0)+' szt.':''}</div></div><div class="side">${z.locked?'':btn('Usuń',`v74DeleteZone('${z.id}')`,'btn tiny danger')}</div></div>`}).join('')}</div><div class="card"><h3>Nowa strefa</h3><form id="newZoneForm"><div class="field"><label>Nazwa</label><input name="name" placeholder="np. Regał A, Chłodziarka 2"></div><div class="field"><label>Typ</label><select name="type"><option value="ambient">Magazyn</option><option value="cold">Chłodnia / lodówka</option><option value="process">Produkcja</option><option value="quarantine">Kwarantanna</option><option value="dispatch">Wysyłka</option></select></div><div class="actions" style="margin-top:10px"><button class="btn primary">Dodaj strefę</button></div></form></div></div>`;document.getElementById('newZoneForm').onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),name=String(fd.get('name')||'').trim();if(!name)return;const arr=v74Zones().map(z=>({...z}));arr.push({id:uid('ZONE'),name,type:String(fd.get('type')||'ambient'),locked:false});db.settings.storageZones=arr;await saveSettings();renderBody()}}
+ renderBody();modal.classList.add('open');
+}
+async function v74DeleteZone(id){const z=v74Zone(id);if(z.locked)return;const used=(db.inventory||[]).filter(x=>v74ZoneIdOf(x)===id&&Number(x.qty||0)>0);if(used.length)return alert(`Nie można usunąć strefy. Jest w niej ${used.length} pozycji z dodatnim stanem.`);if(!confirm(`Usunąć strefę „${z.name}”?`))return;db.settings.storageZones=v74Zones().filter(x=>x.id!==id);await saveSettings();openStorageZoneManager()}
+
+// Lodówka jest strefą zapasu, a nie aktywnym zbiornikiem produkcyjnym.
+productionReadyCultures=function(){return liveStock().filter(x=>!['fridge','quarantine'].includes(v74ZoneIdOf(x))&&!['W toku','Zaplanowana','Kwarantanna','Problem','Problem / skażenie','Anulowana','Zakończona','Zapas chłodniczy'].includes(x.status||''))};
+tankTilesHTML=function(){const list=liveStock().filter(x=>!['fridge','quarantine','dispatch'].includes(v74ZoneIdOf(x))).sort((a,b)=>String(a.status||'').localeCompare(String(b.status||''))||String(a.lot||'').localeCompare(String(b.lot||'')));if(!list.length)return '<div class="empty">Brak kultur w strefie produkcyjnej.</div>';return `<div class="tank-grid">${list.map(x=>{const j=tankJob(x.id),p=readinessPct(x),cls=['Problem','Kwarantanna'].includes(x.status)?'problem':p>=100?'ready':'';return `<div class="tank-card ${cls}" style="--progress:${num(p,0)}%"><div class="mini">${esc(x.vessel||'Kultura')} • ${esc(v74ZoneOf(x).name)}</div><h4>${esc(x.lot||x.name)}</h4><div class="litres">${x.unit==='ml'?num(Number(x.qty||0)/1000,2)+' L':stockQtyText(x)}</div><div class="mini">${esc(x.organism||'')} • ${esc(x.status||'')}</div>${j?`<div class="mini" style="margin-top:5px">${esc(deadlineText(j.plannedReadyDate,j.status))}</div>`:''}<div class="actions">${btn('Panel',`openTankPanel('${x.id}')`,'btn tiny primary')}${btn('QR',`openQuickStock('${x.id}')`,'btn tiny')}${btn('Do lodówki',`openStorageTransfer('${x.id}','fridge')`,'btn tiny secondary')}</div></div>`}).join('')}</div>`}
+
+renderInventory=function(){
+ const q=(document.getElementById('warehouseSearchSimple')?.value||'').trim().toLowerCase();
+ const kinds=['','Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy'];
+ const zones=v74Zones();
+ const items=db.inventory.filter(x=>{const matchKind=!warehouseSimpleFilter||inferStockKind(x)===warehouseSimpleFilter,matchZone=!warehouseZoneFilter||v74ZoneIdOf(x)===warehouseZoneFilter,hay=[x.name,x.lot,x.organism,x.category,x.supplier,v74ZoneOf(x).name,x.storageSlot].join(' ').toLowerCase();return matchKind&&matchZone&&(!q||hay.includes(q))}).sort(bestBeforeSort);
+ const expiring=fefoCandidates().filter(x=>(!warehouseZoneFilter||v74ZoneIdOf(x)===warehouseZoneFilter)&&x.bestBefore&&daysUntil(x.bestBefore)<=30).slice(0,5);
+ return `<div class="toolbar">${btn('+ Kultura żywa','openInitialCultureIntake()','btn primary')}${btn('+ Surowiec / opakowanie',"openWarehouseItemForm('','Surowiec')")}${btn('+ Inna pozycja',"openWarehouseItemForm('','Inne')")}${btn('Przenieś','openStorageTransfer()','btn primary')}${btn('Strefy','openStorageZoneManager()')}${btn('Ruch / korekta','openStockMove()')}${btn('Rezerwacja','openReservationForm()')}${btn('Inwentaryzacja','openInventoryCount()')}${btn('Import / eksport','openWarehouseTransfer()','btn secondary')}</div>
+ <div class="callout section"><strong>Strefy magazynowe v7.4.</strong> Nadmiar kultury możesz przenieść do Lodówki w całości albo częściowo. Częściowy transfer nie zmienia partii ani kosztu jednostkowego — tworzy odrębny stan tej samej partii w wybranej strefie.</div>
+ <div class="storage-zone-grid section">${zones.map(z=>{const s=v74ZoneSummary(z.id),active=warehouseZoneFilter===z.id;return `<button class="storage-zone-card ${z.type==='cold'?'cold':''} ${active?'active':''}" onclick="setWarehouseZoneFilter('${z.id}')"><span class="zone-icon">${esc(v74ZoneIcon(z))}</span><span class="zone-main"><strong>${esc(z.name)}</strong><small>${s.items} pozycji${s.culturesMl?' • '+num(s.culturesMl/1000,2)+' L kultur':''}${s.mediumMl?' • '+num(s.mediumMl/1000,2)+' L medium':''}${s.pieces?' • '+num(s.pieces,0)+' szt.':''}</small></span></button>`}).join('')}<button class="storage-zone-card ${warehouseZoneFilter===''?'active':''}" onclick="setWarehouseZoneFilter('')"><span class="zone-icon">◎</span><span class="zone-main"><strong>Wszystkie strefy</strong><small>${db.inventory.filter(x=>Number(x.qty||0)>0).length} pozycji z dodatnim stanem</small></span></button></div>
+ <div class="simple-search"><input id="warehouseSearchSimple" placeholder="Szukaj w magazynie, lodówce, partiach..." value="${esc(q)}" oninput="render()"><button class="btn" onclick="document.getElementById('warehouseSearchSimple').value='';warehouseSimpleFilter='';warehouseZoneFilter='';render()">Wyczyść</button></div>
+ <div class="inventory-filters section">${kinds.map(k=>`<button class="filter-pill ${warehouseSimpleFilter===k?'active':''}" onclick="setWarehouseFilter('${k.replaceAll("'","\\'")}')">${k||'Wszystko'}</button>`).join('')}</div>
+ ${expiring.length?`<div class="card"><h3>FEFO — użyj najpierw</h3>${expiring.map(x=>`<div class="fefo-row"><div><strong>${esc(x.name)}</strong><div class="mini">${esc(x.lot||x.id)} • ${esc(v74ZoneOf(x).name)}</div></div><div>${stockQtyText(x)}</div><div>${datePL(x.bestBefore)}</div><div>${btn('Karta',`openStockCard('${x.id}')`,'btn tiny')}</div></div>`).join('')}</div>`:''}
+ <div class="inventory-card-grid section">${items.length?items.map(x=>{const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9,r=reservedStockQty(x.id),zone=v74ZoneOf(x),quick=v74ZoneIdOf(x)==='fridge'?btn('Do produkcji',`openStorageTransfer('${x.id}','production')`,'btn tiny primary'):((inferStockKind(x)==='Kultura żywa'||inferStockKind(x)==='Pożywka / medium')&&Number(x.qty||0)>0?btn('Do lodówki',`openStorageTransfer('${x.id}','fridge')`,'btn tiny primary'):'');return `<div class="inventory-card ${zone.type==='cold'?'cold-stock':''}"><div class="head"><div><h4>${esc(x.name)}</h4><div class="mini">${esc(x.lot||x.id)}${x.organism?' • '+esc(x.organism):''}</div></div><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></div><div class="zone-line">${esc(v74ZoneIcon(zone)+' '+zone.name)}${x.storageSlot?' • '+esc(x.storageSlot):''}${v74StorageAgeText(x)}</div><div class="qty">${stockQtyText(x)}</div><div class="mini">${r>0?`zarezerwowane ${num(r,3)} ${esc(x.unit)} • wolne ${num(freeStockQty(x),3)}`:'całość wolna'}${x.bestBefore?' • FEFO '+datePL(x.bestBefore):''}</div><div class="mini"><span class="status-dot ${ok?'':'bad'}"></span>${ok?'saldo zgodne':'sprawdź saldo'}</div><div class="actions">${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${quick}${btn('Przenieś',`openStorageTransfer('${x.id}')`,'btn tiny')}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Rezerwuj',`openReservationForm('${x.id}')`,'btn tiny')}</div></div>`}).join(''):'<div class="empty card">Brak pozycji w tej strefie / filtrze.</div>'}</div>`;
+};
+
+const v74OpenStockCardBase=openStockCard;
+openStockCard=function(id){v74OpenStockCardBase(id);const x=getById('inventory',id);if(!x)return;const z=v74ZoneOf(x),quick=v74ZoneIdOf(x)==='fridge'?`openStorageTransfer('${x.id}','production')`:`openStorageTransfer('${x.id}','fridge')`;modalBody.innerHTML=`<div class="storage-card-banner ${z.type==='cold'?'cold':''}"><div><strong>${esc(v74ZoneIcon(z)+' '+z.name)}</strong><div class="mini">${x.storageSlot?esc(x.storageSlot):'brak oznaczenia półki / miejsca'}${v74StorageAgeText(x)}</div></div><div class="actions">${btn('Przenieś',`openStorageTransfer('${x.id}')`,'btn tiny')}${(inferStockKind(x)==='Kultura żywa'||inferStockKind(x)==='Pożywka / medium')&&Number(x.qty||0)>0?btn(v74ZoneIdOf(x)==='fridge'?'Do produkcji':'Do lodówki',quick,'btn tiny primary'):''}</div></div>`+modalBody.innerHTML};
+
+// Import v7.3/v7.0 zostaje zachowany, po nim v7.4 dodaje strefy lokalizacji.
+const v74ImportBase=importBackup;
+importBackup=async function(){await v74ImportBase();await v74MigrateStorageZones();render()};
+
+// Eksport v7.4 zawiera storageZone/storageRootId i konfigurację stref w settings.
+exportFullBackup=async function(){const media=[];for(const m of db.media)media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null});const data={app:'AquaCulture Manager LAB',version:7,appVersion:V74_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')};
+exportDataBackup=function(){const data={app:'AquaCulture Manager LAB',version:7,appVersion:V74_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')};
+buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),payload={app:'AquaCulture Manager',appVersion:V74_APP_VERSION,schema:7,generatedAt:new Date().toISOString(),settings:db.settings,stores};if(includeMedia){payload.media=[];for(const m of db.media)payload.media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}return payload};
+
+const v74InitBase=init;
+init=async function(){await v74InitBase();await v74MigrateStorageZones();document.title='AquaCulture Manager v7.4 Storage Zones';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.4 • Storage Zones • AquaFlow');titles.inventory=['Magazyn','Strefy magazynowe: magazyn główny, produkcja, lodówka, kwarantanna i wysyłka. Przenoszenie całych lub częściowych stanów z pełnym audytem.'];render()};
+
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v74-sw-reloaded')){sessionStorage.setItem('acm-v74-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.4',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v74-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.4:',err)}})};
 
 registerPWA();
 
