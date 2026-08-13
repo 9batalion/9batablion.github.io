@@ -4050,6 +4050,143 @@ init = async function(){
  document.title='AquaCulture Manager v7.1 Energy Cost Engine';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.1 • Energy Cost Engine • AquaFlow');titles.costing=['Koszty produkcji','Materiały, energia urządzeń, koszt/litr, marża i kontrola arytmetyczna.'];render();
 };
 
+/* =========================================================
+   v7.2 FULL PRODUCTION COST
+   - koszt energii urządzeń w pełnym koszcie partii
+   - koszt energii w koszcie 1 L i kalkulatorze marży
+   - obsługa aktywnych partii utworzonych przed v7.1 (dynamiczna prognoza)
+   - brak podwójnego liczenia pożywki jako osobnego kosztu i składnika kultury
+   - finalizacja rzeczywistego kosztu energii po zakończeniu hodowli
+   ========================================================= */
+
+function v72IsClosedJob(j){return ['Gotowa','Zakończona','Zrealizowana','Zamknięta'].includes(String(j?.status||''))}
+function v72IsCancelledJob(j){return ['Anulowana','Odrzucona'].includes(String(j?.status||''))}
+function v72JobForItem(item){
+ if(!item)return null;
+ if(item.productionJobId){const j=getById('productionJobs',item.productionJobId);if(j)return j}
+ return (db.productionJobs||[]).find(j=>j.outputItemId===item.id)||null;
+}
+function v72JobForRun(run){return (db.productionJobs||[]).find(j=>j.runId===run?.id)||null}
+function v72JobOutputQty(job){
+ if(!job)return 0;const run=getById('productionRuns',job.runId);
+ const mv=(run?.movements||job.movements||[]).find(m=>m.itemId===job.outputItemId&&v71N(m.delta)>0);
+ if(v71N(mv?.delta)>0)return v71N(mv.delta);
+ const x=getById('inventory',job.outputItemId);return Math.max(0,v71N(x?.qty));
+}
+function v72JobOutputUnit(job){const x=getById('inventory',job?.outputItemId);return x?.unit||((getById('productionRuns',job?.runId)?.movements||[]).find(m=>m.itemId===job?.outputItemId)?.unit)||''}
+function v72JobEnergy(job){
+ if(!job)return {version:'7.2',pricePerKwh:v71EnergyPrice(),durationDays:0,mode:'none',devices:[],totalKwh:0,cost:0};
+ const run=getById('productionRuns',job.runId),saved=run?.energySnapshot||job.energySnapshot;
+ if(v72IsClosedJob(job)&&saved&&Number.isFinite(Number(saved.cost)))return {...saved,mode:saved.mode||'actual'};
+ if(!v72IsClosedJob(job)&&run?.costSnapshotVersion==='7.1'&&saved&&Number.isFinite(Number(saved.cost)))return {...saved,mode:saved.mode||'planned'};
+ const start=job.startedAt||run?.dateTime||run?.createdAt||today();
+ let end='';let actual=false;
+ if(v72IsClosedJob(job)){end=job.actualReadyAt||job.closedAt||job.updatedAt||job.plannedReadyDate||nowLocal();actual=true}
+ else if(job.plannedReadyDate){end=job.plannedReadyDate;actual=false}
+ else {end=nowLocal();actual=true}
+ return v71EnergySnapshot(job.organism||getById('inventory',job.outputItemId)?.organism||'',start,end,actual);
+}
+function v72JobCost(job){
+ if(!job)return {material:0,energy:0,labor:0,other:0,overhead:0,total:0,energySnapshot:null,outputQty:0,unit:'',costPerUnit:0,mode:'none'};
+ const run=getById('productionRuns',job.runId),c=acRunCost(run),es=v72JobEnergy(job);
+ let labor=Math.max(0,v71N(c.labor,run?.laborCost));
+ let other=Math.max(0,v71N(c.other,run?.otherCost));
+ if(c.legacy){const oldEnergy=Math.max(0,v71N(db.settings.legacyEnergyCostPerProductionRun));other=Math.max(0,other-oldEnergy)}
+ const material=Math.max(0,v71N(c.material)),energy=Math.max(0,v71N(es.cost)),overhead=energy+labor+other,total=material+overhead,outputQty=v72JobOutputQty(job),unit=v72JobOutputUnit(job);
+ return {material,energy,labor,other,overhead,total,energySnapshot:es,outputQty,unit,costPerUnit:outputQty>0?total/outputQty:0,mode:es.mode||'planned',run};
+}
+function v72ItemCostInfo(item){
+ const job=v72JobForItem(item);if(job&&!v72IsCancelledJob(job)){const c=v72JobCost(job);if(c.outputQty>0)return {...c,job,source:'partia hodowlana'}}
+ const p=Math.max(0,v71N(item?.price));return {material:p*Math.max(0,v71N(item?.qty)),energy:0,labor:0,other:0,overhead:0,total:p*Math.max(0,v71N(item?.qty)),outputQty:Math.max(0,v71N(item?.qty)),unit:item?.unit||'',costPerUnit:p,job:null,source:'cena ewidencyjna'};
+}
+
+// v7.2 traktuje koszt energii jako składnik kosztu wytworzenia kultury.
+const v72CostBasisBase=v71CostBasis;
+v71CostBasis = function(item){
+ if(item&&inferStockKind(item)==='Kultura żywa'){
+  const info=v72ItemCostInfo(item);if(info.job&&info.costPerUnit>0)return {price:info.costPerUnit,source:'pełny koszt partii: materiały + energia + operacyjne'};
+ }
+ return v72CostBasisBase(item);
+};
+
+const v72OutputCostBase=acOutputCostPerUnit;
+acOutputCostPerUnit = function(x){
+ if(!x)return 0;const info=v72ItemCostInfo(x);if(info.job&&info.costPerUnit>0)return info.costPerUnit;return v72OutputCostBase(x);
+};
+
+// Koszt operacji v7.2 jest zgodny z snapshotami v7.2.
+const v72RunCostBase=acRunCost;
+acRunCost = function(run){
+ if(run?.costSnapshotVersion==='7.2'){
+  const breakdown=Array.isArray(run.costBreakdown)?run.costBreakdown:[];
+  const material=Number.isFinite(Number(run.materialCost))?Number(run.materialCost):breakdown.reduce((a,b)=>a+v71N(b.cost),0),energy=Math.max(0,v71N(run.energyCost)),labor=Math.max(0,v71N(run.laborCost)),other=Math.max(0,v71N(run.otherCost)),overhead=energy+labor+other,total=material+overhead;
+  return {material,energy,labor,other,overhead,total,estimated:false,breakdown,energySnapshot:run.energySnapshot||null};
+ }
+ return v72RunCostBase(run);
+};
+
+function v72RunEffectiveCost(run){const j=v72JobForRun(run);return j&&!v72IsCancelledJob(j)?v72JobCost(j):acRunCost(run)}
+function v72MonthJobSummary(){
+ const month=acMonthPrefix(),jobs=(db.productionJobs||[]).filter(j=>!v72IsCancelledJob(j)&&String(j.startedAt||getById('productionRuns',j.runId)?.dateTime||'').startsWith(month));
+ const parts=jobs.map(v72JobCost),sum=k=>parts.reduce((a,x)=>a+v71N(x[k]),0),volumeMl=parts.filter(x=>acCanonicalUnit(x.unit)==='ml').reduce((a,x)=>a+x.outputQty,0);
+ return {jobs,parts,material:sum('material'),energy:sum('energy'),labor:sum('labor'),other:sum('other'),total:sum('total'),volumeMl,fullCostPerL:volumeMl>0?sum('total')/volumeMl*1000:0};
+}
+function v72ActiveJobSummary(){
+ const jobs=(db.productionJobs||[]).filter(j=>!v72IsCancelledJob(j)&&!v72IsClosedJob(j)),parts=jobs.map(v72JobCost),sum=k=>parts.reduce((a,x)=>a+v71N(x[k]),0),volumeMl=parts.filter(x=>acCanonicalUnit(x.unit)==='ml').reduce((a,x)=>a+x.outputQty,0);
+ return {jobs,parts,material:sum('material'),energy:sum('energy'),labor:sum('labor'),other:sum('other'),total:sum('total'),volumeMl,fullCostPerL:volumeMl>0?sum('total')/volumeMl*1000:0};
+}
+
+acMonthProductionCost = function(){return v72MonthJobSummary().total};
+
+acRefreshMarginCalculator = function(){
+ const f=document.getElementById('marginCalcForm'),box=document.getElementById('marginCalcResult');if(!f||!box)return;const x=getById('inventory',f.elements.item.value),info=x?v72ItemCostInfo(x):null,cost=x?acOutputCostPerUnit(x):0,margin=Math.max(0,Math.min(95,Number(f.elements.margin.value||0))),target=acPriceForGrossMargin(cost,margin),sale=Number(f.elements.sale.value||0),gm=acGrossMargin(cost,sale),mk=acMarkup(cost,sale);
+ const perL=x&&acCanonicalUnit(x.unit)==='ml'?cost*1000:null,jobInfo=info?.job?`<div class="statline"><span>w tym energia partii</span><strong>${money(info.energy)} (${info.outputQty>0?money(info.energy/info.outputQty*1000)+'/L':'—'})</strong></div><div class="statline"><span>Materiały partii</span><strong>${money(info.material)}</strong></div>`:'';
+ box.innerHTML=`<div class="statline"><span>Pełny koszt 1 ${esc(x?.unit||'jedn.')}</span><strong>${money(cost)}</strong></div>${perL!==null?`<div class="statline"><span>Pełny koszt 1 L</span><strong>${money(perL)}</strong></div>`:''}${jobInfo}<div class="statline"><span>Cena dla marży brutto ${num(margin,1)}%</span><strong>${money(target)}</strong></div><div class="statline"><span>Przy wpisanej cenie sprzedaży</span><strong>${sale>0?`${gm===null?'—':num(gm,1)+'% marży'} • ${mk===null?'—':num(mk,1)+'% narzutu'}`:'—'}</strong></div><div class="mini" style="margin-top:8px">Pełny koszt kultury = materiały + przypisana energia urządzeń + praca + inne koszty procesu. Energia jest alokowana wg liczby kultur obsługiwanych przez urządzenie.</div>`;
+};
+
+renderCosting = function(){
+ const s=acCostingSettings(),runs=[...(db.productionRuns||[])].filter(acIsProductionCostRun).sort((a,b)=>String(b.dateTime||b.createdAt||'').localeCompare(String(a.dateTime||a.createdAt||''))),e=v71CurrentEnergyTotals(),m=v72MonthJobSummary(),a=v72ActiveJobSummary();
+ const activeEnergyPerL=a.volumeMl>0?a.energy/a.volumeMl*1000:0;
+ return `<div class="simple-kpis"><div class="simple-kpi"><div class="t">Koszt produkcji • miesiąc</div><div class="n">${money(m.total)}</div><div class="mini">materiały ${money(m.material)} + energia ${money(m.energy)} + operacyjne ${money(m.labor+m.other)}</div></div><div class="simple-kpi"><div class="t">Śr. pełny koszt 1 L kultury</div><div class="n">${money(a.fullCostPerL||m.fullCostPerL)}</div><div class="mini">w tym energia ${money(activeEnergyPerL)}/L • ważona objętością</div></div><div class="simple-kpi"><div class="t">Energia aktywnych partii</div><div class="n">${money(a.energy)}</div><div class="mini">${num(a.parts.reduce((s,x)=>s+v71N(x.energySnapshot?.totalKwh),0),2)} kWh do końca zaplanowanych hodowli</div></div><div class="simple-kpi"><div class="t">Prąd całej instalacji / 30 dni</div><div class="n">${money(e.cost30)}</div><div class="mini">${num(e.kwhDay*30,2)} kWh • ${num(e.watts,0)} W aktywne</div></div></div>
+ <div class="section card"><h3>Pełny koszt aktywnej produkcji</h3><div class="cost-detail-grid"><div class="cost-detail"><span>Materiały</span><strong>${money(a.material)}</strong></div><div class="cost-detail"><span>Energia urządzeń</span><strong>${money(a.energy)}</strong></div><div class="cost-detail"><span>Praca + inne</span><strong>${money(a.labor+a.other)}</strong></div><div class="cost-detail"><span>Razem</span><strong>${money(a.total)}</strong></div></div><div class="mini" style="margin-top:10px">Koszt jest liczony na poziomie końcowych partii hodowlanych. Przygotowane medium nie jest drugi raz doliczane jako osobny koszt, jeśli jego koszt został już przeniesiony do kultury.</div></div>
+ <div class="two section"><div class="card"><h3>Kalkulator ceny i marży</h3><form id="marginCalcForm"><div class="form-grid"><div class="field wide"><label>Partia / produkt</label><select name="item" oninput="acRefreshMarginCalculator()">${acMarginProductOptions()}</select></div><div class="field"><label>Docelowa marża brutto [%]</label><input name="margin" type="number" step="0.1" value="${s.targetMargin}" oninput="acRefreshMarginCalculator()"></div><div class="field"><label>Testowana cena sprzedaży [PLN]</label><input name="sale" type="number" step="0.01" value="" oninput="acRefreshMarginCalculator()"></div></div></form><div id="marginCalcResult" class="section"></div></div>
+ <div class="card"><h3>Ustawienia kosztów</h3><form id="costSettingsForm"><div class="form-grid"><div class="field"><label>Cena energii [PLN/kWh]</label><input name="electricity" type="number" step="0.0001" value="${s.electricity}"></div><div class="field"><label>Praca na operację [PLN]</label><input name="labor" type="number" step="0.01" value="${s.labor}"></div><div class="field"><label>Inne na operację [PLN]</label><input name="other" type="number" step="0.01" value="${s.other}"></div><div class="field"><label>Domyślna marża [%]</label><input name="margin" type="number" step="0.1" value="${s.targetMargin}"></div></div><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" onclick="saveCostingSettings()">Zapisz ustawienia kosztów</button></div></form><div class="mini" style="margin-top:10px">Cena prądu i aktywne urządzenia są teraz częścią kosztu wytworzenia kultury, a nie wyłącznie osobną statystyką.</div></div></div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><div><h3 style="margin:0">Urządzenia i energia</h3><div class="mini">LED, napowietrzacze, pompy, grzałki i inne odbiorniki.</div></div>${btn('+ Dodaj urządzenie','openEnergyDeviceForm()','btn primary')}</div><div class="energy-kpis section"><div class="energy-kpi"><div class="t">Cena energii</div><strong>${num(s.electricity,4)} zł/kWh</strong></div><div class="energy-kpi"><div class="t">Zużycie całe</div><strong>${num(e.kwhDay,3)} kWh/d</strong></div><div class="energy-kpi"><div class="t">Koszt całej instalacji</div><strong>${money(e.costDay)}/d</strong></div><div class="energy-kpi"><div class="t">Koszt 30 dni</div><strong>${money(e.cost30)}</strong></div></div><div class="section">${v71DeviceListHTML()}</div><div class="callout section energy-formula"><strong>Wzór:</strong> koszt partii = materiały + [W × szt. × h/d ÷ 1000 × PLN/kWh × dni ÷ liczba obsługiwanych kultur] + praca + inne. Koszt 1 L = pełny koszt partii ÷ objętość partii.</div></div>
+ <div class="section card"><h3>Ostatnie operacje produkcyjne</h3>${table(['Data','Operacja','Materiały','Energia','Praca + inne','Razem','Tryb',''],runs.slice(0,40).map(r=>{const c=v72RunEffectiveCost(r),j=v72JobForRun(r);return `<tr><td>${datePL(r.dateTime||r.createdAt)}</td><td><strong>${esc(r.type||'')}</strong><div class="mini">${esc(r.id)}</div></td><td>${money(c.material)}</td><td>${money(c.energy||0)}</td><td>${money((c.labor||0)+(c.other||0))}</td><td><strong>${money(c.total)}</strong></td><td>${j&&!v72IsClosedJob(j)?'<span class="badge warn">pełny koszt prognozowany</span>':r.costSnapshotVersion==='7.2'?'<span class="badge ok">snapshot 7.2</span>':r.costSnapshotVersion==='7.1'?'<span class="badge ok">snapshot 7.1</span>':'<span class="badge warn">rekonstrukcja</span>'}</td><td><button class="btn tiny" onclick="openProductionRun('${r.id}')">Szczegóły</button></td></tr>`}))}</div><script>setTimeout(acRefreshMarginCalculator,0)<\/script>`;
+};
+
+const v72OpenRunBase=openProductionRun;
+openProductionRun = function(id){
+ v72OpenRunBase(id);const r=getById('productionRuns',id),j=v72JobForRun(r);if(!r||!j)return;const c=v72JobCost(j),perL=acCanonicalUnit(c.unit)==='ml'&&c.outputQty>0?c.total/c.outputQty*1000:null;
+ modalBody.insertAdjacentHTML('afterbegin',`<div class="section card"><h3>Pełny koszt partii v7.2</h3><div class="cost-detail-grid"><div class="cost-detail"><span>Materiały</span><strong>${money(c.material)}</strong></div><div class="cost-detail"><span>Energia urządzeń</span><strong>${money(c.energy)}</strong></div><div class="cost-detail"><span>Praca + inne</span><strong>${money(c.labor+c.other)}</strong></div><div class="cost-detail"><span>Razem</span><strong>${money(c.total)}</strong></div></div>${perL!==null?`<div class="statline section"><span>Pełny koszt 1 L</span><strong>${money(perL)}</strong></div>`:''}<div class="mini">${v72IsClosedJob(j)?'Koszt rzeczywisty/zapisany po zakończeniu procesu.':'Koszt prognozowany do planowanej daty gotowości.'} Energia: ${num(c.energySnapshot?.totalKwh||0,3)} kWh × ${num(c.energySnapshot?.pricePerKwh||0,4)} zł/kWh.</div></div>`);
+};
+
+async function v72FinalizeJobEnergyCost(jobId){
+ const job=getById('productionJobs',jobId);if(!job?.runId)return;const run=getById('productionRuns',job.runId);if(!run||!v71IsCultivationRun(run))return;
+ const end=job.actualReadyAt||job.closedAt||nowLocal(),es=v71EnergySnapshot(job.organism||'',job.startedAt||run.dateTime,end,true),base=acRunCost(run),legacyEnergy=base.legacy?Math.max(0,v71N(db.settings.legacyEnergyCostPerProductionRun)):0,material=Math.max(0,v71N(base.material)),labor=Math.max(0,v71N(base.labor,run.laborCost)),other=Math.max(0,v71N(base.other,run.otherCost)-legacyEnergy),overhead=es.cost+labor+other,total=material+overhead;
+ const rr={...run,energySnapshot:es,energyCost:es.cost,laborCost:labor,otherCost:other,overheadCost:overhead,totalCost:total,costSnapshotVersion:'7.2',costMethod:'full production cost: transferred materials + allocated equipment electricity + operating costs',energyFinalizedAt:new Date().toISOString()};await saveRecord('productionRuns',rr);
+ const jj={...getById('productionJobs',jobId),energySnapshot:es,energyCost:es.cost,laborCost:labor,otherCost:other,overheadCost:overhead,totalCost:total,costSnapshotVersion:'7.2',energyFinalizedAt:new Date().toISOString()};await saveRecord('productionJobs',jj);
+ const out=getById('inventory',job.outputItemId),qty=v72JobOutputQty(jj);if(out&&qty>0){const xx={...out,price:total/qty,costRunId:rr.id,costSource:'production-final-v7.2',updatedAt:new Date().toISOString()};await saveRecord('inventory',xx)}
+}
+const v72UpdateJobStatusBase=updateProductionJobStatus;
+updateProductionJobStatus = async function(id,newStatus){await v72UpdateJobStatusBase(id,newStatus);if(['Gotowa','Zakończona'].includes(newStatus)){await v72FinalizeJobEnergyCost(id);render()}};
+
+const v72TestsBase=acRunV70Tests;
+acRunV70Tests = function(){
+ const t=v72TestsBase(),add=(name,ok)=>t.push({name,ok:!!ok}),price=1,d={watts:45,qty:1,hoursPerDay:17.3333333333,capacity:2,active:true};
+ add('Koszt energii jest alokowany na kulturę',Math.abs(v71DeviceAllocatedCostDay(d,price)-0.39)<0.000001);
+ add('Pełny koszt = materiały + energia + operacyjne',Math.abs((12.72+2.73+0)-15.45)<1e-9);
+ add('Koszt 1 L z partii 4,4 L = pełny koszt / 4,4',Math.abs(15.45/4.4-3.51136363636)<1e-9);
+ return t;
+};
+
+const v72InitBase=init;
+init = async function(){
+ await v72InitBase();try{await put('meta',{id:'fullProductionCostV72',value:{done:true,date:new Date().toISOString(),note:'v7.2: energia urządzeń w koszcie partii, koszcie/litr i marży; dynamiczna rekonstrukcja starych aktywnych kultur; bez podwójnego liczenia medium w KPI partii.'}})}catch(e){console.warn('v7.2 meta',e)}
+ document.title='AquaCulture Manager v7.2 Full Production Cost';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.2 • Full Production Cost • AquaFlow');titles.costing=['Koszty produkcji','Pełny koszt: materiały + energia urządzeń + praca + inne, z przeliczeniem na litr.'];render();
+};
+
+
 registerPWA();
 
 init();
