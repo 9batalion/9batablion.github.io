@@ -432,6 +432,32 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 }
 </style>
 
+
+<style id="v76-label-studio-css">
+.v76-label-hero{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;align-items:stretch}
+.v76-label-hero .card{border-color:#315a50;background:linear-gradient(135deg,#0d1c2c,#0c2a25)}
+.v76-label-hero h3{font-size:18px;margin:0 0 6px}
+.v76-label-features{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}
+.v76-label-feature{border:1px solid rgba(111,220,183,.22);background:rgba(255,255,255,.025);padding:9px;border-radius:12px}
+.v76-label-feature b{display:block;font-size:12px}.v76-label-feature span{display:block;font-size:9px;color:var(--muted);margin-top:3px}
+.v76-studio-row{display:grid;grid-template-columns:auto minmax(0,1fr) 100px 100px;gap:9px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:13px;background:#0a1728;margin:7px 0}
+.v76-studio-row input[type=checkbox]{width:21px;height:21px}
+.v76-studio-row .v76-name strong{display:block;font-size:12px}.v76-studio-row .v76-name small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.v76-studio-row .v76-mini-field label{font-size:8px;color:var(--muted);display:block;margin-bottom:3px;text-transform:uppercase}
+.v76-studio-row .v76-mini-field input{padding:7px 8px}
+.v76-studio-options{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.v76-check{display:flex!important;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:11px;background:#0a1728;font-size:11px;color:#c9d9e9}
+.v76-check input{width:18px;height:18px}
+@media(max-width:760px){
+ .v76-label-hero{grid-template-columns:1fr}
+ .v76-label-features{grid-template-columns:1fr 1fr}
+ .v76-studio-row{grid-template-columns:auto 1fr}
+ .v76-studio-row .v76-mini-field{grid-column:2}
+ .v76-studio-options{grid-template-columns:1fr 1fr}
+}
+@media(max-width:480px){.v76-label-features,.v76-studio-options{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -4646,7 +4672,7 @@ registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=
    - przychód dopiero po płatności
    - szybkie akcje i lekki CRM/RFM
    ========================================================== */
-const V75_APP_VERSION='7.5.1';
+const V75_APP_VERSION='7.6';
 let v75SalesFilter='todo';
 let v75SalesQuery='';
 let v75ClientQuery='';
@@ -5039,15 +5065,156 @@ buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntr
 const v75InitBase=init;
 init=async function(){
  await v75InitBase();const purchaseFixes=await v751RepairPurchaseUnitCosts();await v75MigrateSales();
- document.title='AquaCulture Manager v7.5.1 Sales Hub';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.5.1 • Sales Hub • Purchase Cost Fix');
+ document.title='AquaCulture Manager v7.6 Label Studio Pro';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6 • Label Studio Pro • Sales Hub');
  titles.sales=['Sprzedaż','Jedno centrum działania: zamówienia, płatności, wysyłka, klienci i marża.'];
  titles.orders=['Zamówienia','Kanban realizacji z osobnym statusem płatności i rezerwacją magazynową.'];
  titles.clients=['Klienci','Lekki CRM: historia, wartość, częstotliwość i szybkie zamówienia.'];
  if(purchaseFixes)console.info(`v7.5.1: naprawiono ${purchaseFixes} cen zakupowych.`);
  render();
 };
-registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v751-sw-reloaded')){sessionStorage.setItem('acm-v751-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.5.1',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v751-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.5.1:',err)}})};
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v76-sw-reloaded')){sessionStorage.setItem('acm-v76-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.6',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v76-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.6:',err)}})};
+
+
+// ==========================================================
+// v7.6 LABEL STUDIO PRO
+// Premium A4 labels generated directly from central inventory.
+// No external graphics or libraries are required for printing.
+// ==========================================================
+function v76Hash(str=''){
+ let h=2166136261>>>0;
+ for(let i=0;i<String(str).length;i++){h^=String(str).charCodeAt(i);h=Math.imul(h,16777619)}
+ return h>>>0;
+}
+function v76Rnd(seed){
+ let s=seed>>>0;
+ return ()=>{s=(Math.imul(1664525,s)+1013904223)>>>0;return s/4294967296};
+}
+function v76FlaskLogo(){
+ return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/><path d="M26 14h12M29 14v13L19 43c-2 4 1 8 6 8h14c5 0 8-4 6-8L35 27V14" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 41h18" stroke="currentColor" stroke-width="3"/><circle cx="29" cy="38" r="2.4" fill="currentColor"/><circle cx="35" cy="44" r="2.2" fill="currentColor"/><circle cx="37" cy="35" r="1.8" fill="currentColor"/></svg>`;
+}
+function v76MicroArt(key=''){
+ const rnd=v76Rnd(v76Hash(key)),gid='v76g'+v76Hash(key).toString(36);
+ let dots='';
+ for(let i=0;i<28;i++){
+  const a=rnd()*Math.PI*2,r=27+rnd()*35,x=80+Math.cos(a)*r,y=54+Math.sin(a)*r*.62,rr=1.2+rnd()*4.1,op=.25+rnd()*.62;
+  dots+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="url(#${gid})" opacity="${op.toFixed(2)}"/>`;
+ }
+ let cells='';
+ for(let i=0;i<17;i++){
+  const a=rnd()*Math.PI*2,r=rnd()*25,x=80+Math.cos(a)*r,y=54+Math.sin(a)*r,rr=4+rnd()*6;
+  cells+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="url(#${gid})" stroke="#1f5e12" stroke-width=".8"/><circle cx="${(x-rr*.22).toFixed(1)}" cy="${(y-rr*.22).toFixed(1)}" r="${(rr*.22).toFixed(1)}" fill="#d7ff8d" opacity=".55"/>`;
+ }
+ return `<svg viewBox="0 0 160 108" aria-hidden="true"><defs><radialGradient id="${gid}" cx="35%" cy="28%"><stop offset="0" stop-color="#dfff73"/><stop offset=".38" stop-color="#65c51a"/><stop offset="1" stop-color="#0b4e17"/></radialGradient><radialGradient id="${gid}b"><stop offset="0" stop-color="#b6ef4a"/><stop offset=".72" stop-color="#25770d"/><stop offset="1" stop-color="#06350d"/></radialGradient></defs>${dots}<circle cx="80" cy="54" r="34" fill="url(#${gid}b)" stroke="#e5f6d9" stroke-width="3"/><circle cx="80" cy="54" r="30" fill="#153f10" opacity=".35"/>${cells}<circle cx="80" cy="54" r="34" fill="none" stroke="#2d681d" stroke-width="1.3"/></svg>`;
+}
+function v76EligibleLabelStock(){
+ return (db.inventory||[]).filter(x=>Number(x.qty||0)>0&&['Kultura żywa','Produkt gotowy'].includes(inferStockKind(x)))
+  .sort((a,b)=>String(a.organism||a.name||'').localeCompare(String(b.organism||b.name||''))||String(a.lot||a.id).localeCompare(String(b.lot||b.id)));
+}
+function v76GuessVolumeMl(x){
+ const direct=Number(x?.packageSizeMl||x?.labelVolumeMl||0);if(direct>0)return direct;
+ const s=[x?.name,x?.category,x?.notes].filter(Boolean).join(' ');
+ let m=s.match(/(\d+(?:[.,]\d+)?)\s*ml\b/i);if(m)return Math.round(Number(m[1].replace(',','.')));
+ m=s.match(/(\d+(?:[.,]\d+)?)\s*l\b/i);if(m)return Math.round(Number(m[1].replace(',','.'))*1000);
+ return 1000;
+}
+function v76VolumeText(ml){
+ ml=Math.max(0,Number(ml||0));
+ if(ml>=1000&&Math.abs(ml%1000)<1e-9)return `${num(ml/1000,0)} L`;
+ if(ml>=1000)return `${num(ml/1000,2)} L`;
+ return `${num(ml,0)} ml`;
+}
+function v76SpeciesDesign(x){
+ const raw=String(x?.organism||x?.name||'Żywa kultura').trim(),s=raw.toLowerCase();
+ if(s.includes('nannochloropsis'))return {a:'NANNO',b:'CHLOROPSIS',descriptor:'ŻYWA FITOPLANKTONOWA MIKROALGA',ecosystem:'DLA SŁONOWODNYCH EKOSYSTEMÓW',micro:'MICROALGAE'};
+ if(s.includes('tigriopus')||s.includes('widłon'))return {a:'TIGRIOPUS',b:'',descriptor:'ŻYWE WIDŁONOGI MORSKIE',ecosystem:'ŻYWA KULTURA DLA AKWARIÓW MORSKICH',micro:'COPEPODS'};
+ if(s.includes('kiełż')||s.includes('amphip'))return {a:'KIEŁŻE',b:'MORSKIE',descriptor:'ŻYWA KULTURA AMFIPODÓW',ecosystem:'DLA SŁONOWODNYCH EKOSYSTEMÓW',micro:'AMPHIPODS'};
+ const words=raw.toUpperCase().replace(/\s+/g,' ').split(' ').filter(Boolean);
+ return {a:words.slice(0,1).join(' ')||'ŻYWA',b:words.slice(1,3).join(' '),descriptor:'ŻYWA KULTURA AKWARIOWA',ecosystem:'IDENTYFIKOWALNA PARTIA PRODUKCYJNA',micro:'LIVE CULTURE'};
+}
+function v76StudioSelected(){
+ const out=[];
+ document.querySelectorAll('[data-v76-stock]:checked').forEach(cb=>{
+  const id=cb.dataset.v76Stock,x=getById('inventory',id);if(!x)return;
+  const row=cb.closest('.v76-studio-row'),copies=Math.max(1,Math.min(99,Number(row?.querySelector('[data-v76-copies]')?.value||1))),volumeMl=Math.max(1,Number(row?.querySelector('[data-v76-volume]')?.value||1000));
+  out.push({item:x,copies,volumeMl});
+ });
+ return out;
+}
+function v76StudioToggleAll(state){document.querySelectorAll('[data-v76-stock]').forEach(x=>x.checked=state)}
+function v76FeatureIcon(kind){
+ const inner=kind==='marine'?'<path d="M6 13c5-7 13-7 18 0-5 7-13 7-18 0Zm18 0 5-4v8l-5-4Z"/><circle cx="13" cy="11" r="1.3" fill="#fff"/>':kind==='coral'?'<path d="M16 26V9m0 5-5-5m5 9 6-6m-6 10-7-5m13 8-6-4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M8 27h16" stroke="currentColor" stroke-width="2.4"/>':'<path d="M16 5c5 7 8 11 8 15a8 8 0 1 1-16 0c0-4 3-8 8-15Z" fill="none" stroke="currentColor" stroke-width="2.4"/>';
+ return `<svg viewBox="0 0 32 32" aria-hidden="true">${inner}</svg>`;
+}
+function v76LabelRecordFromStock(x,volumeMl){
+ const d=v76SpeciesDesign(x),lot=String(x.lot||x.id),best=x.bestBefore?datePL(x.bestBefore):'',strain=String(x.strain||''),qr=qrPayload('STOCK',x.id);
+ return {id:x.id,lot,name:x.name||d.a,organism:x.organism||'',d,volumeMl,best,strain,status:x.status||'',qr,zone:typeof v74ZoneOf==='function'?v74ZoneOf(x).name:(x.location||''),stock:stockQtyText(x)};
+}
+function v76PremiumLabelHTML(rec,opts={},idx=0){
+ const qr=makeQR(rec.qr),d=rec.d,showBest=!!opts.showBest,showStrain=!!opts.showStrain;
+ const batchShort=rec.lot.length>25?rec.lot.slice(0,25):rec.lot;
+ return `<article class="v76p-label">
+  <div class="v76p-top">
+   <div class="v76p-brand"><div class="v76p-logo">${v76FlaskLogo()}</div><div><strong>${esc(db.settings.companyName||'NANNO CULTURE')}</strong><span>• ${esc(d.micro)} •</span></div></div>
+   <div class="v76p-art">${v76MicroArt(rec.id+'|'+idx)}</div>
+  </div>
+  <div class="v76p-species"><div>${esc(d.a)}</div>${d.b?`<div class="green">${esc(d.b)}</div>`:''}</div>
+  <div class="v76p-pill">${esc(d.descriptor)}</div>
+  <div class="v76p-ecosystem">${esc(d.ecosystem)}</div>
+  <div class="v76p-features">
+   <div><i>${v76FeatureIcon('marine')}</i><span>DO AKWARIÓW<br>MORSKICH</span></div>
+   <div><i>${v76FeatureIcon('coral')}</i><span>DLA KORALOWCÓW<br>I BEZKRĘGOWCÓW</span></div>
+   <div><i>${v76FeatureIcon('drop')}</i><span>NATURALNE ŹRÓDŁO<br>POKARMU</span></div>
+  </div>
+  <div class="v76p-trace">
+   <div class="trace-text"><small>NUMER PARTII</small><b>${esc(batchShort)}</b>${showStrain&&rec.strain?`<span>Szczep: ${esc(rec.strain)}</span>`:''}${showBest&&rec.best?`<span>Użyć do: ${esc(rec.best)}</span>`:''}</div>
+   <div class="trace-qr">${qr}<small>QR • ${esc(rec.id)}</small></div>
+  </div>
+  <div class="v76p-bottom"><strong>${esc(v76VolumeText(rec.volumeMl))}</strong><span>OBJĘTOŚĆ<br>NETTO</span><em></em><b>100% ŻYWA KULTURA</b></div>
+ </article>`;
+}
+function v76Layout(code){
+ if(code==='compact')return {cols:2,w:96,h:67,gap:3,scale:.80,name:'Kompakt 2×4 • 8/A4'};
+ if(code==='mini')return {cols:3,w:62,h:65,gap:3,scale:.68,name:'Mini 3×4 • 12/A4'};
+ return {cols:2,w:96,h:90,gap:4,scale:1,name:'Premium 2×3 • 6/A4'};
+}
+function v76PrintCSS(layout,trim=false){
+ const s=layout.scale;
+ return `@page{size:A4 portrait;margin:7mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.v76p-sheet{width:196mm;display:grid;grid-template-columns:repeat(${layout.cols},${layout.w}mm);grid-auto-rows:${layout.h}mm;gap:${layout.gap}mm;align-content:start}.v76p-label{position:relative;width:${layout.w}mm;height:${layout.h}mm;border:${trim?'1px dashed #89958e':'1.2px solid #153f31'};border-radius:${3.2*s}mm;padding:${3.3*s}mm ${3.2*s}mm ${0*s}mm;overflow:hidden;background:#fff;color:#07110c;font-family:Arial,Helvetica,sans-serif;break-inside:avoid;display:flex;flex-direction:column}.v76p-top{height:${22*s}mm;position:relative;display:flex;justify-content:space-between}.v76p-brand{display:flex;gap:${2*s}mm;align-items:flex-start;z-index:2}.v76p-logo{width:${11*s}mm;height:${11*s}mm;color:#07110c}.v76p-logo svg{width:100%;height:100%}.v76p-brand strong{display:block;font-size:${12*s}px;letter-spacing:.45px;margin-top:${1.6*s}mm}.v76p-brand span{display:block;color:#336b24;font-weight:800;font-size:${7.1*s}px;letter-spacing:1px;margin-top:${.7*s}mm}.v76p-art{position:absolute;right:-${3*s}mm;top:-${5*s}mm;width:${46*s}mm;height:${30*s}mm}.v76p-art svg{width:100%;height:100%}.v76p-species{font-weight:1000;font-size:${30*s}px;line-height:.87;letter-spacing:-1.2px;margin-top:${.8*s}mm;max-width:78%}.v76p-species .green{color:#2e720f}.v76p-pill{align-self:flex-start;background:#073a20;color:#fff;border-radius:${1.1*s}mm;padding:${.8*s}mm ${1.8*s}mm;margin-top:${1.6*s}mm;font-size:${7.2*s}px;font-weight:900;letter-spacing:.15px}.v76p-ecosystem{font-size:${7.2*s}px;font-weight:900;letter-spacing:.2px;margin:${1.7*s}mm 0 ${1.8*s}mm}.v76p-features{display:grid;grid-template-columns:repeat(3,1fr);gap:${1.5*s}mm;border-top:.25mm solid #dde4df;padding-top:${1.6*s}mm}.v76p-features>div{display:grid;grid-template-columns:${8*s}mm 1fr;gap:${1*s}mm;align-items:center;border-right:.25mm solid #6c9b57;padding-right:${1*s}mm}.v76p-features>div:last-child{border-right:0}.v76p-features i{width:${7*s}mm;height:${7*s}mm;border:.35mm solid #111;border-radius:50%;display:grid;place-items:center}.v76p-features i svg{width:80%;height:80%}.v76p-features span{font-size:${6.2*s}px;font-style:normal;font-weight:900;line-height:1.22}.v76p-trace{display:grid;grid-template-columns:1fr ${17*s}mm;gap:${2*s}mm;align-items:center;margin-top:auto;padding-top:${1.4*s}mm}.trace-text small{display:block;font-size:${5.6*s}px;color:#66726c;font-weight:800;letter-spacing:.55px}.trace-text b{display:block;font-size:${8.1*s}px;line-height:1.1;margin-top:${.45*s}mm;word-break:break-all}.trace-text span{display:block;font-size:${5.5*s}px;color:#4f5d57;margin-top:${.45*s}mm}.trace-qr{text-align:center}.trace-qr .qrsvg{display:block;width:${15.2*s}mm;height:${15.2*s}mm;margin:auto}.trace-qr small{display:block;font-size:${4.5*s}px;color:#56625c;max-width:${17*s}mm;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-top:.3mm}.v76p-bottom{height:${11*s}mm;background:linear-gradient(100deg,#00412c,#073e29 60%,#0b2f23);color:#fff;margin:${1.8*s}mm -${3.2*s}mm 0;display:grid;grid-template-columns:auto auto 1fr auto;align-items:center;gap:${2.2*s}mm;padding:0 ${3.2*s}mm}.v76p-bottom strong{font-size:${21*s}px;line-height:1}.v76p-bottom span{font-size:${5.8*s}px;font-weight:800;line-height:1.15;border-left:.3mm solid rgba(255,255,255,.55);padding-left:${2*s}mm}.v76p-bottom em{height:55%;border-left:.3mm solid rgba(255,255,255,.55)}.v76p-bottom b{font-size:${6.2*s}px;white-space:nowrap}@media print{button{display:none!important}}`;
+}
+async function v76GenerateLabels(){
+ const selected=v76StudioSelected();if(!selected.length)return alert('Zaznacz co najmniej jedną pozycję z magazynu.');
+ const layout=v76Layout(document.getElementById('v76Layout')?.value||'premium'),showBest=document.getElementById('v76ShowBest')?.checked,showStrain=document.getElementById('v76ShowStrain')?.checked,trim=document.getElementById('v76Trim')?.checked;
+ const records=[];for(const s of selected){for(let i=0;i<s.copies;i++)records.push(v76LabelRecordFromStock(s.item,s.volumeMl))}
+ const body=`<div class="v76p-sheet">${records.map((r,i)=>v76PremiumLabelHTML(r,{showBest,showStrain},i)).join('')}</div>`;
+ db.settings.labelStudioLayout=document.getElementById('v76Layout')?.value||'premium';db.settings.labelStudioShowBest=!!showBest;db.settings.labelStudioShowStrain=!!showStrain;db.settings.labelStudioTrim=!!trim;await saveSettings();
+ popupDoc('AquaCulture • etykiety '+layout.name,body,v76PrintCSS(layout,trim));
+}
+function openV76LabelStudio(){
+ const items=v76EligibleLabelStock();if(!items.length)return alert('Brak dodatniego stanu kultur lub produktów gotowych w magazynie.');
+ modalTitle.textContent='Label Studio Pro — z magazynu';modalBox.classList.add('wide');
+ const rows=items.map((x,i)=>`<div class="v76-studio-row"><input type="checkbox" data-v76-stock="${esc(x.id)}" ${i===0?'checked':''}><div class="v76-name"><strong>${esc(x.organism||x.name)} • ${esc(x.lot||x.id)}</strong><small>${esc(x.name)} • ${stockQtyText(x)} • ${esc(typeof v74ZoneOf==='function'?v74ZoneOf(x).name:(x.location||'magazyn'))}</small></div><div class="v76-mini-field"><label>Kopie</label><input type="number" min="1" max="99" value="1" data-v76-copies></div><div class="v76-mini-field"><label>Objętość etykiety [ml]</label><input type="number" min="1" step="1" value="${v76GuessVolumeMl(x)}" data-v76-volume></div></div>`).join('');
+ modalBody.innerHTML=`<div class="callout"><strong>Dane pochodzą bezpośrednio z Magazynu.</strong> Nazwa/organizm, numer partii, szczep, termin i identyfikator QR są pobierane z bieżącego rekordu. QR ma format <code>ACM|STOCK|ID</code> i po zeskanowaniu otwiera kartę tej pozycji w aplikacji.</div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Wybierz partie</h3><div>${btn('Zaznacz wszystko','v76StudioToggleAll(true)','btn tiny secondary')}${btn('Wyczyść','v76StudioToggleAll(false)','btn tiny secondary')}</div></div><div class="section">${rows}</div></div>
+ <div class="section card"><h3>Układ i treść</h3><div class="v76-studio-options"><div class="field"><label>Format arkusza A4</label><select id="v76Layout"><option value="premium" ${(db.settings.labelStudioLayout||'premium')==='premium'?'selected':''}>Premium 2×3 • 6/A4 • podobny układ</option><option value="compact" ${db.settings.labelStudioLayout==='compact'?'selected':''}>Kompakt 2×4 • 8/A4</option><option value="mini" ${db.settings.labelStudioLayout==='mini'?'selected':''}>Mini 3×4 • 12/A4</option></select></div><label class="v76-check"><input id="v76ShowStrain" type="checkbox" ${db.settings.labelStudioShowStrain!==false?'checked':''}> Pokaż szczep / źródło</label><label class="v76-check"><input id="v76ShowBest" type="checkbox" ${db.settings.labelStudioShowBest?'checked':''}> Pokaż termin użycia</label><label class="v76-check"><input id="v76Trim" type="checkbox" ${db.settings.labelStudioTrim?'checked':''}> Przerywana linia cięcia</label></div><div class="actions section">${btn('Generuj podgląd A4 / drukuj','v76GenerateLabels()','btn primary')}</div></div>
+ <div class="section callout"><strong>Projekt wektorowy i offline.</strong> Grafika mikroalg, logo oraz QR są generowane w przeglądarce jako SVG. Nie trzeba pobierać obrazków z internetu, dzięki czemu wydruk pozostaje ostry również w PDF.</div>`;
+ modal.classList.add('open');
+}
+const v76RenderPrintsBase=renderPrints;
+renderPrints=function(){
+ const eligible=v76EligibleLabelStock(),base=v76RenderPrintsBase();
+ return `<div class="v76-label-hero"><div class="card"><h3>Label Studio Pro</h3><div class="small">Nowy generator etykiet w stylu premium 2×3 A4. Partie, organizm i kod QR są pobierane bezpośrednio z centralnego magazynu.</div><div class="v76-label-features"><div class="v76-label-feature"><b>${eligible.length} pozycji</b><span>dostępnych do etykietowania</span></div><div class="v76-label-feature"><b>QR → magazyn</b><span>kod otwiera konkretną kartę</span></div><div class="v76-label-feature"><b>6 / 8 / 12</b><span>etykiet na arkusz A4</span></div></div><div class="actions section">${btn('Otwórz Label Studio','openV76LabelStudio()','btn primary')}</div></div><div class="card"><h3>Co trafia na etykietę</h3><div class="statline"><span>Numer partii</span><strong>lot / ID magazynowe</strong></div><div class="statline"><span>QR</span><strong>ACM|STOCK|…</strong></div><div class="statline"><span>Produkt</span><strong>organizm / nazwa</strong></div><div class="statline"><span>Opcjonalnie</span><strong>szczep + termin</strong></div></div></div><div class="section">${base}</div>`;
+};
+
+// Update visible version after the previous init wrapper completes.
+const v76InitBase=init;
+init=async function(){
+ await v76InitBase();
+ document.title='AquaCulture Manager v7.6 Label Studio Pro';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6 • Label Studio Pro • Sales Hub');
+ titles.prints=['Etykiety / wydruki','Label Studio Pro: etykiety premium z QR i numerem partii pobieranym z magazynu.'];
+ render();
+};
 
 
 registerPWA();
