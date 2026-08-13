@@ -503,6 +503,29 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 @media(max-width:680px){.v77-hero{grid-template-columns:1fr}.v77-points{grid-template-columns:1fr 1fr}.v77-row{grid-template-columns:auto 1fr}.v77-row .f{grid-column:2}.v77-options{grid-template-columns:1fr}}
 </style>
 
+
+<style id="v771-label-quality-fixes">
+.v77-row .f input,.v77-row .f select{width:100%}
+.v77-options-fix{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.v77-toggle-card{border:1px solid var(--line);background:#091728;border-radius:12px;padding:10px 12px}
+.v77-toggle-card label{display:flex;gap:10px;align-items:flex-start;font-size:11px;color:#dce9f7;line-height:1.25;text-transform:none}
+.v77-toggle-card input{width:18px;height:18px;flex:0 0 auto;margin-top:1px}
+.v77-toggle-card small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.v77-help{font-size:10px;color:var(--muted)}
+@media(max-width:680px){
+  .v77-options-fix{grid-template-columns:1fr}
+  .v77-row{gap:10px}
+}
+</style>
+
+
+<style id="v78-label-studio-css">
+.v78-bundle-hint{margin-top:6px;padding:7px 9px;border-radius:9px;background:#0c1d31;border:1px solid #27445f;font-size:9px;color:#a9bdd3}
+.v78-preview-note{display:flex;gap:8px;align-items:flex-start;border:1px solid #31506d;background:#0b1a2d;border-radius:11px;padding:10px;font-size:10px;color:#c5d7ea}
+.v78-preview-note b{color:#fff}
+@media(max-width:680px){.v77-row .name strong{font-size:11px}.v77-row .name small{line-height:1.3}}
+</style>
+
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -4717,7 +4740,7 @@ registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=
    - przychód dopiero po płatności
    - szybkie akcje i lekki CRM/RFM
    ========================================================== */
-const V75_APP_VERSION='7.7';
+const V75_APP_VERSION='7.8';
 let v75SalesFilter='todo';
 let v75SalesQuery='';
 let v75ClientQuery='';
@@ -5110,15 +5133,15 @@ buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntr
 const v75InitBase=init;
 init=async function(){
  await v75InitBase();const purchaseFixes=await v751RepairPurchaseUnitCosts();await v75MigrateSales();
- document.title='AquaCulture Manager v7.7 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.7 • Advanced Label Studio • Bundle Labels');
+ document.title='AquaCulture Manager v7.8 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.8 • Adaptive Bundle • AutoFit Preview');
  titles.sales=['Sprzedaż','Jedno centrum działania: zamówienia, płatności, wysyłka, klienci i marża.'];
  titles.orders=['Zamówienia','Kanban realizacji z osobnym statusem płatności i rezerwacją magazynową.'];
  titles.clients=['Klienci','Lekki CRM: historia, wartość, częstotliwość i szybkie zamówienia.'];
  if(purchaseFixes)console.info(`v7.5.1: naprawiono ${purchaseFixes} cen zakupowych.`);
  render();
 };
-registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v77-sw-reloaded')){sessionStorage.setItem('acm-v77-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.7',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v77-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.7:',err)}})};
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v78-sw-reloaded')){sessionStorage.setItem('acm-v78-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.8',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v78-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.8:',err)}})};
 
 
 // ==========================================================
@@ -5255,8 +5278,8 @@ renderPrints=function(){
 const v76InitBase=init;
 init=async function(){
  await v76InitBase();
- document.title='AquaCulture Manager v7.7 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.7 • Advanced Label Studio • Bundle Labels');
+ document.title='AquaCulture Manager v7.8 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.8 • Adaptive Bundle • AutoFit Preview');
  titles.prints=['Etykiety / wydruki','Label Studio Pro: etykiety premium z QR i numerem partii pobieranym z magazynu.'];
  render();
 };
@@ -5326,8 +5349,8 @@ openV76LabelStudio=function(){
 const v761InitBase=init;
 init=async function(){
  await v761InitBase();
- document.title='AquaCulture Manager v7.7 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.7 • Advanced Label Studio • Bundle Labels');
+ document.title='AquaCulture Manager v7.8 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.8 • Adaptive Bundle • AutoFit Preview');
  render();
 };
 
@@ -5351,16 +5374,168 @@ function v77Texts(tpl){if(tpl==='bundle')return {a:'NANNO',b:'FITO+ WIDŁONOGI',
 function v77FeatIcon(idx,color){const inner=idx===0?'<path d="M6 13c5-7 13-7 18 0-5 7-13 7-18 0Zm18 0 5-4v8l-5-4Z"/><circle cx="13" cy="11" r="1.3" fill="#fff"/>':idx===1?'<circle cx="10" cy="16" r="3.6"/><circle cx="22" cy="16" r="3.6"/><circle cx="16" cy="9" r="3.6"/>':'<path d="M16 5c5 7 8 11 8 15a8 8 0 1 1-16 0c0-4 3-8 8-15Z" fill="none" stroke="currentColor" stroke-width="2.5"/>';return `<svg viewBox="0 0 32 32" style="color:${color}" aria-hidden="true">${inner}</svg>`}
 function v77Layout(code){if(code==='compact')return {cols:2,w:96,h:67,gap:3,font:.84};if(code==='mini')return {cols:3,w:62,h:64,gap:3,font:.73};return {cols:2,w:96,h:90,gap:4,font:1}}
 function v77Rec(item,tpl,vol){return {item,tpl,vol,lot:String(item.lot||item.id),qr:qrPayload('STOCK',item.id),best:item.bestBefore?datePL(item.bestBefore):'',strain:String(item.strain||item.source||item.supplier||'')}}
-function v77RenderLabel(rec,idx,opts){const th=v77Theme(rec.tpl),txt=v77Texts(rec.tpl);const qr=opts.showQr?makeQR(rec.qr):'';const art=rec.tpl==='phyto'?v76MicroArt(rec.item.id+'|'+idx):v77CopepodArt(rec.item.id+'|'+idx);const leftBubbles=rec.tpl==='bundle'?v77BubbleArt(rec.item.id+'|'+idx):'';const rightArt=rec.tpl==='bundle'?v77CopepodArt(rec.item.id+'|'+idx+'b'):art;const extra=rec.tpl==='bundle'?`<div class="v77-leftb">${leftBubbles}</div><div class="v77-art right">${rightArt}</div>`:`<div class="v77-art">${art}</div>`;return `<article class="v77label ${rec.tpl}"><div class="brand"><div class="logo">${v77FlaskLogo(th.navy)}</div><div class="brtxt"><strong>NANNO CULTURE</strong><span>• MICROALGAE •</span></div></div><div class="artzone">${extra}</div><div class="title"><div class="a" style="color:${th.navy}">${esc(txt.a)}</div><div class="b" style="color:${th.accent}">${esc(txt.b)}</div></div><div class="pills"><span class="p1" style="background:${th.accent}">${esc(txt.p1)}</span><span class="p2" style="background:${th.navy}">${esc(txt.p2)}</span></div><div class="tag">${esc(txt.tag)}</div><div class="icons">${[['IDEALNA PASZA','DLA RYB I LARW'],['WYSOKA WARTOŚĆ','ODŻYWCZA'],['WZMACNIA','ODPORNOŚĆ']].map((f,i)=>`<div class="ic"><i>${v77FeatIcon(i,th.navy)}</i><span>${esc(f[0])}<br>${esc(f[1])}</span></div>`).join('')}</div><div class="trace"><div class="lot"><small>NUMER PARTII</small><b>${esc(rec.lot)}</b>${opts.showStrain&&rec.strain?`<span>Źródło: ${esc(rec.strain)}</span>`:''}${opts.showBest&&rec.best?`<span>Użyć do: ${esc(rec.best)}</span>`:''}</div>${opts.showQr?`<div class="qr"><div class="code">${qr}</div><small>QR • ${esc(rec.item.id)}</small></div>`:''}</div><div class="bottom" style="background:${th.navy}"><strong>${esc(v77VolumeText(rec.vol))}</strong><span>OBJĘTOŚĆ<br>NETTO</span><em></em><b>100% NATURALNY<br>PRODUKT</b></div></article>`}
-function v77PrintCSS(layout,trim){const f=layout.font;return `@page{size:A4 portrait;margin:7mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}.v77sheet{width:196mm;display:grid;grid-template-columns:repeat(${layout.cols},${layout.w}mm);grid-auto-rows:${layout.h}mm;gap:${layout.gap}mm;align-content:start}.v77label{position:relative;width:${layout.w}mm;height:${layout.h}mm;border:${trim?'1px dashed #8a8a8a':'1.2px solid #1d2f47'};border-radius:${3.3*f}mm;padding:${3.0*f}mm ${3.4*f}mm ${7.0*f}mm;background:#fff;overflow:hidden}.v77label .brand{display:flex;align-items:center;gap:${2.0*f}mm;position:relative;z-index:3}.v77label .logo{width:${8.8*f}mm;height:${8.8*f}mm}.v77label .brtxt strong{display:block;font-size:${4.0*f}mm;letter-spacing:.02em}.v77label .brtxt span{display:block;font-size:${2.0*f}mm;letter-spacing:.15em}.v77label .artzone{position:absolute;inset:${4.0*f}mm ${3.0*f}mm auto auto;width:${31*f}mm;height:${31*f}mm}.v77label .artzone .v77-art{position:absolute;right:0;top:0;width:${30*f}mm;height:${30*f}mm}.v77label.bundle .artzone .v77-leftb{position:absolute;left:${2*f}mm;top:${7*f}mm;width:${17*f}mm;height:${17*f}mm}.v77label.bundle .artzone .v77-art.right{right:-${1.5*f}mm;top:-${1.2*f}mm;width:${23*f}mm;height:${23*f}mm}.v77label .title{position:relative;z-index:3;margin-top:${4.0*f}mm;line-height:.9}.v77label .title .a{font-weight:900;font-size:${14.5*f}mm;letter-spacing:.01em}.v77label .title .b{font-weight:900;font-size:${8.0*f}mm;letter-spacing:.01em}.v77label .pills{position:relative;z-index:3;display:flex;flex-direction:column;gap:${1.0*f}mm;margin-top:${2.0*f}mm;max-width:${60*f}mm}.v77label .pills span{display:inline-block;color:#fff;border-radius:${1.4*f}mm;padding:${1.2*f}mm ${2.2*f}mm;font-weight:800;font-size:${2.7*f}mm;letter-spacing:.02em;width:max-content;max-width:100%}.v77label .tag{position:relative;z-index:3;margin-top:${2.1*f}mm;font-weight:800;font-size:${2.5*f}mm;color:#202734;max-width:${72*f}mm}.v77label .icons{position:absolute;right:${3.3*f}mm;top:${23*f}mm;width:${25*f}mm;display:flex;flex-direction:column;gap:${2.0*f}mm;z-index:3}.v77label .ic{display:flex;align-items:center;gap:${1.8*f}mm}.v77label .ic i{display:inline-flex;align-items:center;justify-content:center;width:${7.2*f}mm;height:${7.2*f}mm;border:${.45*f}mm solid #24324c;border-radius:50%}.v77label .ic i svg{width:${5.2*f}mm;height:${5.2*f}mm}.v77label .ic span{font-size:${2.15*f}mm;font-weight:800;color:#111a27;line-height:1.15}.v77label .trace{position:absolute;left:${3.4*f}mm;right:${3.4*f}mm;bottom:${10.2*f}mm;display:flex;justify-content:space-between;align-items:flex-end;gap:${2*f}mm;z-index:3}.v77label .trace .lot small,.v77label .trace .qr small{display:block;font-size:${1.85*f}mm;color:#5a6170;font-weight:700;letter-spacing:.03em}.v77label .trace .lot b{display:block;font-size:${3.0*f}mm;color:#0e1730;margin-top:${.5*f}mm}.v77label .trace .lot span{display:block;font-size:${2.0*f}mm;color:#333b47;margin-top:${.4*f}mm}.v77label .trace .qr{display:flex;flex-direction:column;align-items:center}.v77label .trace .code svg{width:${12*f}mm;height:${12*f}mm}.v77label .bottom{position:absolute;left:0;right:0;bottom:0;height:${10*f}mm;color:#fff;display:grid;grid-template-columns:${17*f}mm ${20*f}mm 1fr ${34*f}mm;align-items:center;padding:0 ${3.3*f}mm;border-radius:0 0 ${3.1*f}mm ${3.1*f}mm}.v77label .bottom strong{font-size:${8.0*f}mm;line-height:1;font-weight:900}.v77label .bottom span,.v77label .bottom b{font-size:${2.8*f}mm;line-height:1.1;font-weight:800}.v77label .bottom em{height:${6*f}mm;border-left:${.4*f}mm solid rgba(255,255,255,.55)}.v77label svg{max-width:100%;max-height:100%}`}
+function v77RenderLabel(rec,idx,opts){
+ const th=v77Theme(rec.tpl),txt=v77Texts(rec.tpl);
+ const qr=opts.showQr?makeQR(rec.qr):'';
+ const art=rec.tpl==='phyto'?v76MicroArt(rec.item.id+'|'+idx):v77CopepodArt(rec.item.id+'|'+idx);
+ const leftBubbles=rec.tpl==='bundle'?v77BubbleArt(rec.item.id+'|'+idx):'';
+ const rightArt=rec.tpl==='bundle'?v77CopepodArt(rec.item.id+'|'+idx+'b'):art;
+ const extra=rec.tpl==='bundle'
+   ? `<div class="v77-leftb">${leftBubbles}</div><div class="v77-art right">${rightArt}</div>`
+   : `<div class="v77-art">${art}</div>`;
+ const titleBHtml=rec.tpl==='bundle' ? 'FITO+<br>WIDŁONOGI' : esc(txt.b);
+ const features=[['IDEALNA PASZA','DLA RYB I LARW'],['WYSOKA WARTOŚĆ','ODŻYWCZA'],['WZMACNIA','ODPORNOŚĆ']];
+ return `<article class="v77label ${rec.tpl}">
+   <div class="brand"><div class="logo">${v77FlaskLogo(th.navy)}</div><div class="brtxt"><strong>NANNO CULTURE</strong><span>• MICROALGAE •</span></div></div>
+   <div class="artzone">${extra}</div>
+   <div class="title"><div class="a" style="color:${th.navy}">${esc(txt.a)}</div><div class="b" style="color:${th.accent}">${titleBHtml}</div></div>
+   <div class="pills"><span class="p1" style="background:${th.accent}">${esc(txt.p1)}</span><span class="p2" style="background:${th.navy}">${esc(txt.p2)}</span></div>
+   <div class="tag">${esc(txt.tag)}</div>
+   <div class="icons">${features.map((f,i)=>`<div class="ic"><i>${v77FeatIcon(i,th.navy)}</i><span>${esc(f[0])}<br>${esc(f[1])}</span></div>`).join('')}</div>
+   <div class="trace"><div class="lot"><small>NUMER PARTII</small><b>${esc(rec.lot)}</b>${opts.showStrain&&rec.strain?`<span>Źródło: ${esc(rec.strain)}</span>`:''}${opts.showBest&&rec.best?`<span>Użyć do: ${esc(rec.best)}</span>`:''}</div>${opts.showQr?`<div class="qr"><div class="code">${qr}</div><small>QR • ${esc(rec.item.id)}</small></div>`:''}</div>
+   <div class="bottom" style="background:${th.navy}"><strong>${esc(v77VolumeText(rec.vol))}</strong><span>OBJĘTOŚĆ<br>NETTO</span><em></em><b>100% NATURALNY<br>PRODUKT</b></div>
+ </article>`
+}
+function v77PrintCSS(layout,trim){
+ const f=layout.font;
+ return `@page{size:A4 portrait;margin:7mm}*{box-sizing:border-box}html,body{margin:0;padding:0;background:#fff;font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}.v77sheet{width:196mm;display:grid;grid-template-columns:repeat(${layout.cols},${layout.w}mm);grid-auto-rows:${layout.h}mm;gap:${layout.gap}mm;align-content:start}.v77label{position:relative;width:${layout.w}mm;height:${layout.h}mm;border:${trim?'1px dashed #8a8a8a':'1.2px solid #1d2f47'};border-radius:${3.3*f}mm;padding:${3.0*f}mm ${3.4*f}mm ${7.0*f}mm;background:#fff;overflow:hidden}.v77label .brand{display:flex;align-items:center;gap:${2.0*f}mm;position:relative;z-index:3}.v77label .logo{width:${8.8*f}mm;height:${8.8*f}mm}.v77label .brtxt strong{display:block;font-size:${4.0*f}mm;letter-spacing:.02em}.v77label .brtxt span{display:block;font-size:${2.0*f}mm;letter-spacing:.15em}.v77label .artzone{position:absolute;inset:${4.0*f}mm ${3.0*f}mm auto auto;width:${31*f}mm;height:${31*f}mm}.v77label .artzone .v77-art{position:absolute;right:0;top:0;width:${29.5*f}mm;height:${29.5*f}mm}.v77label.bundle .artzone{width:${33*f}mm;height:${29*f}mm}.v77label.bundle .artzone .v77-leftb{position:absolute;left:${1.8*f}mm;top:${7.5*f}mm;width:${16.5*f}mm;height:${16.5*f}mm}.v77label.bundle .artzone .v77-art.right{right:-${1.2*f}mm;top:-${1.0*f}mm;width:${22.0*f}mm;height:${22.0*f}mm}.v77label .title{position:relative;z-index:3;margin-top:${4.0*f}mm;line-height:.88;max-width:${57*f}mm}.v77label .title .a{font-weight:900;font-size:${14.1*f}mm;letter-spacing:.005em}.v77label .title .b{font-weight:900;font-size:${7.2*f}mm;letter-spacing:.005em}.v77label.copepods .title{max-width:${54*f}mm}.v77label.copepods .title .a{font-size:${13.8*f}mm}.v77label.copepods .title .b{font-size:${6.7*f}mm}.v77label.bundle .title{max-width:${56*f}mm}.v77label.bundle .title .a{font-size:${13.6*f}mm}.v77label.bundle .title .b{font-size:${6.5*f}mm;line-height:.84}.v77label .pills{position:relative;z-index:3;display:flex;flex-direction:column;gap:${1.0*f}mm;margin-top:${2.1*f}mm;max-width:${56*f}mm}.v77label .pills span{display:inline-block;color:#fff;border-radius:${1.4*f}mm;padding:${1.15*f}mm ${2.2*f}mm;font-weight:800;font-size:${2.7*f}mm;letter-spacing:.02em;width:max-content;max-width:100%}.v77label.bundle .pills{max-width:${57*f}mm}.v77label .tag{position:relative;z-index:3;margin-top:${2.1*f}mm;font-weight:800;font-size:${2.45*f}mm;color:#202734;max-width:${58*f}mm;line-height:1.2}.v77label .icons{position:absolute;right:${3.2*f}mm;top:${22.0*f}mm;width:${23*f}mm;display:flex;flex-direction:column;gap:${1.9*f}mm;z-index:3}.v77label.bundle .icons{top:${21.5*f}mm;width:${23.5*f}mm}.v77label .ic{display:flex;align-items:center;gap:${1.8*f}mm}.v77label .ic i{display:inline-flex;align-items:center;justify-content:center;width:${7.2*f}mm;height:${7.2*f}mm;border:${.45*f}mm solid #24324c;border-radius:50%;background:#fff}.v77label .ic i svg{width:${5.2*f}mm;height:${5.2*f}mm}.v77label .ic span{font-size:${2.1*f}mm;font-weight:800;color:#111a27;line-height:1.15}.v77label .trace{position:absolute;left:${3.4*f}mm;right:${3.4*f}mm;bottom:${10.2*f}mm;display:flex;justify-content:space-between;align-items:flex-end;gap:${2*f}mm;z-index:3}.v77label .trace .lot{max-width:${54*f}mm}.v77label .trace .lot small,.v77label .trace .qr small{display:block;font-size:${1.85*f}mm;color:#5a6170;font-weight:700;letter-spacing:.03em}.v77label .trace .lot b{display:block;font-size:${3.0*f}mm;color:#0e1730;margin-top:${.5*f}mm}.v77label .trace .lot span{display:block;font-size:${2.0*f}mm;color:#333b47;margin-top:${.4*f}mm;line-height:1.15}.v77label .trace .qr{display:flex;flex-direction:column;align-items:center;gap:${.2*f}mm}.v77label .trace .code svg{width:${12.5*f}mm;height:${12.5*f}mm}.v77label .bottom{position:absolute;left:0;right:0;bottom:0;height:${10.0*f}mm;color:#fff;display:grid;grid-template-columns:${17*f}mm ${20*f}mm 1fr ${34*f}mm;align-items:center;padding:0 ${3.3*f}mm;border-radius:0 0 ${3.1*f}mm ${3.1*f}mm}.v77label .bottom strong{font-size:${8.0*f}mm;line-height:1;font-weight:900}.v77label .bottom span,.v77label .bottom b{font-size:${2.8*f}mm;line-height:1.1;font-weight:800}.v77label .bottom em{height:${6*f}mm;border-left:${.4*f}mm solid rgba(255,255,255,.55)}.v77label svg{max-width:100%;max-height:100%}`
+}
 function v77Selected(){const out=[];document.querySelectorAll('[data-v77-item]:checked').forEach(cb=>{const row=cb.closest('.v77-row');const item=getById('inventory',cb.dataset.v77Item);if(!row||!item)return;out.push({item,tpl:row.querySelector('[data-v77-template]').value,copies:Math.max(1,Math.min(99,Number(row.querySelector('[data-v77-copies]').value||1))),vol:String(row.querySelector('[data-v77-volume]').value||'1').trim()})});return out}
 function v77ToggleAll(state){document.querySelectorAll('[data-v77-item]').forEach(x=>x.checked=state)}
 async function v77GenerateAdvancedLabels(){const rows=v77Selected();if(!rows.length)return alert('Zaznacz co najmniej jedną pozycję.');const layout=v77Layout(document.getElementById('v77Layout').value);const opts={showQr:!!document.getElementById('v77ShowQr').checked,showStrain:!!document.getElementById('v77ShowStrain').checked,showBest:!!document.getElementById('v77ShowBest').checked};const trim=!!document.getElementById('v77Trim').checked;db.settings.v77Layout=document.getElementById('v77Layout').value;db.settings.v77ShowQr=opts.showQr;db.settings.v77ShowStrain=opts.showStrain;db.settings.v77ShowBest=opts.showBest;db.settings.v77Trim=trim;await saveSettings();const list=[];rows.forEach(r=>{for(let i=0;i<r.copies;i++)list.push(v77Rec(r.item,r.tpl,r.vol))});const html=`<div class="v77sheet">${list.map((r,i)=>v77RenderLabel(r,i,opts)).join('')}</div>`;popupDoc('AquaCulture • Advanced Label Studio',html,v77PrintCSS(layout,trim))}
-function openV77AdvancedLabelStudio(){const items=v77EligibleStock();if(!items.length)return alert('Brak dodatnich stanów kultur lub produktów gotowych.');modalTitle.textContent='Advanced Label Studio — z magazynu';modalBox.classList.add('wide');const rows=items.map((x,i)=>{const tpl=v77InferTemplate(x),vol=v77GuessVol(x,tpl);return `<div class="v77-row"><input type="checkbox" data-v77-item="${esc(x.id)}" ${i===0?'checked':''}><div class="name"><strong>${esc(x.organism||x.name)} • ${esc(x.lot||x.id)}</strong><small>${esc(x.name)} • ${stockQtyText(x)} • ${esc(typeof v74ZoneOf==='function'?v74ZoneOf(x).name:(x.location||'magazyn'))}</small></div><div class="f"><label>Szablon</label><select data-v77-template><option value="phyto" ${tpl==='phyto'?'selected':''}>Fito / Nanno</option><option value="copepods" ${tpl==='copepods'?'selected':''}>Widłonogi / Tigriopus</option><option value="bundle" ${tpl==='bundle'?'selected':''}>Fito + Widłonogi</option></select></div><div class="f"><label>Kopie</label><input type="number" min="1" max="99" value="1" data-v77-copies></div><div class="f"><label>Objętość</label><input type="text" value="${esc(vol)}" data-v77-volume></div></div>`}).join('');modalBody.innerHTML=`<div class="callout"><strong>Zaawansowany generator etykiet z magazynu.</strong> Skrypt automatycznie pobiera <strong>numer partii</strong> z pola <code>lot</code> oraz generuje <strong>QR</strong> dla identyfikatora rekordu magazynowego. Obsługuje trzy szablony: Nanno, Widłonogi oraz zestaw <strong>Fito + Widłonogi</strong>.</div><div class="section card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Wybierz pozycje</h3><div>${btn('Zaznacz wszystko','v77ToggleAll(true)','btn tiny secondary')}${btn('Wyczyść','v77ToggleAll(false)','btn tiny secondary')}</div></div><div class="section">${rows}</div></div><div class="section card"><h3>Ustawienia arkusza A4</h3><div class="v77-options"><div class="field"><label>Układ</label><select id="v77Layout"><option value="premium" ${(db.settings.v77Layout||'premium')==='premium'?'selected':''}>Premium 2×3 • 6/A4</option><option value="compact" ${db.settings.v77Layout==='compact'?'selected':''}>Kompakt 2×4 • 8/A4</option><option value="mini" ${db.settings.v77Layout==='mini'?'selected':''}>Mini 3×4 • 12/A4</option></select></div><div class="field"><label style="display:flex;gap:8px;align-items:center;font-size:11px;text-transform:none"><input type="checkbox" id="v77ShowQr" ${(db.settings.v77ShowQr!==false)?'checked':''}> Pokaż kod QR</label></div><div class="field"><label style="display:flex;gap:8px;align-items:center;font-size:11px;text-transform:none"><input type="checkbox" id="v77ShowStrain" ${db.settings.v77ShowStrain?'checked':''}> Pokaż szczep / źródło</label></div><div class="field"><label style="display:flex;gap:8px;align-items:center;font-size:11px;text-transform:none"><input type="checkbox" id="v77ShowBest" ${db.settings.v77ShowBest?'checked':''}> Pokaż termin użycia</label></div><div class="field"><label style="display:flex;gap:8px;align-items:center;font-size:11px;text-transform:none"><input type="checkbox" id="v77Trim" ${db.settings.v77Trim?'checked':''}> Przerywana linia cięcia</label></div></div><div class="actions" style="margin-top:12px"><button class="btn primary" onclick="v77GenerateAdvancedLabels()">Generuj podgląd A4</button></div></div><div class="section callout"><strong>Szablon bundle</strong> tworzy etykiety podobne do wzoru „NANNO FITO+ WIDŁONOGI”. Na iPhonie podgląd otwiera się w tej samej karcie, a nie jako nowe okno.</div>`;modal.classList.add('open')}
+function openV77AdvancedLabelStudio(){
+ const items=v77EligibleStock();
+ if(!items.length)return alert('Brak dodatnich stanów kultur lub produktów gotowych.');
+ modalTitle.textContent='Advanced Label Studio — z magazynu';
+ modalBox.classList.add('wide');
+ const rows=items.map((x,i)=>{
+   const tpl=v77InferTemplate(x),vol=v77GuessVol(x,tpl);
+   return `<div class="v77-row">
+     <input type="checkbox" data-v77-item="${esc(x.id)}" ${i===0?'checked':''}>
+     <div class="name"><strong>${esc(x.organism||x.name)} • ${esc(x.lot||x.id)}</strong><small>${esc(x.name)} • ${stockQtyText(x)} • ${esc(typeof v74ZoneOf==='function'?v74ZoneOf(x).name:(x.location||'magazyn'))}</small></div>
+     <div class="f"><label>Szablon</label><select data-v77-template><option value="phyto" ${tpl==='phyto'?'selected':''}>Fito / Nanno</option><option value="copepods" ${tpl==='copepods'?'selected':''}>Widłonogi / Tigriopus</option><option value="bundle" ${tpl==='bundle'?'selected':''}>Fito + Widłonogi</option></select></div>
+     <div class="f"><label>Kopie</label><input type="number" min="1" max="99" value="1" data-v77-copies></div>
+     <div class="f"><label>Objętość</label><input type="text" value="${esc(vol)}" data-v77-volume></div>
+   </div>`
+ }).join('');
+ modalBody.innerHTML=`<div class="callout"><strong>Zaawansowany generator etykiet z magazynu.</strong> Skrypt automatycznie pobiera <strong>numer partii</strong> z pola <code>lot</code> oraz generuje <strong>QR</strong> dla identyfikatora rekordu magazynowego. Obsługuje trzy szablony: Nanno, Widłonogi oraz zestaw <strong>Fito + Widłonogi</strong>.</div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Wybierz pozycje</h3><div>${btn('Zaznacz wszystko','v77ToggleAll(true)','btn tiny secondary')}${btn('Wyczyść','v77ToggleAll(false)','btn tiny secondary')}</div></div><div class="section">${rows}</div></div>
+ <div class="section card"><h3>Ustawienia arkusza A4</h3>
+   <div class="field"><label>Układ</label><select id="v77Layout"><option value="premium" ${(db.settings.v77Layout||'premium')==='premium'?'selected':''}>Premium 2×3 • 6/A4</option><option value="compact" ${db.settings.v77Layout==='compact'?'selected':''}>Kompakt 2×4 • 8/A4</option><option value="mini" ${db.settings.v77Layout==='mini'?'selected':''}>Mini 3×4 • 12/A4</option></select></div>
+   <div class="v77-options-fix" style="margin-top:12px">
+     <div class="v77-toggle-card"><label><input type="checkbox" id="v77ShowQr" ${(db.settings.v77ShowQr!==false)?'checked':''}><span><strong>Pokaż kod QR</strong><small>Dodaje kod QR powiązany z rekordem magazynowym.</small></span></label></div>
+     <div class="v77-toggle-card"><label><input type="checkbox" id="v77ShowStrain" ${db.settings.v77ShowStrain?'checked':''}><span><strong>Pokaż szczep / źródło</strong><small>Wyświetla źródło, szczep lub dostawcę partii.</small></span></label></div>
+     <div class="v77-toggle-card"><label><input type="checkbox" id="v77ShowBest" ${db.settings.v77ShowBest?'checked':''}><span><strong>Pokaż termin użycia</strong><small>Dodaje datę przydatności, jeśli istnieje w rekordzie.</small></span></label></div>
+     <div class="v77-toggle-card"><label><input type="checkbox" id="v77Trim" ${db.settings.v77Trim?'checked':''}><span><strong>Przerywana linia cięcia</strong><small>Pomocnicza obwódka do cięcia etykiet po wydruku.</small></span></label></div>
+   </div>
+   <div class="v77-help" style="margin-top:10px">W polu <strong>Objętość</strong> możesz wpisać np. <code>1</code>, <code>1,5</code>, <code>0,5</code> albo <code>1+1</code>.</div>
+   <div class="actions" style="margin-top:12px"><button class="btn primary" onclick="v77GenerateAdvancedLabels()">Generuj podgląd A4</button></div>
+ </div>
+ <div class="section callout"><strong>Poprawki v7.7.1:</strong> lepsza jakość układu etykiet, poprawione proporcje tytułów i ikon oraz naprawione ustawienia na iPhonie — przełączniki nie wychodzą już poza ekran.</div>`;
+ modal.classList.add('open')
+}
 const v77RenderPrintsBase=renderPrints;
 renderPrints=function(){const base=v77RenderPrintsBase(),items=v77EligibleStock();return `<div class="v77-hero"><div class="card"><h3>Advanced Label Studio</h3><div class="small">Zaawansowany skrypt generowania etykiet A4 z danymi pobieranymi bezpośrednio z magazynu. Obsługuje style: <strong>Nanno</strong>, <strong>Widłonogi / Tigriopus</strong> oraz <strong>Fito + Widłonogi</strong>.</div><div class="v77-points"><div class="v77-point"><b>${items.length} pozycji</b><span>gotowych do etykietowania</span></div><div class="v77-point"><b>QR + partia</b><span>automatycznie z rekordu magazynowego</span></div><div class="v77-point"><b>6 / 8 / 12</b><span>etykiet na arkuszu A4</span></div></div><div class="actions" style="margin-top:12px">${btn('Otwórz Advanced Label Studio','openV77AdvancedLabelStudio()','btn primary')}</div></div><div class="card"><h3>Nowe możliwości</h3><div class="statline"><span>Szablony</span><strong>Nanno / Widłonogi / Bundle</strong></div><div class="statline"><span>Źródło danych</span><strong>Magazyn centralny</strong></div><div class="statline"><span>Kod QR</span><strong>ACM|STOCK|ID</strong></div><div class="statline"><span>Numer partii</span><strong>z pola lot</strong></div></div></div>`+base}
 const v77InitBase=init;
-init=async function(){await v77InitBase();document.title='AquaCulture Manager v7.7 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.7 • Advanced Label Studio • Bundle Labels');titles.prints=['Etykiety / wydruki','Advanced Label Studio: QR i numer partii pobierane bezpośrednio z magazynu.'];render()}
+init=async function(){await v77InitBase();document.title='AquaCulture Manager v7.8 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.8 • Adaptive Bundle • AutoFit Preview');titles.prints=['Etykiety / wydruki','Advanced Label Studio: QR i numer partii pobierane bezpośrednio z magazynu.'];render()}
+
+
+// ==========================================================
+// v7.8 ADAPTIVE BUNDLE + AUTO TITLE + MOBILE A4 AUTOFIT
+// ==========================================================
+function v78BaseTpl(tpl=''){return String(tpl).startsWith('bundle')?'bundle':tpl}
+function v78BundleMode(tpl='',vol=''){
+ if(tpl==='bundle-duo')return 'duo';
+ if(tpl==='bundle-15')return '15';
+ const s=String(vol||'').replace(' ','').replace(',','.');
+ if(s.includes('+'))return 'duo';
+ const n=Number(s);if(Number.isFinite(n)&&n>=1.45&&n<=1.55)return '15';
+ return 'standard';
+}
+function v78TitleFont(text,kind='b',tpl=''){
+ const clean=String(text||'').replace(/<br\s*\/?>/gi,' ').replace(/\s+/g,' ').trim();
+ const len=clean.length,base=kind==='a'?14.0:7.15;
+ let factor=1;
+ if(kind==='b'){
+  if(len>20)factor=.72;else if(len>16)factor=.80;else if(len>12)factor=.90;
+ }else{
+  if(len>12)factor=.82;else if(len>9)factor=.91;
+ }
+ if(String(tpl).startsWith('bundle'))factor*=.96;
+ return (base*factor).toFixed(2);
+}
+function v78BundleNote(mode){
+ if(mode==='duo')return 'ZESTAW • 1 L FITO + 1 L WIDŁONOGI';
+ if(mode==='15')return 'ZESTAW • ŁĄCZNA OBJĘTOŚĆ 1,5 L';
+ return 'KOMPLETNY ZESTAW ŻYWEGO POKARMU';
+}
+function v78RenderLabel(rec,idx,opts){
+ const base=v78BaseTpl(rec.tpl),mode=v78BundleMode(rec.tpl,rec.vol),th=v77Theme(base),txt=v77Texts(base);
+ const qr=opts.showQr?makeQR(rec.qr):'';
+ const art=base==='phyto'?v76MicroArt(rec.item.id+'|'+idx):v77CopepodArt(rec.item.id+'|'+idx);
+ const leftBubbles=base==='bundle'?v77BubbleArt(rec.item.id+'|'+idx):'';
+ const rightArt=base==='bundle'?v77CopepodArt(rec.item.id+'|'+idx+'b'):art;
+ const extra=base==='bundle'?`<div class="v77-leftb">${leftBubbles}</div><div class="v77-art right">${rightArt}</div>`:`<div class="v77-art">${art}</div>`;
+ const titleB=base==='bundle'?'FITO+<br>WIDŁONOGI':esc(txt.b);
+ const aSize=v78TitleFont(txt.a,'a',base),bSize=v78TitleFont(base==='bundle'?'FITO+ WIDŁONOGI':txt.b,'b',base);
+ const features=[['IDEALNA PASZA','DLA RYB I LARW'],['WYSOKA WARTOŚĆ','ODŻYWCZA'],['WZMACNIA','ODPORNOŚĆ']];
+ return `<article class="v77label ${base}${base==='bundle'?' bundle-'+mode:''}">
+   <div class="brand"><div class="logo">${v77FlaskLogo(th.navy)}</div><div class="brtxt"><strong>NANNO CULTURE</strong><span>• MICROALGAE •</span></div></div>
+   <div class="artzone">${extra}</div>
+   <div class="title"><div class="a" style="color:${th.navy};font-size:${aSize}mm">${esc(txt.a)}</div><div class="b" style="color:${th.accent};font-size:${bSize}mm">${titleB}</div></div>
+   <div class="pills"><span class="p1" style="background:${th.accent}">${esc(txt.p1)}</span><span class="p2" style="background:${th.navy}">${esc(txt.p2)}</span></div>
+   <div class="tag">${esc(txt.tag)}</div>
+   ${base==='bundle'?`<div class="bundle-note">${esc(v78BundleNote(mode))}</div>`:''}
+   <div class="icons">${features.map((f,i)=>`<div class="ic"><i>${v77FeatIcon(i,th.navy)}</i><span>${esc(f[0])}<br>${esc(f[1])}</span></div>`).join('')}</div>
+   <div class="trace"><div class="lot"><small>NUMER PARTII</small><b>${esc(rec.lot)}</b>${opts.showStrain&&rec.strain?`<span>Źródło: ${esc(rec.strain)}</span>`:''}${opts.showBest&&rec.best?`<span>Użyć do: ${esc(rec.best)}</span>`:''}</div>${opts.showQr?`<div class="qr"><div class="code">${qr}</div><small>QR • ${esc(rec.item.id)}</small></div>`:''}</div>
+   <div class="bottom" style="background:${th.navy}"><strong>${esc(v77VolumeText(rec.vol))}</strong><span>OBJĘTOŚĆ<br>NETTO</span><em></em><b>100% NATURALNY<br>PRODUKT</b></div>
+ </article>`
+}
+v77RenderLabel=v78RenderLabel;
+
+const v78PrintCSSBase=v77PrintCSS;
+v77PrintCSS=function(layout,trim){
+ return v78PrintCSSBase(layout,trim)+`.v77label.bundle .bundle-note{position:absolute;left:${34*(layout.font||1)}mm;top:${37.4*(layout.font||1)}mm;right:${28*(layout.font||1)}mm;font-size:${2.0*(layout.font||1)}mm;font-weight:900;color:#26323f;line-height:1.15}.v77label.bundle-duo .bundle-note{color:#315b19}.v77label.bundle-15 .bundle-note{color:#244a78}.v77label.bundle-duo .artzone .v77-leftb{width:${18.5*(layout.font||1)}mm;height:${18.5*(layout.font||1)}mm;top:${5.7*(layout.font||1)}mm}.v77label.bundle-duo .artzone .v77-art.right{width:${22.5*(layout.font||1)}mm;height:${22.5*(layout.font||1)}mm}.v77label.bundle-15 .artzone .v77-leftb{width:${20*(layout.font||1)}mm;height:${20*(layout.font||1)}mm;top:${5*(layout.font||1)}mm}.v77label.bundle-15 .artzone .v77-art.right{width:${20.5*(layout.font||1)}mm;height:${20.5*(layout.font||1)}mm;top:${1*(layout.font||1)}mm}.v77label.bundle .tag{max-width:${54*(layout.font||1)}mm;margin-top:${1.8*(layout.font||1)}mm}`;
+}
+
+function v78TemplateChange(sel){
+ const row=sel.closest('.v77-row'),vol=row?.querySelector('[data-v77-volume]');if(!vol)return;
+ if(sel.value==='bundle-duo')vol.value='1+1';
+ if(sel.value==='bundle-15')vol.value='1,5';
+ if(sel.value==='bundle-auto'&&!String(vol.value||'').trim())vol.value='1+1';
+}
+
+function openV78AdvancedLabelStudio(){
+ const items=v77EligibleStock();if(!items.length)return alert('Brak dodatnich stanów kultur lub produktów gotowych.');
+ modalTitle.textContent='Advanced Label Studio — z magazynu';modalBox.classList.add('wide');
+ const rows=items.map((x,i)=>{const inferred=v77InferTemplate(x),tpl=inferred==='bundle'?'bundle-auto':inferred,vol=v77GuessVol(x,inferred);return `<div class="v77-row">
+ <input type="checkbox" data-v77-item="${esc(x.id)}" ${i===0?'checked':''}>
+ <div class="name"><strong>${esc(x.organism||x.name)} • ${esc(x.lot||x.id)}</strong><small>${esc(x.name)} • ${stockQtyText(x)} • ${esc(typeof v74ZoneOf==='function'?v74ZoneOf(x).name:(x.location||'magazyn'))}</small></div>
+ <div class="f"><label>Szablon</label><select data-v77-template onchange="v78TemplateChange(this)"><option value="phyto" ${tpl==='phyto'?'selected':''}>Fito / Nanno</option><option value="copepods" ${tpl==='copepods'?'selected':''}>Widłonogi / Tigriopus</option><option value="bundle-auto" ${tpl==='bundle-auto'?'selected':''}>Fito + Widłonogi • auto</option><option value="bundle-duo">Fito + Widłonogi • 1+1 L</option><option value="bundle-15">Fito + Widłonogi • 1,5 L</option></select></div>
+ <div class="f"><label>Kopie</label><input type="number" min="1" max="99" value="1" data-v77-copies></div>
+ <div class="f"><label>Objętość</label><input type="text" value="${esc(vol)}" data-v77-volume></div></div>`}).join('');
+ modalBody.innerHTML=`<div class="callout"><strong>Generator z automatycznym dopasowaniem.</strong> Numer partii i QR pochodzą z magazynu. Długie tytuły są automatycznie skalowane, a zestaw Fito + Widłonogi ma osobne warianty dla <strong>1+1 L</strong> i <strong>1,5 L</strong>.</div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Wybierz pozycje</h3><div>${btn('Zaznacz wszystko','v77ToggleAll(true)','btn tiny secondary')}${btn('Wyczyść','v77ToggleAll(false)','btn tiny secondary')}</div></div><div class="section">${rows}</div></div>
+ <div class="section card"><h3>Ustawienia arkusza A4</h3><div class="field"><label>Układ</label><select id="v77Layout"><option value="premium" ${(db.settings.v77Layout||'premium')==='premium'?'selected':''}>Premium 2×3 • 6/A4</option><option value="compact" ${db.settings.v77Layout==='compact'?'selected':''}>Kompakt 2×4 • 8/A4</option><option value="mini" ${db.settings.v77Layout==='mini'?'selected':''}>Mini 3×4 • 12/A4</option></select></div>
+ <div class="v77-options-fix" style="margin-top:12px"><div class="v77-toggle-card"><label><input type="checkbox" id="v77ShowQr" ${(db.settings.v77ShowQr!==false)?'checked':''}><span><strong>Pokaż kod QR</strong><small>Kod otwiera konkretny rekord magazynowy.</small></span></label></div><div class="v77-toggle-card"><label><input type="checkbox" id="v77ShowStrain" ${db.settings.v77ShowStrain?'checked':''}><span><strong>Pokaż szczep / źródło</strong><small>Źródło, szczep albo dostawca partii.</small></span></label></div><div class="v77-toggle-card"><label><input type="checkbox" id="v77ShowBest" ${db.settings.v77ShowBest?'checked':''}><span><strong>Pokaż termin użycia</strong><small>Datę dodaje tylko, jeśli istnieje w magazynie.</small></span></label></div><div class="v77-toggle-card"><label><input type="checkbox" id="v77Trim" ${db.settings.v77Trim?'checked':''}><span><strong>Linia cięcia</strong><small>Pomocnicza przerywana obwódka.</small></span></label></div></div>
+ <div class="v78-preview-note" style="margin-top:12px"><span>▦</span><span><b>Podgląd mobilny AutoFit.</b> Cała szerokość A4 zostanie automatycznie pomniejszona tak, aby na iPhonie były widoczne dwie etykiety obok siebie. Wydruk pozostaje w rzeczywistym rozmiarze A4.</span></div>
+ <div class="actions" style="margin-top:12px"><button class="btn primary" onclick="v77GenerateAdvancedLabels()">Generuj podgląd A4</button></div></div>`;
+ modal.classList.add('open')
+}
+openV77AdvancedLabelStudio=openV78AdvancedLabelStudio;
+
+// Same-window preview with automatic fit-to-width for full A4 on mobile.
+popupDoc=function(title,body,css=''){
+ const root=v761EnsurePrintPreview(),frame=document.getElementById('acmPrintFrame'),ttl=document.getElementById('acmPrintTitle');
+ if(ttl)ttl.textContent=title||'Podgląd wydruku';
+ const safeTitle=String(title||'AquaCulture').replace(/[<>&"]/g,'');
+ const fitScript=`<script>(function(){function fit(){var s=document.querySelector('.v77sheet,.v76p-sheet');if(!s)return;s.style.transform='none';s.style.transformOrigin='top left';document.body.style.height='auto';var sw=s.scrollWidth||s.getBoundingClientRect().width;var scale=Math.min(1,(window.innerWidth-12)/sw);s.style.transform='scale('+scale+')';document.body.style.width=(sw*scale+12)+'px';document.body.style.height=(s.scrollHeight*scale+12)+'px';document.body.style.overflowX='hidden'}window.addEventListener('load',function(){setTimeout(fit,30)});window.addEventListener('resize',fit);window.addEventListener('beforeprint',function(){var s=document.querySelector('.v77sheet,.v76p-sheet');if(s)s.style.transform='none';document.body.style.width='auto';document.body.style.height='auto'});window.addEventListener('afterprint',fit);})();<\/script>`;
+ const doc=`<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><style>html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}${css||''}@media screen{body{padding:6px;background:#dde2e6}.v77sheet,.v76p-sheet{margin:0!important}}@media print{body{padding:0!important;background:#fff!important;width:auto!important;height:auto!important}.v77sheet,.v76p-sheet{transform:none!important}}</style></head><body>${body||''}${fitScript}</body></html>`;
+ frame.srcdoc=doc;root.classList.add('open');return {document:frame.contentDocument,print:v761PrintPreview,close:v761ClosePrintPreview};
+};
+
+const v78InitBase=init;
+init=async function(){await v78InitBase();document.title='AquaCulture Manager v7.8 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.8 • Adaptive Bundle • AutoFit Preview');titles.prints=['Etykiety / wydruki','Adaptive Bundle, automatyczne skalowanie tytułów i mobilny podgląd całego A4.'];render()};
 
 
 registerPWA();
