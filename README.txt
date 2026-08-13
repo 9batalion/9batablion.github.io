@@ -1,11 +1,12 @@
-AquaCulture Manager v6.1 HOTFIX — GitHub Pages FLAT
+AquaCulture Manager v6.3 PRODUCTION FLOW — GitHub Pages FLAT
 
-Naprawiono dodawanie kultury żywej:
-- osobny przycisk „+ Kultura żywa”,
-- Kultura żywa -> Kultura biologiczna + ml automatycznie,
-- Pożywka / medium -> Pożywka przygotowana + ml automatycznie,
-- kategorie zależą od typu,
-- pola organizm / szczep / stężenie są dostępne dla kultury,
-- brak migracji bazy i brak zmian istniejących stanów.
+Nowości:
+- cały moduł Produkcja w układzie blokowym,
+- drag & drop planu na desktopie i iPhonie (Pointer Events),
+- bloki: Inokulum → Pożywka → Hodowla → Kontrola jakości → Rozlew,
+- przyciski + pomiędzy etapami do szybkich operacji,
+- po uruchomieniu produkcji schemat jest blokowany jako historia,
+- plan może być zapisany jako szablon,
+- brak migracji bazy i brak automatycznej zmiany istniejących stanów.
 
-Wgraj wszystkie pliki z ZIP-a bezpośrednio do głównego katalogu repozytorium GitHub Pages.
+Wgraj wszystkie pliki z ZIP-a bezpośrednio do głównego katalogu GitHub Pages.

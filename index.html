@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" sizes="192x192" href="./icon-192.png">
-<title>AquaCulture Manager v6.1 Hotfix</title>
+<title>AquaCulture Manager v6.3 Production Flow</title>
 <style>
 :root{
  --bg:#07111f;--panel:#0d1a2b;--panel2:#13243a;--panel3:#18304d;--text:#eef6ff;--muted:#91a4bb;
@@ -285,6 +285,56 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 .incident-card{border-left:4px solid var(--danger)}
 .purchase-row{display:grid;grid-template-columns:1.5fr .6fr .6fr .7fr auto;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:8px 0}.purchase-row:last-child{border-bottom:0}
 @media(max-width:820px){.device-panel{grid-template-columns:1fr}.device-actions{grid-template-columns:repeat(2,1fr)}.metric-strip{grid-template-columns:repeat(2,1fr)}.calendar-cell{min-height:78px;padding:4px}.cal-event{font-size:7px;padding:3px}.template-grid{grid-template-columns:1fr}.plan-result{grid-template-columns:repeat(2,1fr)}.analysis-bar{grid-template-columns:95px 1fr 55px}.sync-state{grid-template-columns:1fr}.purchase-row{grid-template-columns:1fr .7fr .7fr}.purchase-row>*:nth-child(4),.purchase-row>*:nth-child(5){grid-column:auto}}
+
+
+/* ===== v6.3 Production Flow ===== */
+.flow-builder-wrap{display:grid;gap:14px}
+.flow-builder-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.flow-canvas{display:grid;gap:10px}
+.flow-block{border:1px solid var(--line);background:#0c192a;border-radius:16px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+.flow-block.dragging{opacity:.55;outline:2px dashed var(--accent)}
+.flow-block .head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.flow-block .head strong{font-size:14px}
+.flow-block .head .mini{font-size:10px;color:var(--muted)}
+.flow-block .grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:10px}
+.flow-arrow{display:flex;justify-content:center;align-items:center;color:var(--muted);font-size:26px;line-height:1}
+.output-block{border-color:#2a6e69;background:#0e2424}
+.output-block .big{font-size:22px;font-weight:900;color:#b8ffe8}
+.flow-dropzone{border:1px dashed #315f70;border-radius:14px;padding:14px;text-align:center;color:var(--muted);background:#0a1624}
+.palette-chip{border:1px solid #315f70;background:#0b1829;color:#dce9f7;border-radius:999px;padding:8px 12px;font-size:12px;cursor:pointer}
+.recipe-summary-line{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.recipe-summary-line:last-child{border-bottom:0}
+@media(max-width:700px){.flow-block .grid2{grid-template-columns:1fr}}
+
+
+/* ===== v6.3 Production Flow ===== */
+.prod-flow{display:grid;gap:10px}
+.prod-plan-block,.prod-live-block{border:1px solid var(--line);background:#0c192a;border-radius:17px;padding:14px;position:relative}
+.prod-plan-block.dragging{opacity:.62;outline:2px dashed var(--accent);transform:scale(.99)}
+.prod-block-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.prod-block-title{display:flex;align-items:center;gap:9px;min-width:0}
+.prod-block-icon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#142a42;font-size:18px;flex:0 0 auto}
+.prod-drag{cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:22px;color:#89a3bc;padding:5px 8px}
+.prod-drag:active{cursor:grabbing}
+.prod-flow-arrow{display:grid;place-items:center;color:#6f8aa4;font-size:25px;min-height:24px}
+.prod-add-step{display:flex;justify-content:center}
+.prod-add-step button{border:1px dashed #345a79;background:#091726;color:#93abc0;border-radius:999px;padding:7px 12px}
+.prod-block-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.prod-block-grid .field{margin:0}
+.prod-live-block.good{border-color:#28745f;background:#0d2822}
+.prod-live-block.warn{border-color:#7c6731;background:#272210}
+.prod-live-block.bad{border-color:#8b3943;background:#2a1419}
+.prod-live-block.planned{border-style:dashed}
+.prod-live-block .statusline{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.prod-live-block .amount{font-size:20px;font-weight:900;margin-top:6px}
+.prod-flow-lock{font-size:10px;color:var(--muted);padding:5px 8px;border:1px solid var(--line);border-radius:999px}
+.prod-builder-summary{position:sticky;bottom:0;z-index:8;background:rgba(8,18,31,.96);backdrop-filter:blur(16px);border:1px solid var(--line);border-radius:16px;padding:12px}
+.prod-palette{display:flex;gap:7px;flex-wrap:wrap}
+.prod-palette button{border:1px solid #315a79;background:#0b1929;color:#dce9f7;border-radius:999px;padding:8px 11px}
+@media(max-width:700px){
+ .prod-block-grid{grid-template-columns:1fr}
+ .prod-plan-block,.prod-live-block{padding:12px}
+}
 
 </style>
 </head>
@@ -2892,6 +2942,489 @@ function renderInventory(){
   const ledger=stockLedgerBalance(x.id),ok=Math.abs(ledger-Number(x.qty||0))<1e-9,r=reservedStockQty(x.id);
   return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.name)}</h4><div class="mini">${esc(x.lot||x.id)}${x.organism?' • '+esc(x.organism):''}</div></div><span class="stock-kind ${stockKindClass(inferStockKind(x))}">${esc(inferStockKind(x))}</span></div><div class="qty">${stockQtyText(x)}</div><div class="mini">${r>0?`zarezerwowane ${num(r,3)} ${esc(x.unit)} • wolne ${num(freeStockQty(x),3)}`:'całość wolna'}${x.bestBefore?' • FEFO '+datePL(x.bestBefore):''}</div><div class="mini"><span class="status-dot ${ok?'':'bad'}"></span>${ok?'saldo zgodne':'sprawdź saldo'}</div><div class="actions">${btn('Karta',`openStockCard('${x.id}')`,'btn tiny secondary')}${inferStockKind(x)==='Kultura żywa'?btn('Panel',`openTankPanel('${x.id}')`,'btn tiny primary'):''}${btn('Ruch',`openStockMove('${x.id}')`,'btn tiny')}${btn('Rezerwuj',`openReservationForm('${x.id}')`,'btn tiny')}</div></div>`;
  }).join(''):'<div class="empty card">Brak pozycji.</div>'}</div>`;
+}
+
+
+/* ===== v6.3 Production Flow ===== */
+let acFlowRecipeBlocks = [];
+let acFlowDraggedIndex = null;
+
+function stockLabelSafe(item){
+  if(!item) return '—';
+  return `${item.name||item.category||'Pozycja'} • ${num(Number(item.qty||0),3)} ${item.unit||''} • ${money(Number(item.price||0))}/${item.unit||''}`;
+}
+function recipeCandidateItems(){
+  const items=(db.inventory||[]).filter(x=>Number(x.qty||0)>=0);
+  return items.filter(x=>{
+    const k=inferStockKind(x), c=String(x.category||'').toLowerCase(), n=String(x.name||'').toLowerCase();
+    return k==='Surowiec' || c.includes('woda ro') || c.includes('sól') || c.includes('nawóz');
+  });
+}
+function guessIngredientRole(item){
+  const t=(String(item?.name||'')+' '+String(item?.category||'')).toLowerCase();
+  if(t.includes('woda ro')) return 'Woda RO';
+  if(t.includes('sól')) return 'Sól';
+  if(t.includes('f/2')||t.includes('f2')||t.includes('nawóz')) return 'F/2 / nawóz';
+  return 'Składnik';
+}
+function makeFlowBlock(itemId='', qty='', basis='na 1 L', role='Składnik'){
+  const item=itemId?getById('inventory', itemId):null;
+  return {uid:uid('BLK'), itemId:itemId||'', qty:qty!==''?Number(qty):'', basis:basis||'na 1 L', role:role||guessIngredientRole(item)};
+}
+function defaultMediumBlocksFromBase(){
+  const blocks=[];
+  const ro=typeof baseMaterial==='function'?baseMaterial('ro'):null;
+  const salt=typeof baseMaterial==='function'?baseMaterial('salt'):null;
+  const f2=typeof baseMaterial==='function'?baseMaterial('f2'):null;
+  if(ro) blocks.push(makeFlowBlock(ro.id,1000,'na 1 L','Woda RO'));
+  if(salt) blocks.push(makeFlowBlock(salt.id,35,'na 1 L','Sól'));
+  if(f2) blocks.push(makeFlowBlock(f2.id,1,'na 1 L','F/2 / nawóz'));
+  return blocks;
+}
+function renderRecipeFlowSummary(){
+  const el=document.getElementById('recipeFlowSummary');
+  if(!el) return;
+  if(!acFlowRecipeBlocks.length){el.innerHTML='<div class="empty">Brak składników w schemacie.</div>';return;}
+  el.innerHTML=acFlowRecipeBlocks.map((b,idx)=>{
+    const it=getById('inventory', b.itemId);
+    const label=it ? (it.name||it.category||'Pozycja') : 'Nie wybrano pozycji';
+    const unit=it?.unit||'';
+    return `<div class="recipe-summary-line"><span>${idx+1}. ${esc(b.role||'Składnik')} — ${esc(label)}</span><strong>${b.qty!==''?esc(String(b.qty)):'?'} ${esc(unit)} / ${esc(b.basis||'na 1 L')}</strong></div>`;
+  }).join('');
+}
+function bindRecipeFlowDnD(containerId){
+  const root=document.getElementById(containerId);
+  if(!root) return;
+  root.querySelectorAll('.flow-block[draggable="true"]').forEach(node=>{
+    node.addEventListener('dragstart', ()=>{acFlowDraggedIndex=Number(node.dataset.idx);node.classList.add('dragging');});
+    node.addEventListener('dragend', ()=>{node.classList.remove('dragging');acFlowDraggedIndex=null;});
+    node.addEventListener('dragover', e=>e.preventDefault());
+    node.addEventListener('drop', e=>{
+      e.preventDefault();
+      const targetIdx=Number(node.dataset.idx);
+      if(acFlowDraggedIndex===null || targetIdx===acFlowDraggedIndex) return;
+      const arr=[...acFlowRecipeBlocks];
+      const moved=arr.splice(acFlowDraggedIndex,1)[0];
+      arr.splice(targetIdx,0,moved);
+      acFlowRecipeBlocks=arr;
+      renderRecipeFlowCanvas(containerId);
+    });
+  });
+}
+function renderRecipeFlowCanvas(containerId){
+  const el=document.getElementById(containerId); if(!el) return;
+  if(!acFlowRecipeBlocks.length){el.innerHTML='<div class="flow-dropzone">Brak bloków. Dodaj składnik z paska powyżej.</div>';renderRecipeFlowSummary();return;}
+  el.innerHTML=acFlowRecipeBlocks.map((b,idx)=>{
+    return `<div class="flow-block" draggable="true" data-idx="${idx}">
+      <div class="head">
+        <div><strong>${esc(b.role||'Składnik')}</strong><div class="mini">Przeciągnij, aby zmienić kolejność</div></div>
+        <div>
+          <button type="button" class="btn tiny secondary" onclick="moveRecipeFlowBlock(${idx},-1)">↑</button>
+          <button type="button" class="btn tiny secondary" onclick="moveRecipeFlowBlock(${idx},1)">↓</button>
+          <button type="button" class="btn tiny danger" onclick="removeRecipeFlowBlock(${idx})">Usuń</button>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Pozycja magazynowa</label>
+          <select onchange="updateRecipeFlowBlock(${idx},'itemId',this.value)">
+            <option value="">— wybierz pozycję —</option>
+            ${recipeCandidateItems().map(it=>`<option value="${it.id}" ${b.itemId===it.id?'selected':''}>${esc(stockLabelSafe(it))}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field">
+          <label>Rola bloku</label>
+          <input value="${esc(b.role||'Składnik')}" oninput="updateRecipeFlowBlock(${idx},'role',this.value)">
+        </div>
+        <div class="field">
+          <label>Ilość</label>
+          <input type="number" inputmode="decimal" value="${b.qty!==''?b.qty:''}" oninput="updateRecipeFlowBlock(${idx},'qty',this.value)">
+        </div>
+        <div class="field">
+          <label>Przelicznik</label>
+          <select onchange="updateRecipeFlowBlock(${idx},'basis',this.value)">
+            <option value="na 1 L" ${b.basis==='na 1 L'?'selected':''}>na 1 L</option>
+            <option value="na partię" ${b.basis==='na partię'?'selected':''}>na partię</option>
+          </select>
+        </div>
+      </div>
+    </div>${idx<acFlowRecipeBlocks.length-1?'<div class="flow-arrow">↓</div>':''}`;
+  }).join('') + `<div class="flow-arrow">↓</div>
+    <div class="flow-block output-block">
+      <div class="head"><div><strong>Wynik</strong><div class="mini">Końcowy blok procesu</div></div></div>
+      <div class="big">Pożywka / solanka</div>
+      <div class="mini" style="margin-top:6px">Składniki z bloków powyżej utworzą recepturę pożywki.</div>
+    </div>`;
+  bindRecipeFlowDnD(containerId);
+  renderRecipeFlowSummary();
+}
+function addRecipeFlowBlock(itemId=''){
+  const item=itemId?getById('inventory', itemId):null;
+  acFlowRecipeBlocks.push(makeFlowBlock(itemId,'','na 1 L',item?guessIngredientRole(item):'Składnik'));
+  renderRecipeFlowCanvas('recipeFlowCanvas');
+}
+function removeRecipeFlowBlock(idx){acFlowRecipeBlocks.splice(idx,1);renderRecipeFlowCanvas('recipeFlowCanvas');}
+function moveRecipeFlowBlock(idx,dir){
+  const to=idx+dir; if(to<0||to>=acFlowRecipeBlocks.length) return;
+  const arr=[...acFlowRecipeBlocks]; [arr[idx],arr[to]]=[arr[to],arr[idx]]; acFlowRecipeBlocks=arr; renderRecipeFlowCanvas('recipeFlowCanvas');
+}
+function updateRecipeFlowBlock(idx,key,val){
+  if(!acFlowRecipeBlocks[idx]) return;
+  acFlowRecipeBlocks[idx][key]=(key==='qty' ? (val===''?'':Number(val)) : val);
+  if(key==='itemId'){
+    const it=getById('inventory', val);
+    if(it && (!acFlowRecipeBlocks[idx].role || acFlowRecipeBlocks[idx].role==='Składnik')) acFlowRecipeBlocks[idx].role=guessIngredientRole(it);
+  }
+  renderRecipeFlowSummary();
+}
+
+function openMediumRecipeBuilder(id=''){
+  const rec=id?getById('recipes',id):null;
+  if(rec?.ingredients?.length){
+    acFlowRecipeBlocks=rec.ingredients.map(ing=>{
+      const item=getById('inventory', ing.itemId);
+      return makeFlowBlock(ing.itemId, ing.qty, ing.basis||'na 1 L', guessIngredientRole(item));
+    });
+  }else{
+    acFlowRecipeBlocks=defaultMediumBlocksFromBase();
+  }
+  modalTitle.textContent=rec?'Edytuj recepturę':'Receptura pożywki — Flow Builder';
+  modalBox.classList.add('wide');
+  modalBody.innerHTML=`<form id="mediumRecipeFlowForm">
+    <div class="callout">Zbuduj recepturę z bloków. Każdy blok to jeden składnik wejściowy. Kolejność możesz zmieniać przeciąganiem.</div>
+    <div class="form-grid" style="margin-top:12px">
+      ${f('name','Nazwa receptury','text',rec?.name||'Pożywka F/2')}
+      ${f('organism','Przeznaczenie','select',rec?.product?.replace('Pożywka / medium — ','')||'Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Uniwersalna'])}
+      ${f('notes','Uwagi','textarea',rec?.notes||'')}
+    </div>
+    <div class="flow-builder-wrap section">
+      <div class="flow-builder-toolbar">
+        <button type="button" class="btn" onclick="addRecipeFlowBlock()">+ Dodaj pusty blok</button>
+        ${recipeCandidateItems().slice(0,8).map(it=>`<button type="button" class="palette-chip" onclick="addRecipeFlowBlock('${it.id}')">${esc(it.name||it.category||'Pozycja')}</button>`).join('')}
+      </div>
+      <div id="recipeFlowCanvas" class="flow-canvas"></div>
+      <div class="card"><h3>Podsumowanie receptury</h3><div id="recipeFlowSummary"></div></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary">${rec?'Zapisz zmiany':'Zapisz recepturę'}</button></div>
+  </form>`;
+  renderRecipeFlowCanvas('recipeFlowCanvas');
+  mediumRecipeFlowForm.onsubmit=async e=>{
+    e.preventDefault();
+    const fd=new FormData(e.target);
+    const ingredients=acFlowRecipeBlocks.filter(b=>b.itemId && b.qty!=='' && Number(b.qty)>0).map(b=>({itemId:b.itemId, qty:Number(b.qty), basis:b.basis||'na 1 L'}));
+    if(!ingredients.length) return alert('Dodaj co najmniej jeden poprawny blok składnika.');
+    const payload={id:rec?.id||uid('REC'), name:fd.get('name')||'Pożywka F/2', product:`Pożywka / medium — ${fd.get('organism')||'Uniwersalna'}`, active:'Tak', notes:fd.get('notes')||'', ingredients};
+    await saveRecord('recipes', payload);
+    closeModal(); render();
+  };
+  modal.classList.add('open');
+}
+function productionRecipeChanges(recipeId, litres, _unused=0){
+  const rec=getById('recipes', recipeId);
+  if(!rec?.ingredients?.length) return [];
+  const changes=[];
+  for(const ing of rec.ingredients){
+    const item=getById('inventory', ing.itemId); if(!item) continue;
+    const factor=(ing.basis||'na 1 L')==='na 1 L' ? Number(litres||0) : 1;
+    const qty=Number(ing.qty||0)*factor;
+    changes.push({item, delta:-qty, moveType:'Rozchód produkcyjny', reason:`Receptura: ${rec.name}`});
+  }
+  return changes;
+}
+function openMediumPreparation(){
+  const recipes=(db.recipes||[]).filter(r=>r.active!=='Nie'&&(/pożyw|medium|solank/i.test(String(r.product||'')+' '+String(r.name||''))));
+  if(!recipes.length) return alert('Brak receptury pożywki. Najpierw utwórz ją w Flow Builderze.');
+  modalTitle.textContent='Przygotowanie pożywki / solanki';
+  modalBox.classList.add('wide');
+  modalBody.innerHTML=`<form id="mediumPrepForm">
+    <div class="callout">Wybierz recepturę, a poniżej zobaczysz blokowy schemat wejść i wynik procesu.</div>
+    <div class="form-grid" style="margin-top:12px">
+      ${f('dateTime','Data przygotowania','datetime-local',nowLocal())}
+      <div class="field"><label>Receptura</label><select name="recipe">${mediumRecipeOptions()}</select></div>
+      ${f('outputMl','Objętość gotowej pożywki [ml]','number',10000)}
+      ${f('name','Nazwa pozycji wynikowej','text','Pożywka F/2')}
+      ${f('lot','Partia pożywki','text',typeof nextMediumLot==='function'?nextMediumLot():'')}
+      ${f('organism','Przeznaczenie','select','Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Uniwersalna'])}
+      ${f('salinity','Zasolenie docelowe [ppt]','number','35')}
+      ${f('vessel','Zbiornik / naczynie','text','')}
+      ${f('bestBefore','Termin użycia — opcjonalnie','date','')}
+      ${f('notes','Uwagi','textarea','')}
+    </div>
+    <div class="section flow-builder-wrap">
+      <div id="mediumFlowPreview" class="flow-canvas"></div>
+      <div id="mediumPreview" class="section card"></div>
+    </div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary">Przygotuj i zaksięguj pożywkę</button></div>
+  </form>`;
+  const form=document.getElementById('mediumPrepForm');
+  function renderMediumFlow(){
+    const ml=Number(form.elements.outputMl.value||0), litres=ml/1000, rec=getById('recipes', form.elements.recipe.value), targetName=form.elements.name.value||'Pożywka F/2';
+    let flowHTML='', lines=[];
+    const changes=productionRecipeChanges(form.elements.recipe.value, litres, 0);
+    if(rec?.ingredients?.length){
+      rec.ingredients.forEach(ing=>{
+        const item=getById('inventory', ing.itemId);
+        const factor=(ing.basis||'na 1 L')==='na 1 L' ? litres : 1;
+        const need=Number(ing.qty||0)*factor;
+        const available=Number(item?.qty||0);
+        lines.push({item, need});
+        flowHTML += `<div class="flow-block">
+          <div class="head"><div><strong>${esc(guessIngredientRole(item))}</strong><div class="mini">${esc(item?.name||item?.category||'Pozycja')}</div></div><div class="mini">stan ${num(available,3)} ${esc(item?.unit||'')}</div></div>
+          <div class="recipe-summary-line"><span>Zużycie</span><strong class="${available+1e-9>=need?'ledger-ok':'ledger-bad'}">−${num(need,3)} ${esc(item?.unit||'')}</strong></div>
+        </div><div class="flow-arrow">↓</div>`;
+      });
+      flowHTML += `<div class="flow-block output-block">
+        <div class="head"><div><strong>Wynik procesu</strong><div class="mini">${esc(targetName)}</div></div></div>
+        <div class="big">+${num(ml,0)} ml</div>
+        <div class="mini" style="margin-top:6px">${esc(form.elements.organism.value||'')} ${form.elements.salinity.value?`• ${esc(form.elements.salinity.value)} ppt`:''}</div>
+      </div>`;
+    }else{
+      flowHTML='<div class="empty">Wybierz recepturę.</div>';
+    }
+    document.getElementById('mediumFlowPreview').innerHTML=flowHTML;
+    const cost=changes.filter(ch=>Number(ch.delta||0)<0).reduce((sum,ch)=>sum+Math.abs(Number(ch.delta||0))*Number(ch.item?.price||0),0);
+    document.getElementById('mediumPreview').innerHTML = `<h3>Bilans przygotowania</h3>
+      <div class="recipe-summary-line"><span>Gotowa pożywka</span><strong>+${num(ml,0)} ml</strong></div>
+      <div class="recipe-summary-line"><span>Szacowany koszt surowców</span><strong>${money(cost)}</strong></div>
+      ${lines.map(line=>`<div class="recipe-summary-line"><span>${esc(line.item?.name||line.item?.category||'Pozycja')}</span><strong class="${Number(line.item?.qty||0)+1e-9>=line.need?'ledger-ok':'ledger-bad'}">−${num(line.need,3)} ${esc(line.item?.unit||'')} / stan ${num(Number(line.item?.qty||0),3)}</strong></div>`).join('')}`;
+  }
+  ['recipe','outputMl','name','organism','salinity'].forEach(n=>form.elements[n].addEventListener('input', renderMediumFlow));
+  renderMediumFlow();
+  form.onsubmit=async e=>{
+    e.preventDefault();
+    const fd=new FormData(form), ml=Number(fd.get('outputMl')||0), recipe=fd.get('recipe');
+    if(ml<=0||!recipe) return alert('Wybierz recepturę i podaj objętość.');
+    const changes=productionRecipeChanges(recipe, ml/1000, 0);
+    if(!changes.length) return alert('Wybrana receptura nie ma poprawnych składników.');
+    const cost=changes.filter(ch=>Number(ch.delta||0)<0).reduce((sum,ch)=>sum+Math.abs(Number(ch.delta||0))*Number(ch.item?.price||0),0);
+    const out={id:uid('MAG'),name:fd.get('name')||'Pożywka / medium',kind:'Pożywka / medium',category:'Pożywka przygotowana',qty:0,unit:'ml',min:0,price:ml?cost/ml:0,lot:fd.get('lot')||'',organism:fd.get('organism')||'',salinity:fd.get('salinity')||'',vessel:fd.get('vessel')||'',bestBefore:fd.get('bestBefore')||'',recipeId:recipe,status:'Gotowa',preparedAt:fd.get('dateTime')||nowLocal(),notes:fd.get('notes')||''};
+    const run={id:nextProductionRunId(dateOnly(fd.get('dateTime'))),type:'Przygotowanie pożywki / medium',dateTime:fd.get('dateTime')||nowLocal(),operator:db.settings.operator||'',summary:`${out.lot||out.name}: +${num(ml,0)} ml gotowej pożywki`,notes:out.notes};
+    changes.push({item:out,delta:ml,isNew:true,moveType:'Przyjęcie z produkcji',reason:'Gotowa pożywka / medium'});
+    try{await commitProductionRun(run,changes);closeModal();render();}catch(err){alert(err.message)}
+  };
+  modal.classList.add('open');
+}
+
+
+/* ===== v6.3 Production Flow ===== */
+let acProdPlanBlocks=[];
+let acProdDragIndex=null;
+
+function prodBlock(type,data={}){
+ return {uid:uid('PBLK'),type,...data};
+}
+function defaultProductionPlan(preset=''){
+ const src=productionReadyCultures().find(x=>x.id===preset)||productionReadyCultures()[0]||null;
+ const med=mediumStock()[0]||null;
+ return [
+  prodBlock('source',{itemId:src?.id||'',qty:500}),
+  prodBlock('medium',{itemId:med?.id||'',qty:4500}),
+  prodBlock('process',{vessel:'',plannedReadyDate:'',plannedBottleDate:'',nextCheckDate:'',targetConcentration:'',name:'',lot:'',notes:''}),
+  prodBlock('quality',{enabled:true,label:'Kontrola jakości',plannedDate:''}),
+  prodBlock('bottle',{enabled:true,bottleMl:500,units:10,product:'Nannochloropsis żywy 500 ml'})
+ ];
+}
+function prodBlockMeta(type){
+ const m={
+  source:['🧫','Inokulum','Kultura źródłowa pobierana z magazynu'],
+  medium:['💧','Pożywka','Gotowa pożywka pobierana z magazynu'],
+  process:['⚙️','Hodowla','Proces produkcyjny i terminy'],
+  quality:['🔬','Kontrola jakości','Planowana kontrola procesu'],
+  bottle:['🧴','Rozlew','Planowany rozlew po uzyskaniu gotowej kultury']
+ };
+ return m[type]||['•',type,''];
+}
+function prodPlanBlockHTML(b,idx){
+ const [icon,title,sub]=prodBlockMeta(b.type);
+ let body='';
+ if(b.type==='source'){
+  body=`<div class="prod-block-grid">
+   <div class="field"><label>Kultura źródłowa</label><select onchange="updateProdPlan(${idx},'itemId',this.value)"><option value="">— wybierz —</option>${productionReadyCultures().map(x=>`<option value="${x.id}" ${b.itemId===x.id?'selected':''}>${esc(x.lot||x.name)} • ${stockQtyText(x)}</option>`).join('')}</select></div>
+   <div class="field"><label>Pobierz [ml]</label><input type="number" inputmode="decimal" value="${b.qty||''}" oninput="updateProdPlan(${idx},'qty',this.value)"></div>
+  </div>`;
+ }else if(b.type==='medium'){
+  body=`<div class="prod-block-grid">
+   <div class="field"><label>Partia pożywki</label><select onchange="updateProdPlan(${idx},'itemId',this.value)"><option value="">— wybierz —</option>${mediumStock().map(x=>`<option value="${x.id}" ${b.itemId===x.id?'selected':''}>${esc(x.lot||x.name)} • ${stockQtyText(x)}</option>`).join('')}</select></div>
+   <div class="field"><label>Pobierz [ml]</label><input type="number" inputmode="decimal" value="${b.qty||''}" oninput="updateProdPlan(${idx},'qty',this.value)"></div>
+  </div>`;
+ }else if(b.type==='process'){
+  body=`<div class="prod-block-grid">
+   <div class="field"><label>Naczynie / stanowisko</label><input value="${esc(b.vessel||'')}" oninput="updateProdPlan(${idx},'vessel',this.value)"></div>
+   <div class="field"><label>Planowana gotowość</label><input type="date" value="${esc(b.plannedReadyDate||'')}" oninput="updateProdPlan(${idx},'plannedReadyDate',this.value)"></div>
+   <div class="field"><label>Docelowy rozlew</label><input type="date" value="${esc(b.plannedBottleDate||'')}" oninput="updateProdPlan(${idx},'plannedBottleDate',this.value)"></div>
+   <div class="field"><label>Następna kontrola</label><input type="date" value="${esc(b.nextCheckDate||'')}" oninput="updateProdPlan(${idx},'nextCheckDate',this.value)"></div>
+   <div class="field"><label>Nazwa nowej kultury</label><input value="${esc(b.name||'')}" oninput="updateProdPlan(${idx},'name',this.value)"></div>
+   <div class="field"><label>Partia — opcjonalnie</label><input value="${esc(b.lot||'')}" oninput="updateProdPlan(${idx},'lot',this.value)"></div>
+   <div class="field"><label>Kryterium / stężenie docelowe</label><input value="${esc(b.targetConcentration||'')}" oninput="updateProdPlan(${idx},'targetConcentration',this.value)"></div>
+   <div class="field"><label>Uwagi</label><input value="${esc(b.notes||'')}" oninput="updateProdPlan(${idx},'notes',this.value)"></div>
+  </div>`;
+ }else if(b.type==='quality'){
+  body=`<div class="prod-block-grid">
+   <div class="field"><label>Nazwa kontroli</label><input value="${esc(b.label||'Kontrola jakości')}" oninput="updateProdPlan(${idx},'label',this.value)"></div>
+   <div class="field"><label>Planowana data</label><input type="date" value="${esc(b.plannedDate||'')}" oninput="updateProdPlan(${idx},'plannedDate',this.value)"></div>
+  </div>`;
+ }else if(b.type==='bottle'){
+  body=`<div class="prod-block-grid">
+   <div class="field"><label>Objętość opakowania [ml]</label><input type="number" value="${b.bottleMl||500}" oninput="updateProdPlan(${idx},'bottleMl',this.value)"></div>
+   <div class="field"><label>Planowana liczba sztuk</label><input type="number" value="${b.units||''}" oninput="updateProdPlan(${idx},'units',this.value)"></div>
+   <div class="field wide"><label>Nazwa produktu</label><input value="${esc(b.product||'')}" oninput="updateProdPlan(${idx},'product',this.value)"></div>
+  </div>`;
+ }
+ const removable=!['source','medium','process'].includes(b.type);
+ return `<div class="prod-plan-block" data-prod-idx="${idx}">
+  <div class="prod-block-head">
+   <div class="prod-block-title"><span class="prod-drag" data-prod-drag="${idx}" title="Przeciągnij">≡</span><span class="prod-block-icon">${icon}</span><div><strong>${title}</strong><div class="mini">${sub}</div></div></div>
+   <div>${removable?`<button type="button" class="btn tiny danger" onclick="removeProdPlan(${idx})">Usuń</button>`:''}</div>
+  </div>${body}
+ </div>`;
+}
+function renderProdPlan(){
+ const el=document.getElementById('prodPlanCanvas');if(!el)return;
+ el.innerHTML=acProdPlanBlocks.map((b,i)=>prodPlanBlockHTML(b,i)+(i<acProdPlanBlocks.length-1?`<div class="prod-flow-arrow">↓</div><div class="prod-add-step"><button type="button" onclick="openProdStepMenu(${i+1})">＋ dodaj krok</button></div><div class="prod-flow-arrow">↓</div>`:'')).join('');
+ bindProdPlanDnD();
+ refreshProdPlanSummary();
+}
+function updateProdPlan(idx,key,val){
+ if(!acProdPlanBlocks[idx])return;
+ acProdPlanBlocks[idx][key]=['qty','bottleMl','units'].includes(key)?(val===''?'':Number(val)):val;
+ refreshProdPlanSummary();
+}
+function removeProdPlan(idx){acProdPlanBlocks.splice(idx,1);renderProdPlan()}
+function openProdStepMenu(insertAt){
+ modalTitle.textContent='Dodaj krok do procesu';modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<div class="big-action-grid">
+  <button class="btn big-action" onclick="insertProdStep(${insertAt},'quality')"><strong>Kontrola jakości</strong><span>Pomiar, zdjęcie, wynik OK / problem</span></button>
+  <button class="btn big-action" onclick="insertProdStep(${insertAt},'bottle')"><strong>Rozlew</strong><span>Planowane opakowania po gotowości</span></button>
+ </div>`;
+ modal.classList.add('open');
+}
+function insertProdStep(at,type){
+ const b=type==='quality'?prodBlock('quality',{label:'Kontrola jakości',plannedDate:''}):prodBlock('bottle',{bottleMl:500,units:10,product:'Nannochloropsis żywy 500 ml'});
+ acProdPlanBlocks.splice(at,0,b);closeModal();renderProdPlan();
+}
+function bindProdPlanDnD(){
+ const root=document.getElementById('prodPlanCanvas');if(!root)return;
+ root.querySelectorAll('[data-prod-drag]').forEach(handle=>{
+  const idx=Number(handle.dataset.prodDrag);
+  handle.addEventListener('pointerdown',e=>{
+   acProdDragIndex=idx;handle.setPointerCapture?.(e.pointerId);
+   root.querySelector(`[data-prod-idx="${idx}"]`)?.classList.add('dragging');
+   e.preventDefault();
+  });
+  handle.addEventListener('pointermove',e=>{
+   if(acProdDragIndex===null)return;
+   const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('[data-prod-idx]');
+   if(!target)return;
+   const ti=Number(target.dataset.prodIdx);
+   if(ti===acProdDragIndex)return;
+   const arr=[...acProdPlanBlocks], moved=arr.splice(acProdDragIndex,1)[0];
+   arr.splice(ti,0,moved);acProdPlanBlocks=arr;acProdDragIndex=ti;renderProdPlan();
+  });
+  const end=e=>{acProdDragIndex=null;root.querySelectorAll('.dragging').forEach(n=>n.classList.remove('dragging'));};
+  handle.addEventListener('pointerup',end);handle.addEventListener('pointercancel',end);
+ });
+}
+function prodBlockByType(type){return acProdPlanBlocks.find(b=>b.type===type)}
+function refreshProdPlanSummary(){
+ const el=document.getElementById('prodPlanSummary');if(!el)return;
+ const s=prodBlockByType('source'),m=prodBlockByType('medium'),p=prodBlockByType('process'),b=prodBlockByType('bottle');
+ const src=getById('inventory',s?.itemId),med=getById('inventory',m?.itemId);
+ const ino=Number(s?.qty||0),mm=Number(m?.qty||0),out=ino+mm;
+ const errs=[];
+ if(!src)errs.push('wybierz inokulum');
+ if(!med)errs.push('wybierz pożywkę');
+ if(ino<=0)errs.push('podaj ilość inokulum');
+ if(mm<=0)errs.push('podaj ilość pożywki');
+ if(!p?.plannedReadyDate)errs.push('ustaw termin gotowości');
+ if(src&&ino>freeStockQty(src))errs.push('za mało wolnego inokulum');
+ if(med&&mm>freeStockQty(med))errs.push('za mało wolnej pożywki');
+ el.innerHTML=`<div class="recipe-summary-line"><span>Planowany wynik kultury</span><strong>${num(out,0)} ml</strong></div>
+ <div class="recipe-summary-line"><span>Gotowość</span><strong>${p?.plannedReadyDate?datePL(p.plannedReadyDate):'—'}</strong></div>
+ ${b?`<div class="recipe-summary-line"><span>Planowany rozlew</span><strong>${Number(b.units||0)} × ${Number(b.bottleMl||0)} ml</strong></div>`:''}
+ ${errs.length?`<div class="alert"><strong>Do uzupełnienia</strong><span class="small">${esc(errs.join(' • '))}</span></div>`:`<div class="alert ok"><strong>Plan gotowy do uruchomienia</strong><span class="small">Po uruchomieniu ruchy magazynowe zostaną zaksięgowane, a schemat zostanie zablokowany jako historia.</span></div>`}`;
+}
+function openProductionFlowBuilder(preset=''){
+ acProdPlanBlocks=defaultProductionPlan(preset);
+ modalTitle.textContent='Nowa produkcja — Flow Builder';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="callout"><strong>Plan można układać blokami i przeciągać.</strong> Po uruchomieniu produkcji schemat staje się historią tylko do odczytu.</div>
+ <div class="prod-palette section">
+  <button type="button" onclick="acProdPlanBlocks.push(prodBlock('quality',{label:'Kontrola jakości',plannedDate:''}));renderProdPlan()">+ Kontrola jakości</button>
+  <button type="button" onclick="acProdPlanBlocks.push(prodBlock('bottle',{bottleMl:500,units:10,product:'Nannochloropsis żywy 500 ml'}));renderProdPlan()">+ Rozlew</button>
+ </div>
+ <div id="prodPlanCanvas" class="prod-flow section"></div>
+ <div class="prod-builder-summary"><div id="prodPlanSummary"></div><div class="actions" style="margin-top:10px">${btn('Zapisz jako szablon','saveProductionFlowTemplate()','btn secondary')}${btn('Uruchom produkcję','launchProductionFlow()','btn primary')}</div></div>`;
+ renderProdPlan();modal.classList.add('open');
+}
+async function saveProductionFlowTemplate(){
+ const p=prodBlockByType('process'),s=prodBlockByType('source');
+ const src=getById('inventory',s?.itemId);
+ const name=prompt('Nazwa szablonu:',`Produkcja ${src?.organism||'kultury'} ${num(Number(s?.qty||0)+Number(prodBlockByType('medium')?.qty||0),0)} ml`);
+ if(!name)return;
+ const t={id:uid('TPL'),name,organism:src?.organism||'',active:'Tak',flowPlan:clone(acProdPlanBlocks),createdAt:new Date().toISOString(),notes:'Szablon Flow Builder v6.3'};
+ await saveRecord('productionTemplates',t);alert('Szablon zapisany.');
+}
+async function launchProductionFlow(){
+ const s=prodBlockByType('source'),m=prodBlockByType('medium'),p=prodBlockByType('process'),q=acProdPlanBlocks.find(b=>b.type==='quality'),bt=acProdPlanBlocks.find(b=>b.type==='bottle');
+ const src=getById('inventory',s?.itemId),med=getById('inventory',m?.itemId),ino=Number(s?.qty||0),medMl=Number(m?.qty||0);
+ if(!src||!med||ino<=0||medMl<=0)return alert('Uzupełnij blok Inokulum i Pożywka.');
+ if(!p?.plannedReadyDate)return alert('Ustaw planowany termin gotowości w bloku Hodowla.');
+ if(ino>freeStockQty(src))return alert('Za mało wolnego inokulum.');
+ if(medMl>freeStockQty(med))return alert('Za mało wolnej pożywki.');
+ const started=nowLocal(),jid=nextProductionJobId(dateOnly(started)),output=ino+medMl,cost=ino*Number(src.price||0)+medMl*Number(med.price||0);
+ const out={id:uid('MAG'),name:p.name||`${src.organism||src.name} — produkcja`,kind:'Kultura żywa',category:'Kultura biologiczna',qty:0,unit:'ml',min:0,price:output?cost/output:0,lot:p.lot||nextCultureLot(src.organism||'',today()),organism:src.organism||'',strain:src.strain||'',concentration:'',vessel:p.vessel||'',status:'W toku',parentItemId:src.id,mediumItemId:med.id,productionJobId:jid,start:today(),plannedReadyDate:p.plannedReadyDate||'',plannedBottleDate:p.plannedBottleDate||'',targetConcentration:p.targetConcentration||'',notes:p.notes||''};
+ const flowSnapshot=clone(acProdPlanBlocks).map(b=>({...b,locked:true}));
+ const job={id:jid,type:'Hodowla / namnażanie',organism:src.organism||'',status:'W toku',startedAt:started,plannedReadyDate:p.plannedReadyDate||'',plannedBottleDate:p.plannedBottleDate||'',nextCheckDate:q?.plannedDate||p.nextCheckDate||'',sourceItemId:src.id,mediumItemId:med.id,outputItemId:out.id,targetConcentration:p.targetConcentration||'',vessel:p.vessel||'',notes:p.notes||'',flowPlan:flowSnapshot,plannedBottle:bt?{bottleMl:Number(bt.bottleMl||0),units:Number(bt.units||0),product:bt.product||''}:null,flowVersion:3};
+ const run={id:nextProductionRunId(),type:'Start produkcji Flow',dateTime:started,operator:db.settings.operator||'',summary:`${src.lot||src.name}: −${num(ino,0)} ml + ${med.lot||med.name}: −${num(medMl,0)} ml → ${out.lot}: +${num(output,0)} ml`,notes:p.notes||''};
+ const changes=[{item:src,delta:-ino,moveType:'Rozchód produkcyjny',reason:`Inokulum do ${jid}`},{item:med,delta:-medMl,moveType:'Rozchód produkcyjny',reason:`Pożywka do ${jid}`},{item:out,delta:output,isNew:true,moveType:'Przyjęcie produkcji w toku',reason:`Kultura w toku — ${jid}`}];
+ try{await commitProductionRun(run,changes,job);closeModal();render()}catch(err){alert(err.message)}
+}
+function productionLiveBlock(icon,title,subtitle,amount,statusCls='',actions=''){
+ return `<div class="prod-live-block ${statusCls}"><div class="prod-block-head"><div class="prod-block-title"><span class="prod-block-icon">${icon}</span><div><strong>${esc(title)}</strong><div class="mini">${subtitle}</div></div></div><span class="prod-flow-lock">🔒 historia</span></div>${amount?`<div class="amount">${amount}</div>`:''}${actions?`<div class="actions" style="margin-top:9px">${actions}</div>`:''}</div>`;
+}
+function productionJobFlowVertical(j){
+ const src=getById('inventory',j.sourceItemId),med=getById('inventory',j.mediumItemId),out=getById('inventory',j.outputItemId),latest=out?latestQuality(out.id):null;
+ const blocks=[];
+ blocks.push(productionLiveBlock('🧫',src?.lot||src?.name||'Inokulum',`${esc(src?.organism||'')} • źródło procesu`,src?stockQtyText(src):'—','',src?btn('Karta',`openStockCard('${src.id}')`,'btn tiny secondary'):''));
+ blocks.push(productionLiveBlock('💧',med?.lot||med?.name||'Pożywka',`${med?.salinity?esc(med.salinity)+' ppt • ':''}partia medium`,med?stockQtyText(med):'—','',med?btn('Karta',`openStockCard('${med.id}')`,'btn tiny secondary'):''));
+ const cls=j.status==='Problem'?'bad':j.status==='Gotowa'?'good':'warn';
+ blocks.push(productionLiveBlock('⚙️',out?.lot||out?.name||j.id,`${esc(j.status)} • ${esc(deadlineText(j.plannedReadyDate,j.status))}`,out?stockQtyText(out):'—',cls,`${out?btn('Panel',`openTankPanel('${out.id}')`,'btn tiny primary'):''}${j.status==='W toku'?btn('Oznacz gotową',`updateProductionJobStatus('${j.id}','Gotowa')`,'btn tiny'):''}`));
+ blocks.push(productionLiveBlock('🔬','Kontrola jakości',latest?`${datePL(latest.date)} • ${esc(latest.rating||'')}`:`plan: ${datePL(j.nextCheckDate)||'brak daty'}`,latest?esc(latest.value||latest.notes||'zapisano wynik'):'brak wyniku',latest?.rating==='Problem'?'bad':latest?'good':'planned',out?btn('Dodaj kontrolę',`openQuickQuality('${out.id}')`,'btn tiny primary'):''));
+ if(j.plannedBottle||j.plannedBottleDate){
+  const pb=j.plannedBottle||{};
+  blocks.push(productionLiveBlock('🧴','Rozlew',`${datePL(j.plannedBottleDate)||'bez daty'} • ${esc(pb.product||'produkt gotowy')}`,pb.units&&pb.bottleMl?`${pb.units} × ${pb.bottleMl} ml`:'zaplanowany',j.status==='Gotowa'?'planned':'',out&&j.status==='Gotowa'?btn('Wykonaj rozlew',`quickBottleStock('${out.id}')`,'btn tiny primary'):''));
+ }
+ return `<div class="prod-flow">${blocks.map((x,i)=>x+(i<blocks.length-1?`<div class="prod-flow-arrow">↓</div><div class="prod-add-step">${out?`<button onclick="openProductionActionMenu('${out.id}','${j.id}')">＋ szybka operacja</button>`:''}</div><div class="prod-flow-arrow">↓</div>`:'')).join('')}</div>`;
+}
+function openProductionActionMenu(stockId,jobId){
+ const x=getById('inventory',stockId);if(!x)return;
+ modalTitle.textContent='Szybka operacja';modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<div class="big-action-grid">
+  <button class="btn big-action" onclick="closeModal();openQuickQuality('${stockId}')"><strong>Kontrola jakości</strong><span>Pomiar, zdjęcie, wynik</span></button>
+  ${x.status==='Gotowa'?`<button class="btn big-action" onclick="quickSplitStock('${stockId}')"><strong>Podziel kulturę</strong><span>Utwórz kultury potomne</span></button><button class="btn big-action" onclick="quickBottleStock('${stockId}')"><strong>Rozlew</strong><span>Utwórz produkt gotowy</span></button>`:''}
+  <button class="btn big-action danger" onclick="closeModal();markStockProblem('${stockId}')"><strong>Problem / kwarantanna</strong><span>Zablokuj wykorzystanie partii</span></button>
+ </div>`;modal.classList.add('open');
+}
+function renderProduction(){
+ const active=(db.productionJobs||[]).filter(j=>['W toku','Gotowa','Problem'].includes(j.status)).sort((a,b)=>(a.plannedReadyDate||'9999').localeCompare(b.plannedReadyDate||'9999'));
+ return `<div class="command-banner"><h3>Production Flow</h3><div class="small">Plan układasz blokami. Po uruchomieniu schemat jest blokowany jako historia produkcji.</div>
+ <div class="command-shortcuts" style="margin-top:12px">
+  <button class="command-shortcut" onclick="openProductionFlowBuilder()"><strong>＋ Nowa produkcja</strong><span>Blokowy kreator z drag & drop</span></button>
+  <button class="command-shortcut" onclick="openMediumPreparation()"><strong>Pożywka</strong><span>Flow Builder receptury</span></button>
+  <button class="command-shortcut" onclick="setView('templates')"><strong>Szablony</strong><span>Zapisane procesy</span></button>
+  <button class="command-shortcut" onclick="openOrderDemandCenter()"><strong>Pod zamówienia</strong><span>Sprawdź zapotrzebowanie</span></button>
+ </div></div>
+ ${active.length?active.map(j=>`<div class="section card"><div class="actions" style="justify-content:space-between"><div><strong>${esc(j.id)} • ${esc(j.organism||'Produkcja')}</strong><div class="mini">${esc(j.status)} • ${esc(deadlineText(j.plannedReadyDate,j.status))}</div></div>${btn('Szczegóły',`openProductionJob('${j.id}')`,'btn tiny secondary')}</div><div style="margin-top:12px">${productionJobFlowVertical(j)}</div></div>`).join(''):'<div class="section card empty">Brak aktywnych procesów. Utwórz pierwszy plan blokowy.</div>'}
+ <div class="section card"><h3>Mapa zbiorników</h3>${tankTilesHTML()}</div>`;
+}
+function quickAdd(){
+ if(currentView==='production'||currentView==='smartplan')return openProductionFlowBuilder();
+ if(currentView==='dashboard')return openQuickQR();
+ if(currentView==='inventory')return openStockMove();
+ if(currentView==='sales'||currentView==='orders')return openForm('order');
+ if(currentView==='quality'||currentView==='measurements')return liveStock()[0]?openQuickQuality(liveStock()[0].id):alert('Brak kultury.');
+ if(currentView==='templates')return openTemplateForm();
+ if(currentView==='incidents')return openIncidentForm();
+ return openForm('task');
 }
 
 function isStandalonePWA(){
