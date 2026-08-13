@@ -532,6 +532,16 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 @media(max-width:600px){.acm-print-head strong{font-size:11px!important;max-width:56vw}}
 </style>
 
+
+<style id="v82-label-overrides">
+html{-webkit-text-size-adjust:100%}
+.acm-print-head,.acm-print-head *{-webkit-text-size-adjust:100%}
+.acm-print-head .title{flex:1;min-width:0;overflow:hidden}
+.acm-print-head strong{font-size:11px!important;line-height:1.15!important;max-width:none!important;word-break:break-word!important}
+.acm-print-head span{font-size:9px!important;line-height:1.2!important}
+@media(max-width:600px){.acm-print-head strong{font-size:10px!important}.acm-print-head span{font-size:8px!important}}
+</style>
+
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -4746,7 +4756,7 @@ registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=
    - przychód dopiero po płatności
    - szybkie akcje i lekki CRM/RFM
    ========================================================== */
-const V75_APP_VERSION='8.1';
+const V75_APP_VERSION='8.2';
 let v75SalesFilter='todo';
 let v75SalesQuery='';
 let v75ClientQuery='';
@@ -5139,15 +5149,15 @@ buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntr
 const v75InitBase=init;
 init=async function(){
  await v75InitBase();const purchaseFixes=await v751RepairPurchaseUnitCosts();await v75MigrateSales();
- document.title='AquaCulture Manager v8.1 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v8.1 • Label Studio Polish Fix');
+ document.title='AquaCulture Manager v8.2 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');
  titles.sales=['Sprzedaż','Jedno centrum działania: zamówienia, płatności, wysyłka, klienci i marża.'];
  titles.orders=['Zamówienia','Kanban realizacji z osobnym statusem płatności i rezerwacją magazynową.'];
  titles.clients=['Klienci','Lekki CRM: historia, wartość, częstotliwość i szybkie zamówienia.'];
  if(purchaseFixes)console.info(`v7.5.1: naprawiono ${purchaseFixes} cen zakupowych.`);
  render();
 };
-registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v81-sw-reloaded')){sessionStorage.setItem('acm-v81-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=8.1',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v81-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v8.1:',err)}})};
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v82-sw-reloaded')){sessionStorage.setItem('acm-v82-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=8.2',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v82-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v8.2:',err)}})};
 
 
 // ==========================================================
@@ -5284,8 +5294,8 @@ renderPrints=function(){
 const v76InitBase=init;
 init=async function(){
  await v76InitBase();
- document.title='AquaCulture Manager v8.1 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v8.1 • Label Studio Polish Fix');
+ document.title='AquaCulture Manager v8.2 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');
  titles.prints=['Etykiety / wydruki','Label Studio Pro: etykiety premium z QR i numerem partii pobieranym z magazynu.'];
  render();
 };
@@ -5355,8 +5365,8 @@ openV76LabelStudio=function(){
 const v761InitBase=init;
 init=async function(){
  await v761InitBase();
- document.title='AquaCulture Manager v8.1 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v8.1 • Label Studio Polish Fix');
+ document.title='AquaCulture Manager v8.2 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');
  render();
 };
 
@@ -5443,7 +5453,7 @@ function openV77AdvancedLabelStudio(){
 const v77RenderPrintsBase=renderPrints;
 renderPrints=function(){const base=v77RenderPrintsBase(),items=v77EligibleStock();return `<div class="v77-hero"><div class="card"><h3>Advanced Label Studio</h3><div class="small">Zaawansowany skrypt generowania etykiet A4 z danymi pobieranymi bezpośrednio z magazynu. Obsługuje style: <strong>Nanno</strong>, <strong>Widłonogi / Tigriopus</strong> oraz <strong>Fito + Widłonogi</strong>.</div><div class="v77-points"><div class="v77-point"><b>${items.length} pozycji</b><span>gotowych do etykietowania</span></div><div class="v77-point"><b>QR + partia</b><span>automatycznie z rekordu magazynowego</span></div><div class="v77-point"><b>6 / 8 / 12</b><span>etykiet na arkuszu A4</span></div></div><div class="actions" style="margin-top:12px">${btn('Otwórz Advanced Label Studio','openV77AdvancedLabelStudio()','btn primary')}</div></div><div class="card"><h3>Nowe możliwości</h3><div class="statline"><span>Szablony</span><strong>Nanno / Widłonogi / Bundle</strong></div><div class="statline"><span>Źródło danych</span><strong>Magazyn centralny</strong></div><div class="statline"><span>Kod QR</span><strong>ACM|STOCK|ID</strong></div><div class="statline"><span>Numer partii</span><strong>z pola lot</strong></div></div></div>`+base}
 const v77InitBase=init;
-init=async function(){await v77InitBase();document.title='AquaCulture Manager v8.1 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v8.1 • Label Studio Polish Fix');titles.prints=['Etykiety / wydruki','Advanced Label Studio: QR i numer partii pobierane bezpośrednio z magazynu.'];render()}
+init=async function(){await v77InitBase();document.title='AquaCulture Manager v8.2 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');titles.prints=['Etykiety / wydruki','Advanced Label Studio: QR i numer partii pobierane bezpośrednio z magazynu.'];render()}
 
 
 // ==========================================================
@@ -5541,7 +5551,7 @@ popupDoc=function(title,body,css=''){
 };
 
 const v78InitBase=init;
-init=async function(){await v78InitBase();document.title='AquaCulture Manager v8.1 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v8.1 • Label Studio Polish Fix');titles.prints=['Etykiety / wydruki','Adaptive Bundle, automatyczne skalowanie tytułów i mobilny podgląd całego A4.'];render()};
+init=async function(){await v78InitBase();document.title='AquaCulture Manager v8.2 Advanced Label Studio';document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');titles.prints=['Etykiety / wydruki','Adaptive Bundle, automatyczne skalowanie tytułów i mobilny podgląd całego A4.'];render()};
 
 
 // ==========================================================
@@ -5612,9 +5622,68 @@ openV77AdvancedLabelStudio=function(){
 const v81InitBase=init;
 init=async function(){
  await v81InitBase();
- document.title='AquaCulture Manager v8.1 Advanced Label Studio';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v8.1 • Label Studio Polish Fix');
+ document.title='AquaCulture Manager v8.2 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');
  titles.prints=['Etykiety / wydruki','Label Studio: poprawiona estetyka, opisy i układ etykiet.'];
+ render();
+}
+
+
+// ==========================================================
+// v8.2 BRANDING + LAYOUT FIX
+// - poprawa linii opisowej pod marką
+// - bundle: mniej agresywne "okręgi"/bąbelki
+// - drobne korekty estetyczne i nagłówka podglądu
+// ==========================================================
+function v82BrandLine(base){
+ if(base==='phyto') return '• MICROALGAE •';
+ if(base==='copepods') return '• LIVE COPEPODS •';
+ return '• LIVE CULTURES •';
+}
+function v82RenderLabel(rec,idx,opts){
+ const base=v78BaseTpl(rec.tpl),mode=v78BundleMode(rec.tpl,rec.vol),th=v77Theme(base),txt=v81Texts(base);
+ const qr=opts.showQr?makeQR(rec.qr):'';
+ const art=base==='phyto'?v76MicroArt(rec.item.id+'|'+idx):v77CopepodArt(rec.item.id+'|'+idx);
+ const leftBubbles=base==='bundle'?v77BubbleArt(rec.item.id+'|'+idx):'';
+ const rightArt=base==='bundle'?v77CopepodArt(rec.item.id+'|'+idx+'b'):art;
+ const extra=base==='bundle'?`<div class="v77-leftb">${leftBubbles}</div><div class="v77-art right">${rightArt}</div>`:`<div class="v77-art">${art}</div>`;
+ const titleB=base==='bundle'?'FITO+<br>WIDŁONOGI':esc(txt.b);
+ const aSize=v78TitleFont(txt.a,'a',base),bSize=v78TitleFont(base==='bundle'?'FITO+ WIDŁONOGI':txt.b,'b',base);
+ const features=v81FeatureSet(base);
+ const vol=v81VolumeParts(rec.vol);
+ const bundleNote=(base==='bundle')?`<div class="bundle-note-inline">${esc(v81BundleNote(mode))}</div>`:'';
+ return `<article class="v77label ${base}${base==='bundle'?' bundle-'+mode:''}">
+   <div class="brand"><div class="logo">${v77FlaskLogo(th.navy)}</div><div class="brtxt"><strong>NANNO CULTURE</strong><span>${v82BrandLine(base)}</span></div></div>
+   <div class="artzone">${extra}</div>
+   <div class="title"><div class="a" style="color:${th.navy};font-size:${aSize}mm">${esc(txt.a)}</div><div class="b" style="color:${th.accent};font-size:${bSize}mm">${titleB}</div></div>
+   <div class="pills"><span class="p1" style="background:${th.accent}">${esc(txt.p1)}</span><span class="p2" style="background:${th.navy}">${esc(txt.p2)}</span>${bundleNote}</div>
+   <div class="tag">${esc(txt.tag)}</div>
+   <div class="icons">${features.map((f,i)=>`<div class="ic"><i>${v77FeatIcon(i,th.navy)}</i><span>${esc(f[0])}<br>${esc(f[1])}</span></div>`).join('')}</div>
+   <div class="trace"><div class="lot"><small>NUMER PARTII</small><b>${esc(rec.lot)}</b>${opts.showStrain&&rec.strain?`<span>Źródło: ${esc(rec.strain)}</span>`:''}${opts.showBest&&rec.best?`<span>Użyć do: ${esc(rec.best)}</span>`:''}</div>${opts.showQr?`<div class="qr"><div class="code">${qr}</div><small>QR • ${esc(rec.item.id)}</small></div>`:''}</div>
+   <div class="bottom" style="background:${th.navy}"><strong class="vol ${vol.main.length>=4?'compact':''}">${esc(vol.main)}${vol.suffix?`<small>${esc(vol.suffix)}</small>`:''}</strong><span>OBJĘTOŚĆ<br>NETTO</span><em></em><b>100% NATURALNY<br>PRODUKT</b></div>
+ </article>`
+}
+v77RenderLabel=v82RenderLabel;
+
+const v82PrintBase=v77PrintCSS;
+v77PrintCSS=function(layout,trim){
+ const f=(layout.font||1);
+ return v82PrintBase(layout,trim)+`.v77label .brand .brtxt span{letter-spacing:.11em}.v77label.bundle .brand .brtxt span,.v77label.copepods .brand .brtxt span{letter-spacing:.08em}.v77label.bundle .artzone{width:${24.5*f}mm;height:${24.5*f}mm;right:${4.2*f}mm;top:${6.4*f}mm}.v77label.bundle .artzone .v77-leftb{width:${12.5*f}mm!important;height:${12.5*f}mm!important;left:${1.0*f}mm;top:${8.4*f}mm;opacity:.92}.v77label.bundle .artzone .v77-art.right{width:${17.5*f}mm!important;height:${17.5*f}mm!important;right:-${0.4*f}mm;top:${0.4*f}mm}.v77label.bundle-duo .artzone .v77-leftb,.v77label.bundle-15 .artzone .v77-leftb{width:${12.2*f}mm!important;height:${12.2*f}mm!important}.v77label.bundle .pills{max-width:${57*f}mm}.v77label.bundle .bundle-note-inline{margin-top:${0.6*f}mm;font-size:${1.95*f}mm;max-width:${54*f}mm}.v77label.bundle .tag{max-width:${54*f}mm;font-size:${2.42*f}mm;line-height:1.16}.v77label.bundle .icons{top:${21.0*f}mm;width:${20.5*f}mm}.v77label.bundle .ic span{font-size:${2.08*f}mm}.v77label.copepods .brand .brtxt span{font-size:${1.8*f}mm}.v77label.bundle .brand .brtxt span{font-size:${1.8*f}mm}`
+}
+
+const v82OpenBase=openV77AdvancedLabelStudio;
+openV77AdvancedLabelStudio=function(){
+ v82OpenBase();
+ const note=document.querySelector('#modalBody .section.callout:last-child');
+ if(note)note.innerHTML='<strong>Poprawki v8.2:</strong> dla Widłonogów i zestawów Fito + Widłonogi linia pod marką nie używa już ogólnego opisu „MICROALGAE”. Dodatkowo wygładzono układ bąbelków/okręgów i poprawiono estetykę prawej kolumny.';
+}
+
+const v82InitBase=init;
+init=async function(){
+ await v82InitBase();
+ document.title='AquaCulture Manager v8.2 Advanced Label Studio';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v8.2 • Branding & Layout Fix');
+ titles.prints=['Etykiety / wydruki','Label Studio: poprawiona linia pod marką, bąbelki i drobne detale układu.'];
  render();
 }
 
