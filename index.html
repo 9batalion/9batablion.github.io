@@ -347,6 +347,12 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 @media(max-width:620px){.work-hero{align-items:flex-start;flex-direction:column}.work-card{grid-template-columns:36px 1fr 20px}.qc-mini-grid{grid-template-columns:1fr 1fr}}
 
 </style>
+
+<style id="v71EnergyStyles">
+.energy-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.energy-kpi{border:1px solid var(--line);background:#0a1728;border-radius:12px;padding:11px}.energy-kpi .t{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}.energy-kpi strong{display:block;font-size:19px;margin-top:5px}.energy-device-row{display:grid;grid-template-columns:1.35fr .8fr .65fr .55fr .7fr .75fr .9fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:10px}.energy-device-row.head{font-weight:800;color:var(--muted);font-size:9px}.energy-device-row .name{font-size:11px;font-weight:800}.energy-device-row .muted{color:var(--muted);font-weight:400}.energy-formula{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:10px;line-height:1.55}.cost-detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.cost-detail{border:1px solid var(--line);border-radius:11px;padding:9px;background:#091728}.cost-detail span{display:block;font-size:9px;color:var(--muted)}.cost-detail strong{display:block;font-size:16px;margin-top:4px}.cost-dominant{border-left:3px solid var(--warn)}
+@media(max-width:900px){.energy-kpis{grid-template-columns:repeat(2,1fr)}.energy-device-row{grid-template-columns:1fr 1fr 1fr}.energy-device-row.head{display:none}.energy-device-row .energy-actions{grid-column:1/-1}.cost-detail-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.energy-kpis,.cost-detail-grid{grid-template-columns:1fr 1fr}.energy-device-row{grid-template-columns:1fr 1fr}.energy-device-row .name{grid-column:1/-1}}
+</style>
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -3879,6 +3885,170 @@ openAuditCenter = function(){const issues=auditIssues(),score=auditScore(),bad=i
 const acInitV70Base=init;
 init = async function(){await acInitV70Base();try{await put('meta',{id:'operationsV70',value:{done:true,date:new Date().toISOString(),note:'v7.0 additive: units, costing snapshots for future runs, QC panel, work mode. No automatic stock corrections.'}})}catch(e){console.warn('v7 meta',e)}document.title='AquaCulture Manager v7.0 Operations';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.0 • Operations • AquaFlow');render()};
 
+
+
+/* =========================================================
+   v7.1 ENERGY + COST ENGINE
+   - precyzyjne ceny jednostkowe
+   - energia z rzeczywistych urządzeń (W × szt. × h/d × PLN/kWh)
+   - alokacja kosztu wspólnego sprzętu na liczbę obsługiwanych kultur
+   - snapshot energii dla hodowli i aktualizacja po oznaczeniu „Gotowa”
+   - audyt spójności kosztów
+   ========================================================= */
+
+function v71N(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
+function v71UnitMoney(v,unit=''){
+ const n=Number(v)||0,abs=Math.abs(n);let max=2;
+ if(abs>0&&abs<0.01)max=6;else if(abs<0.1)max=5;else if(abs<1)max=4;else max=2;
+ return n.toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:max})+' zł'+(unit?'/'+unit:'');
+}
+function v71CostBasis(item){
+ if(!item)return {price:0,source:'brak'};
+ const pp=v71N(item.purchasePrice),pq=v71N(item.purchaseQty);
+ if(pp>0&&pq>0)return {price:pp/pq,source:'zakup'};
+ return {price:Math.max(0,v71N(item.price)),source:inferStockKind(item)==='Kultura żywa'?'koszt przeniesiony kultury':'cena ewidencyjna'};
+}
+function v71EnergyDevices(){return Array.isArray(db.settings.energyDevices)?db.settings.energyDevices:[]}
+function v71EnergyPrice(){return Math.max(0,v71N(db.settings.electricityPricePerKwh))}
+function v71DeviceKwhDay(d){return Math.max(0,v71N(d.watts))*Math.max(0,v71N(d.qty,1))*Math.min(24,Math.max(0,v71N(d.hoursPerDay)))/1000}
+function v71DeviceCapacity(d){return Math.max(1,v71N(d.capacity,1))}
+function v71DeviceMatches(d,organism=''){
+ if(d.active===false||String(d.active)==='false')return false;
+ const scope=String(d.organism||'Wszystkie');return !scope||scope==='Wszystkie'||scope===organism;
+}
+function v71DeviceAllocatedCostDay(d,price=v71EnergyPrice()){return v71DeviceKwhDay(d)*Math.max(0,price)/v71DeviceCapacity(d)}
+function v71DeviceAllocatedKwhDay(d){return v71DeviceKwhDay(d)/v71DeviceCapacity(d)}
+function v71CalendarDays(a,b){
+ const ad=String(a||'').slice(0,10),bd=String(b||'').slice(0,10);if(!ad||!bd)return 0;
+ const A=new Date(ad+'T00:00:00'),B=new Date(bd+'T00:00:00');if(!Number.isFinite(A.getTime())||!Number.isFinite(B.getTime()))return 0;
+ return Math.max(0,(B-A)/86400000);
+}
+function v71ActualDays(a,b){
+ const A=new Date(a||''),B=new Date(b||'');if(!Number.isFinite(A.getTime())||!Number.isFinite(B.getTime()))return v71CalendarDays(a,b);
+ return Math.max(0,(B-A)/86400000);
+}
+function v71IsCultivationRun(run){const t=String(run?.type||'').toLowerCase();return /start produkcji|hodowl|namnaż|zwiększenie objętości/.test(t)&&!/rozlew|pakowan|rozdziel/.test(t)}
+function v71EnergySnapshot(organism,start,end,actual=false){
+ const price=v71EnergyPrice(),days=actual?v71ActualDays(start,end):v71CalendarDays(start,end),devices=v71EnergyDevices().filter(d=>v71DeviceMatches(d,organism)).map(d=>{
+  const totalKwhDay=v71DeviceKwhDay(d),allocatedKwhDay=v71DeviceAllocatedKwhDay(d),kwh=allocatedKwhDay*days,cost=kwh*price;
+  return {id:d.id||'',name:d.name||d.type||'Urządzenie',type:d.type||'Inne',watts:v71N(d.watts),qty:v71N(d.qty,1),hoursPerDay:v71N(d.hoursPerDay),capacity:v71DeviceCapacity(d),organism:d.organism||'Wszystkie',totalKwhDay,allocatedKwhDay,kwh,cost};
+ });
+ return {version:'7.1',pricePerKwh:price,durationDays:days,mode:actual?'actual':'planned',devices,totalKwh:devices.reduce((a,x)=>a+x.kwh,0),cost:devices.reduce((a,x)=>a+x.cost,0)};
+}
+function v71CurrentEnergyTotals(){
+ const ds=v71EnergyDevices().filter(d=>v71DeviceMatches(d,'' )||d.active!==false),price=v71EnergyPrice(),kwhDay=ds.filter(d=>d.active!==false&&String(d.active)!=='false').reduce((a,d)=>a+v71DeviceKwhDay(d),0);
+ return {watts:ds.filter(d=>d.active!==false&&String(d.active)!=='false').reduce((a,d)=>a+v71N(d.watts)*v71N(d.qty,1),0),kwhDay,costDay:kwhDay*price,cost30:kwhDay*price*30};
+}
+function v71ProductionBreakdown(changes){
+ return (changes||[]).filter(ch=>v71N(ch.delta)<0).map(ch=>{const q=Math.abs(v71N(ch.delta)),basis=v71CostBasis(ch.item),p=basis.price;return {itemId:ch.item?.id||'',name:ch.item?.name||'',qty:q,unit:ch.item?.unit||'',unitPrice:p,cost:q*p,priceSource:basis.source,lot:ch.item?.lot||''};});
+}
+
+// Nowy silnik kosztu: nie dolicza już stałej „energii na każdą operację”.
+// Energia trafia do hodowli na podstawie urządzeń i czasu procesu.
+commitProductionRun = async function(run,changes,job=null){
+ const breakdown=v71ProductionBreakdown(changes),material=breakdown.reduce((a,b)=>a+v71N(b.cost),0),isProd=acIsProductionCostRun(run);
+ const labor=isProd?Math.max(0,v71N(db.settings.laborCostPerProductionRun)):0,other=isProd?Math.max(0,v71N(db.settings.otherCostPerProductionRun)):0;
+ let energySnapshot=null,energy=0;
+ if(isProd&&job&&v71IsCultivationRun(run)&&job.plannedReadyDate){energySnapshot=v71EnergySnapshot(job.organism||'',run.dateTime||job.startedAt||nowLocal(),job.plannedReadyDate,false);energy=energySnapshot.cost}
+ const overhead=labor+other+energy,total=material+overhead;
+ run.costBreakdown=breakdown;run.materialCost=material;run.energyCost=energy;run.laborCost=labor;run.otherCost=other;run.overheadCost=overhead;run.totalCost=total;run.energySnapshot=energySnapshot;run.costSnapshotVersion='7.1';run.costMethod='FIFO-like transfer cost + equipment electricity snapshot';
+ const positives=(changes||[]).filter(ch=>v71N(ch.delta)>0),sameUnit=positives.length&&positives.every(ch=>acCanonicalUnit(ch.item?.unit)===acCanonicalUnit(positives[0].item?.unit));
+ if(total>=0&&sameUnit){const totalOut=positives.reduce((a,ch)=>a+v71N(ch.delta),0);if(totalOut>0){const unitCost=total/totalOut;positives.forEach(ch=>{if(ch.item){ch.item.price=unitCost;ch.item.costSource='production';ch.item.costRunId=run.id}})}}
+ if(job){job.materialCost=material;job.energyCost=energy;job.laborCost=labor;job.otherCost=other;job.overheadCost=overhead;job.totalCost=total;job.energySnapshot=energySnapshot;job.costSnapshotVersion='7.1'}
+ await acCommitProductionRunV70(run,changes,job);
+};
+
+acRunCost = function(run){
+ if(!run)return {material:0,energy:0,labor:0,other:0,overhead:0,total:0,estimated:true,breakdown:[]};
+ const breakdown=Array.isArray(run.costBreakdown)&&run.costBreakdown.length?run.costBreakdown:(run.movements||[]).filter(m=>v71N(m.delta)<0).map(m=>{const x=getById('inventory',m.itemId),basis=v71CostBasis(x),qty=Math.abs(v71N(m.delta));return {itemId:m.itemId,name:m.name||x?.name||m.itemId,qty,unit:m.unit||x?.unit||'',unitPrice:basis.price,cost:qty*basis.price,priceSource:basis.source};});
+ const material=Number.isFinite(Number(run.materialCost))?Number(run.materialCost):breakdown.reduce((a,b)=>a+v71N(b.cost),0);
+ if(run.costSnapshotVersion==='7.1'){
+  const energy=Math.max(0,v71N(run.energyCost)),labor=Math.max(0,v71N(run.laborCost)),other=Math.max(0,v71N(run.otherCost));
+  const overhead=energy+labor+other,total=material+overhead;return {material,energy,labor,other,overhead,total,estimated:false,breakdown,energySnapshot:run.energySnapshot||null};
+ }
+ if(run.costSnapshotVersion){const overhead=Math.max(0,v71N(run.overheadCost)),total=material+overhead;return {material,energy:0,labor:0,other:overhead,overhead,total,estimated:false,legacy:true,breakdown,energySnapshot:null};}
+ // Rekonstrukcja starszych operacji: materiał wg obecnej bazy + praca/inne; energii historycznej nie zgadujemy.
+ const isProd=acIsProductionCostRun(run),labor=isProd?Math.max(0,v71N(db.settings.laborCostPerProductionRun)):0,other=isProd?Math.max(0,v71N(db.settings.otherCostPerProductionRun)):0;
+ return {material,energy:0,labor,other,overhead:labor+other,total:material+labor+other,estimated:true,breakdown,energySnapshot:null};
+};
+
+function v71CostAudit(run){
+ const c=acRunCost(run),issues=[],sum=c.breakdown.reduce((a,x)=>a+v71N(x.cost),0);
+ if(Math.abs(sum-c.material)>0.011)issues.push(`Suma pozycji materiałowych ${money(sum)} ≠ zapisany materiał ${money(c.material)}.`);
+ const calc=c.material+c.overhead;if(Math.abs(calc-c.total)>0.011)issues.push(`Materiał + koszty operacyjne ${money(calc)} ≠ razem ${money(c.total)}.`);
+ const dominant=[...c.breakdown].sort((a,b)=>v71N(b.cost)-v71N(a.cost))[0];
+ return {issues,dominant,share:dominant&&c.material>0?v71N(dominant.cost)/c.material:0};
+}
+
+function v71DeviceListHTML(){
+ const price=v71EnergyPrice(),rows=v71EnergyDevices();
+ if(!rows.length)return '<div class="empty">Brak urządzeń. Dodaj np. lampę LED i napowietrzacz.</div>';
+ return `<div class="energy-device-row head"><div>Urządzenie</div><div>Zakres</div><div>Moc</div><div>Ilość</div><div>h/d</div><div>Pojemność</div><div>Koszt/d</div><div></div></div>${rows.map(d=>`<div class="energy-device-row"><div class="name">${esc(d.name||d.type||'Urządzenie')}<div class="muted">${esc(d.type||'Inne')}</div></div><div>${esc(d.organism||'Wszystkie')}</div><div>${num(v71N(d.watts),1)} W</div><div>${num(v71N(d.qty,1),0)} szt.</div><div>${num(v71N(d.hoursPerDay),1)}</div><div>${v71DeviceCapacity(d)} kultur</div><div><strong>${money(v71DeviceAllocatedCostDay(d,price))}</strong><div class="muted">${num(v71DeviceAllocatedKwhDay(d),3)} kWh/kulturę</div></div><div class="energy-actions">${btn('Edytuj',`openEnergyDeviceForm('${d.id}')`,'btn tiny')}${btn('Usuń',`deleteEnergyDevice('${d.id}')`,'btn tiny danger')}</div></div>`).join('')}`;
+}
+function openEnergyDeviceForm(id=''){
+ const old=v71EnergyDevices().find(x=>x.id===id),d=old?{...old}:{id:uid('DEV'),name:'',type:'LED',watts:18,qty:1,hoursPerDay:16,capacity:1,organism:'Wszystkie',active:true};
+ modalTitle.textContent=old?'Edytuj urządzenie':'Dodaj urządzenie';modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<form id="energyDeviceForm"><div class="form-grid">${f('name','Nazwa urządzenia','text',d.name)}${f('type','Typ','select',d.type,['LED','Napowietrzacz','Pompa','Grzałka','Sterylizator','Inne'])}${f('watts','Moc jednego urządzenia [W]','number',d.watts)}${f('qty','Liczba urządzeń [szt.]','number',d.qty)}${f('hoursPerDay','Praca [h/dobę]','number',d.hoursPerDay)}${f('capacity','Ile kultur łącznie obsługuje ta pozycja','number',d.capacity)}${f('organism','Przypisz do','select',d.organism,['Wszystkie','Nannochloropsis','Tigriopus / widłonogi','Kiełże morskie','Artemia'])}<div class="field wide"><label class="qc-check"><input name="active" type="checkbox" value="1" ${d.active!==false?'checked':''} style="width:auto"> Aktywne — uwzględniaj w kosztach energii</label></div></div><div class="callout section"><strong>Alokacja sprzętu wspólnego.</strong> Jeśli jeden napowietrzacz obsługuje 4 słoje, wpisz „4” w polu liczby obsługiwanych kultur. Koszt energii tego urządzenia zostanie podzielony przez 4 dla pojedynczej hodowli.</div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz urządzenie</button></div></form>`;
+ energyDeviceForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),obj={id:d.id,name:String(fd.get('name')||fd.get('type')||'Urządzenie'),type:String(fd.get('type')||'Inne'),watts:Math.max(0,v71N(fd.get('watts'))),qty:Math.max(1,Math.round(v71N(fd.get('qty'),1))),hoursPerDay:Math.max(0,Math.min(24,v71N(fd.get('hoursPerDay')))),capacity:Math.max(1,Math.round(v71N(fd.get('capacity'),1))),organism:String(fd.get('organism')||'Wszystkie'),active:fd.get('active')==='1'};const arr=v71EnergyDevices().slice(),i=arr.findIndex(x=>x.id===obj.id);if(i>=0)arr[i]=obj;else arr.push(obj);db.settings.energyDevices=arr;await saveSettings();closeModal();render()};modal.classList.add('open');
+}
+async function deleteEnergyDevice(id){if(!confirm('Usunąć urządzenie z kalkulatora energii? Historyczne snapshoty kosztów pozostaną bez zmian.'))return;db.settings.energyDevices=v71EnergyDevices().filter(x=>x.id!==id);await saveSettings();render()}
+
+acCostingSettings = function(){return {electricity:v71EnergyPrice(),labor:Math.max(0,v71N(db.settings.laborCostPerProductionRun)),other:Math.max(0,v71N(db.settings.otherCostPerProductionRun)),targetMargin:Math.max(0,Math.min(95,v71N(db.settings.targetGrossMargin,50)))}}
+saveCostingSettings = async function(){const f=document.getElementById('costSettingsForm');if(!f)return;const fd=new FormData(f);db.settings.electricityPricePerKwh=Math.max(0,v71N(fd.get('electricity')));db.settings.laborCostPerProductionRun=Math.max(0,v71N(fd.get('labor')));db.settings.otherCostPerProductionRun=Math.max(0,v71N(fd.get('other')));db.settings.targetGrossMargin=Math.max(0,Math.min(95,v71N(fd.get('margin'),50)));await saveSettings();render()}
+
+renderCosting = function(){
+ const s=acCostingSettings(),runs=[...(db.productionRuns||[])].filter(acIsProductionCostRun).sort((a,b)=>String(b.dateTime||b.createdAt||'').localeCompare(String(a.dateTime||a.createdAt||''))),e=v71CurrentEnergyTotals(),live=liveStock().filter(x=>x.unit==='ml'),products=db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&v71N(x.qty)>0),liveCost=live.map(acOutputCostPerUnit).filter(x=>x>0),prodCost=products.map(acOutputCostPerUnit).filter(x=>x>0),avgL=liveCost.length?liveCost.reduce((a,x)=>a+x*1000,0)/liveCost.length:0,avgProd=prodCost.length?prodCost.reduce((a,x)=>a+x,0)/prodCost.length:0;
+ return `<div class="simple-kpis"><div class="simple-kpi"><div class="t">Koszt produkcji • miesiąc</div><div class="n">${money(acMonthProductionCost())}</div></div><div class="simple-kpi"><div class="t">Śr. koszt 1 L kultury</div><div class="n">${money(avgL)}</div></div><div class="simple-kpi"><div class="t">Prąd całej instalacji / 30 dni</div><div class="n">${money(e.cost30)}</div><div class="mini">${num(e.kwhDay*30,2)} kWh</div></div><div class="simple-kpi"><div class="t">Moc urządzeń aktywnych</div><div class="n">${num(e.watts,0)} W</div><div class="mini">${num(e.kwhDay,3)} kWh/dobę</div></div></div>
+ <div class="two section"><div class="card"><h3>Kalkulator ceny i marży</h3><form id="marginCalcForm"><div class="form-grid"><div class="field wide"><label>Partia / produkt</label><select name="item" oninput="acRefreshMarginCalculator()">${acMarginProductOptions()}</select></div><div class="field"><label>Docelowa marża brutto [%]</label><input name="margin" type="number" step="0.1" value="${s.targetMargin}" oninput="acRefreshMarginCalculator()"></div><div class="field"><label>Testowana cena sprzedaży [PLN]</label><input name="sale" type="number" step="0.01" value="" oninput="acRefreshMarginCalculator()"></div></div></form><div id="marginCalcResult" class="section"></div></div>
+ <div class="card"><h3>Ustawienia kosztów</h3><form id="costSettingsForm"><div class="form-grid"><div class="field"><label>Cena energii [PLN/kWh]</label><input name="electricity" type="number" step="0.0001" value="${s.electricity}"></div><div class="field"><label>Praca na operację [PLN]</label><input name="labor" type="number" step="0.01" value="${s.labor}"></div><div class="field"><label>Inne na operację [PLN]</label><input name="other" type="number" step="0.01" value="${s.other}"></div><div class="field"><label>Domyślna marża [%]</label><input name="margin" type="number" step="0.1" value="${s.targetMargin}"></div></div><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" onclick="saveCostingSettings()">Zapisz ustawienia kosztów</button></div></form><div class="mini" style="margin-top:10px">Energia nie jest już stałą kwotą doliczaną do każdej operacji. Dla nowych hodowli jest liczona z mocy urządzeń, czasu pracy i planowanego/realnego czasu procesu.</div></div></div>
+ <div class="section card"><div class="actions" style="justify-content:space-between"><div><h3 style="margin:0">Urządzenia i energia</h3><div class="mini">LED, napowietrzacze, pompy, grzałki i inne odbiorniki.</div></div>${btn('+ Dodaj urządzenie','openEnergyDeviceForm()','btn primary')}</div><div class="energy-kpis section"><div class="energy-kpi"><div class="t">Cena energii</div><strong>${num(s.electricity,4)} zł/kWh</strong></div><div class="energy-kpi"><div class="t">Zużycie całe</div><strong>${num(e.kwhDay,3)} kWh/d</strong></div><div class="energy-kpi"><div class="t">Koszt całej instalacji</div><strong>${money(e.costDay)}/d</strong></div><div class="energy-kpi"><div class="t">Koszt 30 dni</div><strong>${money(e.cost30)}</strong></div></div><div class="section">${v71DeviceListHTML()}</div><div class="callout section energy-formula"><strong>Wzór:</strong> kWh/d = (W × liczba urządzeń × h/d) / 1000. Koszt hodowli = kWh/d × cena PLN/kWh × liczba dni ÷ liczba kultur obsługiwanych przez urządzenie.</div></div>
+ <div class="section card"><h3>Ostatnie operacje produkcyjne</h3>${table(['Data','Operacja','Materiały','Energia','Praca + inne','Razem','Tryb',''],runs.slice(0,40).map(r=>{const c=acRunCost(r);return `<tr><td>${datePL(r.dateTime||r.createdAt)}</td><td><strong>${esc(r.type||'')}</strong><div class="mini">${esc(r.id)}</div></td><td>${money(c.material)}</td><td>${money(c.energy||0)}</td><td>${money((c.labor||0)+(c.other||0))}</td><td><strong>${money(c.total)}</strong></td><td>${c.estimated?'<span class="badge warn">szacunek</span>':c.legacy?'<span class="badge warn">v7.0</span>':'<span class="badge ok">snapshot 7.1</span>'}</td><td><button class="btn tiny" onclick="openProductionRun('${r.id}')">Szczegóły</button></td></tr>`}))}</div><script>setTimeout(acRefreshMarginCalculator,0)<\/script>`;
+};
+
+const v71OpenProductionRunBase=openProductionRun;
+openProductionRun = function(id){
+ v71OpenProductionRunBase(id);const r=getById('productionRuns',id);if(!r)return;const c=acRunCost(r),a=v71CostAudit(r),es=c.energySnapshot;
+ const rows=c.breakdown.map(x=>`<tr><td>${esc(x.name)}<div class="mini">${esc(x.lot||'')} • ${esc(x.priceSource||'')}</div></td><td>${num(x.qty,4)} ${esc(x.unit||'')}</td><td>${v71UnitMoney(x.unitPrice,x.unit||'')}</td><td><strong>${money(x.cost)}</strong></td></tr>`);
+ const energyRows=es?.devices?.map(d=>`<tr><td>${esc(d.name)}<div class="mini">${esc(d.type)} • ${esc(d.organism||'Wszystkie')}</div></td><td>${num(d.watts,1)} W × ${num(d.qty,0)} × ${num(d.hoursPerDay,1)} h/d</td><td>÷ ${d.capacity}</td><td>${num(d.kwh,3)} kWh</td><td><strong>${money(d.cost)}</strong></td></tr>`).join('')||'';
+ modalBody.insertAdjacentHTML('beforeend',`<div class="section card"><h3>Weryfikacja kosztu</h3><div class="cost-detail-grid"><div class="cost-detail"><span>Materiały</span><strong>${money(c.material)}</strong></div><div class="cost-detail"><span>Energia</span><strong>${money(c.energy||0)}</strong></div><div class="cost-detail"><span>Praca + inne</span><strong>${money((c.labor||0)+(c.other||0))}</strong></div><div class="cost-detail"><span>Razem</span><strong>${money(c.total)}</strong></div></div>${a.dominant&&a.share>.5?`<div class="callout section cost-dominant"><strong>Największy składnik kosztu: ${esc(a.dominant.name)}</strong> ${money(a.dominant.cost)} (${num(a.share*100,1)}% materiałów). Cena: ${v71UnitMoney(a.dominant.unitPrice,a.dominant.unit)}. To zwykle wyjaśnia wysokie wartości typu 300+ zł przy drogim inokulum.</div>`:''}${r.costSnapshotVersion==='7.0'?'<div class="callout section"><strong>Snapshot v7.0.</strong> Ta historyczna operacja zachowuje dawny model kosztów. v7.1 nie zmienia jej automatycznie, aby nie przepisywać historii.</div>':''}${a.issues.length?`<div class="callout danger-callout section"><strong>Niespójność kosztu</strong>${a.issues.map(x=>`<div>${esc(x)}</div>`).join('')}</div>`:'<div class="callout section"><strong>Kontrola arytmetyczna: OK.</strong> Suma pozycji materiałowych i kosztów operacyjnych jest zgodna z wartością „Razem”.</div>'}<h3 class="section">Materiały</h3>${rows.length?table(['Pozycja','Ilość','Cena jednostkowa','Koszt'],rows):'<div class="empty">Brak rozchodu materiałów.</div>'}${es?`<h3 class="section">Energia • ${num(es.durationDays,2)} dni • ${num(es.pricePerKwh,4)} zł/kWh</h3>${energyRows?table(['Urządzenie','Parametry','Alokacja','Zużycie','Koszt'],energyRows):'<div class="empty">Brak aktywnych urządzeń przypisanych do tej hodowli.</div>'}`:''}</div>`);
+};
+
+const v71OpenStockCardBase=openStockCard;
+openStockCard = function(id){v71OpenStockCardBase(id);const x=getById('inventory',id);if(!x)return;const labels=[...modalBody.querySelectorAll('.profilebox .label')];const l=labels.find(n=>n.textContent.trim()==='Cena jednostkowa');if(l){const val=l.parentElement?.querySelector('.value');if(val)val.textContent=v71UnitMoney(v71CostBasis(x).price,x.unit||'')}if(v71N(x.purchasePrice)>0&&v71N(x.purchaseQty)>0){const profile=modalBody.querySelector('.profile');if(profile)profile.insertAdjacentHTML('beforeend',profileBox('Zakup / podstawa ceny',`${money(x.purchasePrice)} / ${num(x.purchaseQty,4)} ${x.unit} = ${v71UnitMoney(x.purchasePrice/x.purchaseQty,x.unit)}`))}}
+
+const v71RefreshProdPlanSummaryBase=refreshProdPlanSummary;
+refreshProdPlanSummary = function(){v71RefreshProdPlanSummaryBase();const el=document.getElementById('prodPlanSummary');if(!el)return;const s=prodBlockByType('source'),p=prodBlockByType('process'),src=getById('inventory',s?.itemId);if(!src||!p?.plannedReadyDate)return;const snap=v71EnergySnapshot(src.organism||'',nowLocal(),p.plannedReadyDate,false);el.insertAdjacentHTML('beforeend',`<div class="recipe-summary-line"><span>Energia hodowli • ${num(snap.durationDays,1)} dni</span><strong>${money(snap.cost)} • ${num(snap.totalKwh,2)} kWh</strong></div><div class="mini">Na podstawie ${snap.devices.length} aktywnych pozycji sprzętu i ceny ${num(snap.pricePerKwh,4)} zł/kWh.</div>`)};
+
+async function v71FinalizeJobEnergyCost(jobId){
+ const job=getById('productionJobs',jobId);if(!job?.runId)return;const run=getById('productionRuns',job.runId);if(!run||run.costSnapshotVersion!=='7.1'||!v71IsCultivationRun(run))return;
+ const end=job.actualReadyAt||job.closedAt;if(!end)return;const es=v71EnergySnapshot(job.organism||'',job.startedAt||run.dateTime,end,true),material=v71N(run.materialCost),labor=v71N(run.laborCost),other=v71N(run.otherCost),overhead=es.cost+labor+other,total=material+overhead;
+ const rr={...run,energySnapshot:es,energyCost:es.cost,overheadCost:overhead,totalCost:total,energyFinalizedAt:new Date().toISOString()};await saveRecord('productionRuns',rr);
+ const jj={...getById('productionJobs',jobId),energySnapshot:es,energyCost:es.cost,overheadCost:overhead,totalCost:total,energyFinalizedAt:new Date().toISOString()};await saveRecord('productionJobs',jj);
+ const out=getById('inventory',job.outputItemId),mv=(rr.movements||[]).find(m=>m.itemId===job.outputItemId&&v71N(m.delta)>0);if(out&&v71N(mv?.delta)>0){const xx={...out,price:total/v71N(mv.delta),costRunId:rr.id,costSource:'production-final',updatedAt:new Date().toISOString()};await saveRecord('inventory',xx)}
+}
+const v71UpdateProductionJobStatusBase=updateProductionJobStatus;
+updateProductionJobStatus = async function(id,newStatus){await v71UpdateProductionJobStatusBase(id,newStatus);if(['Gotowa','Zakończona'].includes(newStatus)){await v71FinalizeJobEnergyCost(id);render()}};
+
+const v71AuditIssuesBase=auditIssues;
+auditIssues = function(){
+ const out=[...v71AuditIssuesBase()];const active=v71EnergyDevices().filter(d=>d.active!==false&&String(d.active)!=='false');if(active.length&&v71EnergyPrice()<=0)out.push({level:'warn',title:'Brak ceny energii',desc:'Masz aktywne urządzenia, ale cena PLN/kWh wynosi 0. Koszt prądu będzie zerowy.',action:"setView('costing')"});
+ for(const d of active){if(v71N(d.watts)<=0)out.push({level:'warn',title:'Urządzenie bez mocy',desc:`${d.name||d.type}: ${d.watts||0} W`,action:"setView('costing')"});if(v71N(d.hoursPerDay)<=0||v71N(d.hoursPerDay)>24)out.push({level:'warn',title:'Nieprawidłowy czas pracy urządzenia',desc:`${d.name||d.type}: ${d.hoursPerDay||0} h/d`,action:"setView('costing')"});if(v71N(d.capacity)<1)out.push({level:'bad',title:'Nieprawidłowa alokacja sprzętu',desc:`${d.name||d.type}: liczba obsługiwanych kultur musi być ≥ 1`,action:"setView('costing')"})}
+ for(const r of (db.productionRuns||[]).filter(acIsProductionCostRun)){const a=v71CostAudit(r);for(const msg of a.issues)out.push({level:'bad',title:'Niespójny koszt operacji',desc:`${r.id}: ${msg}`,action:`openProductionRun('${r.id}')`})}
+ for(const x of db.inventory||[]){const pp=v71N(x.purchasePrice),pq=v71N(x.purchaseQty);if(pp>0&&pq>0&&v71N(x.price)>0){const exact=pp/pq;if(Math.abs(exact-v71N(x.price))>Math.max(1e-9,exact*0.001))out.push({level:'warn',title:'Cena jednostkowa różni się od ceny zakupu',desc:`${x.name}: ${v71UnitMoney(x.price,x.unit)} vs ${v71UnitMoney(exact,x.unit)}`,action:`openStockCard('${x.id}')`})}}
+ const seen=new Set();return out.filter(x=>{const k=x.level+'|'+x.title+'|'+x.desc;if(seen.has(k))return false;seen.add(k);return true})
+};
+const v71TestsBase=acRunV70Tests;
+acRunV70Tests = function(){const t=v71TestsBase(),add=(name,ok)=>t.push({name,ok:!!ok});const d={watts:18,qty:1,hoursPerDay:16,capacity:1,active:true};add('LED 18 W × 16 h = 0,288 kWh/d',Math.abs(v71DeviceKwhDay(d)-0.288)<1e-12);d.capacity=2;add('Wspólny LED na 2 kultury = 0,144 kWh/kulturę/d',Math.abs(v71DeviceAllocatedKwhDay(d)-0.144)<1e-12);add('Cena 0,00672 zł/g zachowuje precyzję',v71UnitMoney(0.00672,'g').includes('0,00672'));return t};
+
+const v71InitBase=init;
+init = async function(){
+ await v71InitBase();let changed=false;
+ if(!Array.isArray(db.settings.energyDevices)){db.settings.energyDevices=[];changed=true}
+ if(!Number.isFinite(Number(db.settings.electricityPricePerKwh))){db.settings.electricityPricePerKwh=0;changed=true}
+ if(!db.settings.v71EnergyMigration){db.settings.legacyEnergyCostPerProductionRun=v71N(db.settings.energyCostPerProductionRun);db.settings.energyCostPerProductionRun=0;db.settings.v71EnergyMigration={date:new Date().toISOString(),note:'Stała energia/operację wyłączona dla nowych zapisów. Historia v7.0 pozostaje bez zmian.'};changed=true}
+ if(changed)await saveSettings();try{await put('meta',{id:'energyCostV71',value:{done:true,date:new Date().toISOString(),note:'v7.1: urządzenia, PLN/kWh, alokacja energii, dokładne ceny jednostkowe, audyt kosztów. Bez rekalkulacji historycznych snapshotów v7.0.'}})}catch(e){console.warn('v7.1 meta',e)}
+ document.title='AquaCulture Manager v7.1 Energy Cost Engine';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.1 • Energy Cost Engine • AquaFlow');titles.costing=['Koszty produkcji','Materiały, energia urządzeń, koszt/litr, marża i kontrola arytmetyczna.'];render();
+};
 
 registerPWA();
 
