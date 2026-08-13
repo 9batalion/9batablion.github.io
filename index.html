@@ -458,6 +458,36 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 @media(max-width:480px){.v76-label-features,.v76-studio-options{grid-template-columns:1fr}}
 </style>
 
+
+<style id="v761-print-preview-css">
+#acmPrintPreview{
+ position:fixed;inset:0;z-index:9999;background:#07111f;display:none;
+ flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+#acmPrintPreview.open{display:flex}
+.acm-print-head{
+ flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:10px 12px;border-bottom:1px solid #263d5b;background:#0d1a2b;
+}
+.acm-print-head .title{min-width:0}
+.acm-print-head strong{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acm-print-head span{display:block;font-size:10px;color:#91a4bb;margin-top:2px}
+.acm-print-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+.acm-print-actions button{
+ border:1px solid #355a80;background:#13243a;color:#eef6ff;padding:9px 11px;
+ border-radius:10px;font-weight:750;min-height:42px;
+}
+.acm-print-actions button.primary{background:#32d6ad;color:#05231b;border-color:#32d6ad}
+.acm-print-frame-wrap{flex:1;min-height:0;background:#5f6670;padding:10px;overflow:hidden}
+#acmPrintFrame{width:100%;height:100%;border:0;border-radius:10px;background:#fff;display:block}
+@media(max-width:600px){
+ .acm-print-head{align-items:flex-start}
+ .acm-print-head .title span{display:none}
+ .acm-print-actions button{padding:8px 9px;font-size:12px}
+ .acm-print-frame-wrap{padding:5px}
+}
+</style>
+
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -4672,7 +4702,7 @@ registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=
    - przychód dopiero po płatności
    - szybkie akcje i lekki CRM/RFM
    ========================================================== */
-const V75_APP_VERSION='7.6';
+const V75_APP_VERSION='7.6.1';
 let v75SalesFilter='todo';
 let v75SalesQuery='';
 let v75ClientQuery='';
@@ -5065,15 +5095,15 @@ buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntr
 const v75InitBase=init;
 init=async function(){
  await v75InitBase();const purchaseFixes=await v751RepairPurchaseUnitCosts();await v75MigrateSales();
- document.title='AquaCulture Manager v7.6 Label Studio Pro';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6 • Label Studio Pro • Sales Hub');
+ document.title='AquaCulture Manager v7.6.1 Label Studio Pro';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6.1 • Label Studio Pro • iPhone Print Fix');
  titles.sales=['Sprzedaż','Jedno centrum działania: zamówienia, płatności, wysyłka, klienci i marża.'];
  titles.orders=['Zamówienia','Kanban realizacji z osobnym statusem płatności i rezerwacją magazynową.'];
  titles.clients=['Klienci','Lekki CRM: historia, wartość, częstotliwość i szybkie zamówienia.'];
  if(purchaseFixes)console.info(`v7.5.1: naprawiono ${purchaseFixes} cen zakupowych.`);
  render();
 };
-registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v76-sw-reloaded')){sessionStorage.setItem('acm-v76-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.6',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v76-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.6:',err)}})};
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v761-sw-reloaded')){sessionStorage.setItem('acm-v761-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.6.1',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v761-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.6.1:',err)}})};
 
 
 // ==========================================================
@@ -5210,9 +5240,79 @@ renderPrints=function(){
 const v76InitBase=init;
 init=async function(){
  await v76InitBase();
- document.title='AquaCulture Manager v7.6 Label Studio Pro';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6 • Label Studio Pro • Sales Hub');
+ document.title='AquaCulture Manager v7.6.1 Label Studio Pro';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6.1 • Label Studio Pro • iPhone Print Fix');
  titles.prints=['Etykiety / wydruki','Label Studio Pro: etykiety premium z QR i numerem partii pobieranym z magazynu.'];
+ render();
+};
+
+
+// ==========================================================
+// v7.6.1 iPhone / Safari print fix
+// Replaces window.open() with an in-app preview + iframe print.
+// This avoids popup blockers for local files and PWA mode.
+// ==========================================================
+function v761EnsurePrintPreview(){
+ let root=document.getElementById('acmPrintPreview');
+ if(root)return root;
+ root=document.createElement('div');
+ root.id='acmPrintPreview';
+ root.innerHTML=`<div class="acm-print-head">
+   <div class="title"><strong id="acmPrintTitle">Podgląd wydruku</strong><span>Podgląd działa w tym samym oknie — bez wyskakujących kart.</span></div>
+   <div class="acm-print-actions">
+    <button type="button" onclick="v761ClosePrintPreview()">Zamknij</button>
+    <button type="button" class="primary" onclick="v761PrintPreview()">Drukuj / PDF</button>
+   </div>
+  </div>
+  <div class="acm-print-frame-wrap"><iframe id="acmPrintFrame" title="Podgląd wydruku"></iframe></div>`;
+ document.body.appendChild(root);
+ return root;
+}
+function v761ClosePrintPreview(){
+ const root=document.getElementById('acmPrintPreview');
+ if(root)root.classList.remove('open');
+}
+function v761PrintPreview(){
+ const frame=document.getElementById('acmPrintFrame');
+ if(!frame)return;
+ try{
+  const w=frame.contentWindow;
+  if(!w)throw new Error('Brak kontekstu wydruku.');
+  w.focus();
+  setTimeout(()=>{try{w.print()}catch(e){alert('Nie udało się otworzyć drukowania. Użyj Udostępnij → Drukuj w Safari.')}},50);
+ }catch(e){
+  alert('Nie udało się otworzyć drukowania: '+(e?.message||e));
+ }
+}
+popupDoc=function(title,body,css=''){
+ const root=v761EnsurePrintPreview(),frame=document.getElementById('acmPrintFrame'),ttl=document.getElementById('acmPrintTitle');
+ if(ttl)ttl.textContent=title||'Podgląd wydruku';
+ const safeTitle=String(title||'AquaCulture').replace(/[<>&"]/g,'');
+ const doc=`<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${safeTitle}</title><style>
+ html,body{margin:0;padding:0;background:#fff;color:#111;font-family:Arial,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ ${css||''}
+ </style></head><body>${body||''}</body></html>`;
+ frame.srcdoc=doc;
+ root.classList.add('open');
+ return {document:frame.contentDocument,print:v761PrintPreview,close:v761ClosePrintPreview};
+};
+
+// Make wording in Label Studio explicit for iPhone.
+const v761OpenLabelStudioBase=openV76LabelStudio;
+openV76LabelStudio=function(){
+ v761OpenLabelStudioBase();
+ const btn=[...document.querySelectorAll('#modalBody button')].find(b=>/Generuj podgląd A4/i.test(b.textContent||''));
+ if(btn)btn.textContent='Generuj podgląd A4';
+ const note=document.querySelector('#modalBody .callout:last-child');
+ if(note)note.insertAdjacentHTML('beforeend','<div class="small" style="margin-top:8px"><strong>iPhone/Safari:</strong> podgląd otwiera się teraz wewnątrz aplikacji. Przycisk „Drukuj / PDF” uruchamia systemowe drukowanie bez nowego okna.</div>');
+};
+
+// Refresh visible version after prior wrappers.
+const v761InitBase=init;
+init=async function(){
+ await v761InitBase();
+ document.title='AquaCulture Manager v7.6.1 Label Studio Pro';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.6.1 • Label Studio Pro • iPhone Print Fix');
  render();
 };
 
