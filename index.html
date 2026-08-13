@@ -368,6 +368,70 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 .storage-card-banner{display:flex;justify-content:space-between;gap:12px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;background:#0c192a}
 @media(max-width:620px){.storage-zone-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.storage-zone-card{padding:10px;min-height:68px}.zone-icon{width:30px;height:30px}.zone-main strong{font-size:12px}.zone-main small{font-size:10px}}
 </style>
+
+<style id="v75-sales-css">
+.sales-hero{display:grid;grid-template-columns:1.15fr .85fr;gap:14px}
+.sales-hero .card{min-height:100%}
+.sales-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.sales-kpi{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+.sales-kpi .label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.sales-kpi .value{font-size:28px;font-weight:800;margin-top:5px}
+.sales-kpi .sub{font-size:12px;color:var(--muted);margin-top:4px}
+.sales-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.sales-action-card{border:1px solid var(--line);border-radius:16px;padding:14px;background:rgba(255,255,255,.015)}
+.sales-action-card.high{border-color:rgba(255,182,72,.5)}
+.sales-action-card .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.sales-action-card .title{font-weight:750}
+.sales-action-card .meta{font-size:12px;color:var(--muted);margin-top:4px}
+.sales-action-card .amount{font-weight:800;white-space:nowrap}
+.sales-action-card .buttons{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sales-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.sales-metric{padding:12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.012)}
+.sales-metric small{display:block;color:var(--muted);font-size:11px}
+.sales-metric strong{display:block;margin-top:4px;font-size:17px}
+.sales-filterbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sales-filterbar input{min-width:220px;flex:1}
+.sales-order-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sales-order{border:1px solid var(--line);border-radius:17px;padding:14px;background:var(--card)}
+.sales-order .head{display:flex;justify-content:space-between;gap:12px}
+.sales-order .client{font-weight:800}
+.sales-order .product{font-size:13px;margin-top:3px}
+.sales-order .meta{font-size:12px;color:var(--muted);margin-top:5px}
+.sales-order .money{font-weight:850;font-size:17px;white-space:nowrap}
+.sales-order .foot{display:flex;justify-content:space-between;gap:8px;align-items:end;margin-top:12px;flex-wrap:wrap}
+.sales-order .tags{display:flex;gap:5px;flex-wrap:wrap}
+.sales-stepper{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:10px}
+.sales-step{height:5px;border-radius:99px;background:var(--line)}
+.sales-step.on{background:var(--primary)}
+.sales-client-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sales-client{border:1px solid var(--line);border-radius:17px;padding:14px;background:var(--card)}
+.sales-client .head{display:flex;justify-content:space-between;gap:10px}
+.sales-client .name{font-weight:800}
+.sales-client .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.sales-client .stat{border:1px solid var(--line);border-radius:12px;padding:8px}
+.sales-client .stat small{display:block;color:var(--muted);font-size:10px}
+.sales-client .stat strong{font-size:13px}
+.sales-audit-ok{color:#6ee7a8}
+.sales-audit-warn{color:#ffd27a}
+.sales-profit.pos{color:#6ee7a8}
+.sales-profit.neg{color:#ff8f8f}
+.order-timeline{display:grid;grid-template-columns:repeat(6,1fr);gap:5px}
+.order-timeline .node{border-top:4px solid var(--line);padding-top:6px;font-size:10px;color:var(--muted)}
+.order-timeline .node.on{border-color:var(--primary);color:var(--text)}
+.quick-order-stock{padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}
+@media(max-width:900px){
+ .sales-hero{grid-template-columns:1fr}
+ .sales-kpis{grid-template-columns:repeat(2,1fr)}
+ .sales-order-grid,.sales-client-grid{grid-template-columns:1fr}
+}
+@media(max-width:540px){
+ .sales-kpis,.sales-metrics,.sales-actions{grid-template-columns:1fr 1fr}
+ .sales-kpi{padding:14px}
+ .sales-kpi .value{font-size:23px}
+ .order-timeline{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+
 </head>
 <body>
 <div id="loading" class="loading"><div class="spinner"></div><div>Uruchamianie lokalnej bazy IndexedDB…</div></div>
@@ -4570,6 +4634,394 @@ const v74InitBase=init;
 init=async function(){await v74InitBase();await v74MigrateStorageZones();document.title='AquaCulture Manager v7.4 Storage Zones';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.4 • Storage Zones • AquaFlow');titles.inventory=['Magazyn','Strefy magazynowe: magazyn główny, produkcja, lodówka, kwarantanna i wysyłka. Przenoszenie całych lub częściowych stanów z pełnym audytem.'];render()};
 
 registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v74-sw-reloaded')){sessionStorage.setItem('acm-v74-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.4',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v74-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.4:',err)}})};
+
+
+/* ==========================================================
+   v7.5 SALES HUB
+   Audyt i uproszczenie sprzedaży:
+   - jedno centrum operacyjne
+   - osobne stany realizacji i płatności
+   - rezerwacje ze współczesnego magazynu inventory
+   - koszt/zysk na zamówieniu
+   - przychód dopiero po płatności
+   - szybkie akcje i lekki CRM/RFM
+   ========================================================== */
+const V75_APP_VERSION='7.5';
+let v75SalesFilter='todo';
+let v75SalesQuery='';
+let v75ClientQuery='';
+
+function v75Paid(o){return String(o?.payment||'').toLowerCase()==='opłacona'}
+function v75Cancelled(o){return o?.status==='Anulowane'}
+function v75Closed(o){return ['Dostarczone','Zrealizowane','Anulowane'].includes(o?.status)}
+function v75Open(o){return !v75Closed(o)}
+function v75OrderAge(o){return Math.max(0,daysBetween(o?.date||today()))}
+function v75OrderDateMs(o){const d=new Date((o?.date||today())+'T00:00:00');return Number.isFinite(d.getTime())?d.getTime():0}
+function v75Last30(o){return v75OrderDateMs(o)>=Date.now()-30*86400000}
+function v75OrderStatusIndex(status){
+ const m={Nowe:0,Rezerwacja:0,Przygotowanie:1,Gotowe:2,Wysłane:3,Dostarczone:4,Zrealizowane:5,Anulowane:0};
+ return m[status]??0;
+}
+function v75OrderSteps(o){
+ const i=v75OrderStatusIndex(o?.status);
+ return [0,1,2,3].map(n=>n<=Math.min(i,3));
+}
+function v75NextStatus(o){
+ const s=o?.status||'Nowe';
+ if(s==='Nowe')return o?.reservedStockItemId?'Przygotowanie':'Rezerwacja';
+ if(s==='Rezerwacja')return 'Przygotowanie';
+ if(s==='Przygotowanie')return 'Gotowe';
+ if(s==='Gotowe')return 'Wysłane';
+ if(s==='Wysłane')return 'Dostarczone';
+ if(s==='Dostarczone')return 'Zrealizowane';
+ return '';
+}
+function v75NextLabel(o){
+ const n=v75NextStatus(o);
+ return ({Rezerwacja:'Rezerwuj / potwierdź',Przygotowanie:'Do przygotowania',Gotowe:'Oznacz gotowe',Wysłane:'Oznacz wysłane',Dostarczone:'Oznacz dostarczone',Zrealizowane:'Zakończ'})[n]||'';
+}
+function v75ReservationQty(o){
+ return Math.max(0,v71N(o?.reservedQty,o?.reservedVolumeMl||0));
+}
+function v75ReservationItemId(o){
+ return o?.reservedStockItemId||'';
+}
+function v75ReservedByOrders(itemId,excludeOrderId=''){
+ return db.orders.filter(o=>o.id!==excludeOrderId&&!v75Cancelled(o)&&!o.stockConsumed&&v75ReservationItemId(o)===itemId)
+  .reduce((s,o)=>s+v75ReservationQty(o),0);
+}
+function v75FreeSellableQty(itemId,excludeOrderId=''){
+ const x=getById('inventory',itemId);if(!x)return 0;
+ return Math.max(0,Number(x.qty||0)-reservedStockQty(itemId)-v75ReservedByOrders(itemId,excludeOrderId));
+}
+// Jedno źródło dostępności: rezerwacje magazynowe + rezerwacje sprzedażowe.
+freeStockQty=function(x){return Math.max(0,Number(x?.qty||0)-reservedStockQty(x?.id)-v75ReservedByOrders(x?.id))};
+reservationSummary=function(x){const manual=reservedStockQty(x.id),sales=v75ReservedByOrders(x.id),r=manual+sales;return r>0?`${num(r,3)} ${x.unit} zarezerwowane (${num(sales,3)} sprzedaż) • ${num(freeStockQty(x),3)} ${x.unit} wolne`:`${num(Number(x.qty||0),3)} ${x.unit} wolne`};
+// Planowanie produkcji rozumie także nowe rezerwacje Sales Hub.
+orderDemandMl=function(o){
+ const iid=v75ReservationItemId(o),item=getById('inventory',iid),rq=v75ReservationQty(o);
+ if(item&&item.unit==='ml'&&rq>0)return rq;
+ if(item&&item.unit==='L'&&rq>0)return rq*1000;
+ const explicit=Number(o.reservedVolumeMl||0);if(explicit>0)return explicit;
+ const text=`${o.product||''} ${o.qty||''}`.toLowerCase();
+ const ml=text.match(/(\d+(?:[.,]\d+)?)\s*ml/),l=text.match(/(\d+(?:[.,]\d+)?)\s*l\b/);
+ let pack=ml?Number(ml[1].replace(',','.')):l?Number(l[1].replace(',','.'))*1000:0;
+ const q=String(o.qty||'').match(/\d+(?:[.,]\d+)?/);let units=q?Number(q[0].replace(',','.')):1;
+ if(pack>0)return pack*Math.max(1,units);return 0;
+};
+function v75SellableStock(excludeOrderId='',includeItemId=''){
+ return db.inventory.filter(x=>{
+  if(Number(x.qty||0)<=0)return false;
+  if(v74ZoneIdOf(x)==='quarantine')return false;
+  const k=inferStockKind(x);
+  if(!['Kultura żywa','Produkt gotowy','Pożywka / medium'].includes(k))return false;
+  if(['Problem','Problem / skażenie','Kwarantanna','Odrzucona','Anulowana'].includes(x.status||''))return false;
+  if(k==='Kultura żywa'&&['W toku','Zaplanowana'].includes(x.status||''))return false;
+  return x.id===includeItemId||v75FreeSellableQty(x.id,excludeOrderId)>0;
+ }).sort((a,b)=>String(v74ZoneOf(a).name).localeCompare(String(v74ZoneOf(b).name))||String(a.name).localeCompare(String(b.name)));
+}
+function v75ReservationText(o){
+ const id=v75ReservationItemId(o),x=getById('inventory',id);if(!id||!x)return 'bez rezerwacji magazynowej';
+ return `${num(v75ReservationQty(o),3)} ${x.unit||''} • ${x.lot||x.name} • ${v74ZoneOf(x).name}`;
+}
+function v75OrderCost(o){
+ const manual=Math.max(0,v71N(o?.manualCost));
+ if(manual>0){
+  const shipping=Math.max(0,v71N(o?.shippingCost)),total=Math.max(0,v71N(o?.total));
+  const cost=manual+shipping,profit=total-cost;
+  return {known:true,production:manual,shipping,cost,profit,margin:total?profit/total*100:0,source:'ręczny'};
+ }
+ const x=getById('inventory',v75ReservationItemId(o)),q=v75ReservationQty(o);
+ if(x&&q>0&&Number(x.price||0)>=0){
+  const production=q*Number(x.price||0),shipping=Math.max(0,v71N(o?.shippingCost)),total=Math.max(0,v71N(o?.total));
+  const cost=production+shipping,profit=total-cost;
+  return {known:true,production,shipping,cost,profit,margin:total?profit/total*100:0,source:'magazyn'};
+ }
+ return {known:false,production:0,shipping:Math.max(0,v71N(o?.shippingCost)),cost:0,profit:0,margin:0,source:'brak'};
+}
+function v75ClientStats(c){
+ const os=db.orders.filter(o=>o.client===c.id&&!v75Cancelled(o)).sort((a,b)=>v75OrderDateMs(b)-v75OrderDateMs(a));
+ const revenue=os.reduce((s,o)=>s+v71N(o.total),0),paid=os.filter(v75Paid).reduce((s,o)=>s+v71N(o.total),0);
+ const manual=['VIP','Sklep','Hodowca','Lokalny'].includes(c.segment)?c.segment:'';
+ const segment=manual||(os.length>=4?'Stały':os.length>=2?'Powracający':'Nowy');
+ return {orders:os.length,revenue,paid,aov:os.length?revenue/os.length:0,last:os[0]?.date||'',segment};
+}
+function v75SalesMetrics(){
+ const valid=db.orders.filter(o=>!v75Cancelled(o)),open=valid.filter(v75Open),paid30=valid.filter(o=>v75Paid(o)&&v75Last30(o));
+ const due=valid.filter(o=>!v75Paid(o)&&o.status!=='Anulowane');
+ const clients=db.clients.map(v75ClientStats).filter(x=>x.orders>0);
+ const repeat=clients.filter(x=>x.orders>=2).length;
+ const completed=valid.filter(o=>['Dostarczone','Zrealizowane'].includes(o.status));
+ const profitRows=completed.map(v75OrderCost).filter(x=>x.known);
+ const profit=profitRows.reduce((s,x)=>s+x.profit,0),rev=completed.reduce((s,o)=>s+v71N(o.total),0);
+ return {
+  open:open.length,ready:valid.filter(o=>o.status==='Gotowe').length,
+  dueCount:due.length,dueValue:due.reduce((s,o)=>s+v71N(o.total),0),
+  paid30:paid30.reduce((s,o)=>s+v71N(o.total),0),
+  pipeline:open.reduce((s,o)=>s+v71N(o.total),0),
+  aov:valid.length?valid.reduce((s,o)=>s+v71N(o.total),0)/valid.length:0,
+  repeatRate:clients.length?repeat/clients.length*100:0,
+  margin:rev&&profitRows.length?profit/rev*100:null
+ };
+}
+function v75AutoFinanceRows(orderId){
+ return db.finance.filter(f=>f.ref===orderId&&f.category==='Sprzedaż'&&(f.notes==='Wpis automatyczny'||String(f.notes||'').includes('Sales Hub')||String(f.description||'').startsWith('Zamówienie ')));
+}
+async function v75SyncOrderRevenue(order){
+ const autos=v75AutoFinanceRows(order.id);
+ const should=v75Paid(order)&&!v75Cancelled(order)&&v71N(order.total)>0;
+ if(!should){
+  for(const f of autos){await delStoreRecord('finance',f.id);db.finance=db.finance.filter(x=>x.id!==f.id)}
+  return;
+ }
+ const canonical=autos[0]||{id:uid('FIN'),date:order.date||today(),type:'Przychód',category:'Sprzedaż',description:'Zamówienie '+order.id,ref:order.id,notes:'Wpis automatyczny • Sales Hub v7.5'};
+ canonical.date=order.paidAt?.slice(0,10)||order.date||today();canonical.type='Przychód';canonical.category='Sprzedaż';canonical.description='Zamówienie '+order.id;canonical.amount=v71N(order.total);canonical.ref=order.id;canonical.notes='Wpis automatyczny • Sales Hub v7.5';
+ await saveRecord('finance',canonical);
+ for(const extra of autos.slice(1)){await delStoreRecord('finance',extra.id);db.finance=db.finance.filter(x=>x.id!==extra.id)}
+}
+async function v75SyncAllRevenue(){
+ for(const o of db.orders)await v75SyncOrderRevenue(o);
+}
+function v75SalesAudit(){
+ const issues=[];
+ for(const o of db.orders){
+  if(v75Cancelled(o))continue;
+  if(!o.client)issues.push({level:'warn',text:`${o.id}: brak klienta`});
+  if(!o.product)issues.push({level:'warn',text:`${o.id}: brak produktu`});
+  if(v71N(o.total)<=0)issues.push({level:'warn',text:`${o.id}: brak wartości sprzedaży`});
+  const iid=v75ReservationItemId(o),q=v75ReservationQty(o);
+  if(iid&&!getById('inventory',iid))issues.push({level:'bad',text:`${o.id}: rezerwacja wskazuje brakującą pozycję magazynową`});
+  if(iid&&!o.stockConsumed&&q>0&&(reservedStockQty(iid)+v75ReservedByOrders(iid,''))>Number(getById('inventory',iid)?.qty||0)+1e-9)issues.push({level:'bad',text:`${o.id}: suma rezerwacji przekracza stan magazynowy`});
+  if(['Dostarczone','Zrealizowane'].includes(o.status)&&!v75Paid(o)&&o.payment!=='Pobranie')issues.push({level:'warn',text:`${o.id}: zakończone, ale płatność nie jest oznaczona jako opłacona`});
+  if(v75Paid(o)&&v75AutoFinanceRows(o.id).length!==1)issues.push({level:'warn',text:`${o.id}: wpis finansowy wymaga synchronizacji`});
+ }
+ const score=Math.max(0,100-issues.filter(x=>x.level==='bad').length*15-issues.filter(x=>x.level==='warn').length*5);
+ return {issues,score};
+}
+async function v75MigrateSales(force=false){
+ let meta=null;try{meta=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('salesV75'))}catch(e){}
+ if(meta?.value?.done&&!force){await v75SyncAllRevenue();return meta.value}
+ let changed=0;
+ for(const raw of db.orders){
+  const o={...raw};let c=false;
+  if(['Opłacone','Zapłacone','Zapłacona'].includes(o.payment)){o.payment='Opłacona';c=true}
+  if(!o.payment){o.payment='Oczekuje';c=true}
+  if(!o.status){o.status='Nowe';c=true}
+  if(!o.reservedStockItemId&&o.reservedCulture){
+   let item=getById('inventory',o.reservedCulture);
+   if(!item)item=db.inventory.find(x=>x.legacyCultureId===o.reservedCulture||x.lot===o.reservedCulture);
+   if(item){o.reservedStockItemId=item.id;o.reservedQty=v71N(o.reservedVolumeMl);o.reservedUnit=item.unit||'ml';c=true}
+  }
+  if(o.reservedStockItemId&&!o.reservedUnit){o.reservedUnit=getById('inventory',o.reservedStockItemId)?.unit||'';c=true}
+  if(o.paidAt===undefined){o.paidAt=v75Paid(o)?((o.date||today())+'T12:00'):'';c=true}
+  if(o.salesVersion!=='7.5'){o.salesVersion='7.5';c=true}
+  if(c){await saveRecord('orders',o);changed++}
+ }
+ await v75SyncAllRevenue();
+ const value={done:true,date:new Date().toISOString(),changed,note:'v7.5 Sales Hub: normalizacja płatności, rezerwacji inventory i księgowania przychodu.'};
+ await put('meta',{id:'salesV75',value});return value;
+}
+function v75ActionQueue(){
+ const list=db.orders.filter(o=>!v75Cancelled(o)&&o.status!=='Zrealizowane').map(o=>{
+  let p=50;
+  if(o.status==='Gotowe')p=5;else if(o.status==='Nowe')p=10;else if(o.status==='Wysłane')p=15;else if(o.status==='Przygotowanie')p=20;else if(o.status==='Rezerwacja')p=25;else if(o.status==='Dostarczone')p=30;
+  if(!v75Paid(o))p-=2;
+  p-=Math.min(10,v75OrderAge(o));
+  return {o,p};
+ }).sort((a,b)=>a.p-b.p||v75OrderDateMs(a.o)-v75OrderDateMs(b.o));
+ return list.slice(0,8);
+}
+function v75MatchesFilter(o){
+ if(v75SalesFilter==='todo')return !v75Closed(o);
+ if(v75SalesFilter==='ready')return o.status==='Gotowe';
+ if(v75SalesFilter==='shipping')return ['Gotowe','Wysłane'].includes(o.status);
+ if(v75SalesFilter==='unpaid')return !v75Paid(o)&&!v75Cancelled(o);
+ if(v75SalesFilter==='closed')return ['Dostarczone','Zrealizowane'].includes(o.status);
+ return true;
+}
+function v75SetSalesFilter(f){v75SalesFilter=f;render()}
+function v75SetSalesQuery(v){v75SalesQuery=v;render()}
+function v75StatusProgressHTML(o){
+ const steps=v75OrderSteps(o);
+ return `<div class="sales-stepper">${steps.map(x=>`<span class="sales-step ${x?'on':''}"></span>`).join('')}</div>`;
+}
+function v75OrderMiniActions(o){
+ const next=v75NextStatus(o),parts=[];
+ if(next)parts.push(btn(v75NextLabel(o),`v75SetOrderStatus('${o.id}','${next}')`,'btn tiny primary'));
+ if(!v75Paid(o)&&!v75Cancelled(o))parts.push(btn('Opłacone',`v75MarkPaid('${o.id}')`,'btn tiny'));
+ parts.push(btn('Karta',`openSalesOrderCard('${o.id}')`,'btn tiny secondary'));
+ return parts.join('');
+}
+async function v75ConsumeOrderStock(o){
+ if(o.stockConsumed||!v75ReservationItemId(o)||v75ReservationQty(o)<=0)return o;
+ const item=getById('inventory',v75ReservationItemId(o));if(!item)throw new Error('Nie znaleziono zarezerwowanej pozycji magazynowej.');
+ const q=v75ReservationQty(o);
+ if(Number(item.qty||0)+1e-9<q)throw new Error(`Za mały stan ${item.name}. Stan ${num(item.qty,3)} ${item.unit}; zamówienie wymaga ${num(q,3)} ${item.unit}.`);
+ const run={id:nextProductionRunId(),type:'Sprzedaż / wydanie',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${o.id}: wydano ${num(q,3)} ${item.unit} • ${item.name}`,notes:`Automatyczne wydanie przy realizacji zamówienia ${o.id}`};
+ await commitProductionRun(run,[{item,delta:-q,moveType:'Wydanie sprzedażowe',reason:`Zamówienie ${o.id}`}]);
+ return {...o,stockConsumed:true,stockConsumptionRunId:run.id,stockConsumedAt:new Date().toISOString()};
+}
+async function v75SetOrderStatus(id,status){
+ let o=getById('orders',id);if(!o)return;
+ try{
+  if(['Wysłane','Dostarczone','Zrealizowane'].includes(status)&&!o.stockConsumed)o=await v75ConsumeOrderStock(o);
+  o={...o,status,salesVersion:'7.5',updatedAt:new Date().toISOString()};
+  if(status==='Wysłane'&&!o.shippedAt)o.shippedAt=new Date().toISOString();
+  if(status==='Dostarczone'&&!o.deliveredAt)o.deliveredAt=new Date().toISOString();
+  if(status==='Zrealizowane'&&!o.completedAt)o.completedAt=new Date().toISOString();
+  await saveRecord('orders',o);await v75SyncOrderRevenue(o);render();
+ }catch(e){alert(e.message)}
+}
+async function v75MarkPaid(id){
+ const o=getById('orders',id);if(!o)return;
+ const x={...o,payment:'Opłacona',paidAt:new Date().toISOString(),salesVersion:'7.5',updatedAt:new Date().toISOString()};
+ await saveRecord('orders',x);await v75SyncOrderRevenue(x);render();
+}
+async function v75CancelOrder(id){
+ const o=getById('orders',id);if(!o)return;
+ if(o.stockConsumed&&!confirm('Towar został już wydany z magazynu. Anulowanie nie przywróci stanu automatycznie. Kontynuować?'))return;
+ if(!o.stockConsumed&&!confirm('Anulować zamówienie? Rezerwacja magazynowa zostanie zwolniona.'))return;
+ const x={...o,status:'Anulowane',cancelledAt:new Date().toISOString(),salesVersion:'7.5'};
+ await saveRecord('orders',x);await v75SyncOrderRevenue(x);render();
+}
+function v75OrderStockInfo(id,orderId=''){
+ const x=getById('inventory',id);if(!x)return '';
+ return `${num(v75FreeSellableQty(id,orderId),3)} ${x.unit||''} wolne • ${v74ZoneOf(x).name}${x.lot?' • '+x.lot:''}`;
+}
+function v75QuickOrderStockChanged(orderId=''){
+ const sel=document.getElementById('v75StockItem'),box=document.getElementById('v75StockInfo'),manual=document.getElementById('v75ManualProductWrap');
+ if(!sel||!box)return;const id=sel.value;
+ box.textContent=id?v75OrderStockInfo(id,orderId):'Brak rezerwacji magazynowej — wpisz produkt ręcznie.';
+ if(manual)manual.style.display=id?'none':'block';
+ const x=getById('inventory',id),u=document.getElementById('v75QtyUnit');if(u)u.textContent=x?.unit||'';
+}
+async function openQuickOrder(id=''){
+ const old=id?getById('orders',id):null,o=old?{...old}:{id:uid('ZAM'),date:today(),client:'',product:'',reservedStockItemId:'',reservedQty:'',reservedUnit:'',qty:'',total:'',channel:'OLX',status:'Nowe',payment:'Oczekuje',carrier:'',tracking:'',shippingCost:0,manualCost:0,notes:''};
+ const candidates=v75SellableStock(o.id,o.reservedStockItemId);
+ modalTitle.textContent=old?'Zamówienie — '+o.id:'Szybkie zamówienie';modalBox.classList.add('wide');
+ const clientOptions=db.clients.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(c=>`<option value="${c.id}" ${o.client===c.id?'selected':''}>${esc(c.name)}</option>`).join('');
+ const stockOptions=candidates.map(x=>`<option value="${x.id}" ${o.reservedStockItemId===x.id?'selected':''}>${esc(x.name)} • ${esc(x.lot||x.id)} • wolne ${num(v75FreeSellableQty(x.id,o.id),3)} ${esc(x.unit||'')} • ${esc(v74ZoneOf(x).name)}</option>`).join('');
+ modalBody.innerHTML=`<form id="v75OrderForm">
+ <div class="card"><h3>1. Klient</h3><div class="form-grid"><div class="field"><label>Klient</label><select name="client" id="v75ClientSelect"><option value="">— nowy klient —</option>${clientOptions}</select></div>${f('date','Data zamówienia','date',o.date||today())}${f('newClientName','Nowy klient — nazwa','text','')}${f('newClientPhone','Telefon nowego klienta','text','')}${f('channel','Kanał','select',o.channel||'OLX',['OLX','Allegro Lokalnie','Facebook','Bezpośrednio','Odbiór lokalny','Inne'])}</div></div>
+ <div class="card section"><h3>2. Produkt i rezerwacja</h3><div class="form-grid"><div class="field wide"><label>Pozycja magazynowa</label><select name="stockItemId" id="v75StockItem" onchange="v75QuickOrderStockChanged('${o.id}')"><option value="">— produkt ręczny / bez rezerwacji —</option>${stockOptions}</select><div id="v75StockInfo" class="help"></div></div><div class="field wide" id="v75ManualProductWrap">${f('manualProduct','Produkt / opis','text',o.product)}</div>${f('reservedQty','Ilość rezerwowana','number',v75ReservationQty(o)||'')}<div class="field"><label>Jednostka</label><div class="quick-order-stock"><strong id="v75QtyUnit">${esc(getById('inventory',o.reservedStockItemId)?.unit||o.reservedUnit||'')}</strong></div></div>${f('qty','Opis ilości handlowej','text',o.qty)}${f('total','Kwota sprzedaży brutto [PLN]','number',o.total)}</div></div>
+ <div class="card section"><h3>3. Realizacja</h3><div class="form-grid">${f('status','Status','select',o.status||'Nowe',['Nowe','Rezerwacja','Przygotowanie','Gotowe','Wysłane','Dostarczone','Zrealizowane','Anulowane'])}${f('payment','Płatność','select',o.payment||'Oczekuje',['Oczekuje','Opłacona','Pobranie','Zwrot'])}${f('carrier','Przewoźnik / odbiór','text',o.carrier)}${f('tracking','Numer przesyłki','text',o.tracking)}${f('shippingCost','Koszt wysyłki [PLN]','number',o.shippingCost||0)}${f('manualCost','Ręczny koszt produktu [PLN] — opcjonalnie','number',o.manualCost||0)}${f('notes','Uwagi','textarea',o.notes)}</div></div>
+ <div class="actions section"><button class="btn primary">Zapisz zamówienie</button>${old?btn('Karta zamówienia',`openSalesOrderCard('${o.id}')`,'btn secondary'):''}</div></form>`;
+ v75QuickOrderStockChanged(o.id);
+ v75OrderForm.onsubmit=async e=>{
+  e.preventDefault();const fd=new FormData(e.target);let client=String(fd.get('client')||'');
+  const newName=String(fd.get('newClientName')||'').trim();
+  if(!client&&newName){
+   const c={id:uid('KLI'),name:newName,phone:String(fd.get('newClientPhone')||''),segment:'Nowy',source:String(fd.get('channel')||'Inne'),createdAt:new Date().toISOString()};
+   await saveRecord('clients',c);client=c.id;
+  }
+  if(!client)return alert('Wybierz klienta albo wpisz nazwę nowego klienta.');
+  const stockItemId=String(fd.get('stockItemId')||''),item=getById('inventory',stockItemId),reservedQty=Math.max(0,v71N(fd.get('reservedQty')));
+  if(stockItemId&&reservedQty<=0)return alert('Podaj ilość rezerwowaną.');
+  if(stockItemId&&!o.stockConsumed&&reservedQty>v75FreeSellableQty(stockItemId,o.id)+1e-9)return alert(`Za mały wolny stan. Dostępne ${v75OrderStockInfo(stockItemId,o.id)}.`);
+  if(o.stockConsumed&&stockItemId!==o.reservedStockItemId)return alert('Towar został już wydany. Nie można zmienić pozycji magazynowej tego zamówienia.');
+  const product=item?.name||String(fd.get('manualProduct')||'').trim();
+  if(!product)return alert('Wybierz pozycję magazynową albo wpisz produkt.');
+  let x={...o,date:String(fd.get('date')||today()),client,product,batch:item?.lot||o.batch||'',reservedStockItemId:stockItemId,reservedQty:stockItemId?reservedQty:0,reservedUnit:item?.unit||'',qty:String(fd.get('qty')||''),total:Math.max(0,v71N(fd.get('total'))),channel:String(fd.get('channel')||'Inne'),status:String(fd.get('status')||'Nowe'),payment:String(fd.get('payment')||'Oczekuje'),carrier:String(fd.get('carrier')||''),tracking:String(fd.get('tracking')||''),shippingCost:Math.max(0,v71N(fd.get('shippingCost'))),manualCost:Math.max(0,v71N(fd.get('manualCost'))),notes:String(fd.get('notes')||''),salesVersion:'7.5',updatedAt:new Date().toISOString()};
+  if(!old)x.createdAt=new Date().toISOString();
+  if(v75Paid(x)&&!x.paidAt)x.paidAt=new Date().toISOString();
+  if(!v75Paid(x))x.paidAt='';
+  if(['Wysłane','Dostarczone','Zrealizowane'].includes(x.status)&&!x.stockConsumed){
+   try{x=await v75ConsumeOrderStock(x)}catch(err){return alert(err.message)}
+  }
+  await saveRecord('orders',x);await v75SyncOrderRevenue(x);closeModal();render();
+ };
+ modal.classList.add('open');
+}
+const v75OpenFormBase=openForm;
+openForm=function(type,id='',preset={}){
+ if(type==='order'){
+  if(id)return openQuickOrder(id);
+  openQuickOrder('');
+  setTimeout(()=>{
+   if(preset?.client){const s=document.getElementById('v75ClientSelect');if(s)s.value=preset.client}
+  },0);
+  return;
+ }
+ return v75OpenFormBase(type,id,preset);
+};
+function openSalesOrderCard(id){
+ const o=getById('orders',id);if(!o)return;const c=getById('clients',o.client),cost=v75OrderCost(o),next=v75NextStatus(o),item=getById('inventory',v75ReservationItemId(o));
+ modalTitle.textContent='Zamówienie — '+o.id;modalBox.classList.add('wide');
+ const stages=['Przyjęte','Przygotowanie','Gotowe','Wysłane','Dostarczone','Zakończone'],idx=v75OrderStatusIndex(o.status);
+ modalBody.innerHTML=`<div class="actions" style="margin-bottom:12px">${next?btn(v75NextLabel(o),`closeModal();v75SetOrderStatus('${o.id}','${next}')`,'btn primary'):''}${!v75Paid(o)&&!v75Cancelled(o)?btn('Oznacz opłacone',`closeModal();v75MarkPaid('${o.id}')`):''}${btn('Edytuj',`openQuickOrder('${o.id}')`,'btn secondary')}${!v75Cancelled(o)?btn('Anuluj',`closeModal();v75CancelOrder('${o.id}')`,'btn danger'):''}</div>
+ <div class="order-timeline">${stages.map((s,i)=>`<div class="node ${i<=idx?'on':''}">${esc(s)}</div>`).join('')}</div>
+ <div class="two section"><div class="card"><h3>Realizacja</h3><div class="profile">${profileBox('Klient',c?.name||'—')}${profileBox('Produkt',o.product)}${profileBox('Ilość',o.qty||v75ReservationText(o))}${profileBox('Rezerwacja',v75ReservationText(o))}${profileBox('Strefa',item?v74ZoneOf(item).name:'—')}${profileBox('Status',o.status)}${profileBox('Płatność',o.payment)}${profileBox('Kanał',o.channel)}${profileBox('Wysyłka',o.carrier)}${profileBox('Tracking',o.tracking)}</div></div>
+ <div class="card"><h3>Ekonomika zamówienia</h3><div class="statline"><span>Sprzedaż</span><strong>${money(o.total)}</strong></div><div class="statline"><span>Koszt produktu</span><strong>${cost.known?money(cost.production):'—'}</strong></div><div class="statline"><span>Koszt wysyłki</span><strong>${money(cost.shipping)}</strong></div><div class="statline"><span>Zysk brutto</span><strong class="${cost.known?(cost.profit>=0?'sales-profit pos':'sales-profit neg'):''}">${cost.known?money(cost.profit):'—'}</strong></div><div class="statline"><span>Marża</span><strong>${cost.known?num(cost.margin,1)+'%':'—'}</strong></div><div class="mini" style="margin-top:8px">${cost.known?'Koszt: '+esc(cost.source):'Brak powiązania z kosztem magazynowym. Wybierz pozycję magazynową albo wpisz koszt ręczny.'}</div></div></div>
+ <div class="section card"><h3>Notatka</h3><div class="small">${esc(o.notes||'Brak uwag.')}</div></div>`;
+ modal.classList.add('open');
+}
+function v75ClientSegmentHTML(c){const s=v75ClientStats(c);return badge(s.segment)}
+function v75RenderOrderCard(o){
+ const cost=v75OrderCost(o),c=clientName(o.client)||'Klient',paid=v75Paid(o),age=v75OrderAge(o);
+ return `<div class="sales-order"><div class="head"><div><div class="client">${esc(c)}</div><div class="product">${esc(o.product||o.id)}</div><div class="meta">${esc(o.id)} • ${datePL(o.date)}${age?` • ${age} d`:''}</div></div><div class="money">${money(o.total)}</div></div>${v75StatusProgressHTML(o)}<div class="foot"><div class="tags">${badge(o.status||'Nowe')}${badge(paid?'Opłacona':o.payment||'Oczekuje')}${cost.known?`<span class="badge ${cost.profit>=0?'ok':'bad'}">marża ${num(cost.margin,0)}%</span>`:''}</div><div class="actions">${v75OrderMiniActions(o)}</div></div></div>`;
+}
+renderSales=function(){
+ const m=v75SalesMetrics(),audit=v75SalesAudit(),queue=v75ActionQueue();
+ const q=v75SalesQuery.trim().toLowerCase(),orders=[...db.orders].filter(o=>v75MatchesFilter(o)&&(!q||[o.id,o.product,clientName(o.client),o.status,o.payment,o.tracking].join(' ').toLowerCase().includes(q))).sort((a,b)=>v75OrderDateMs(b)-v75OrderDateMs(a));
+ return `<div class="sales-kpis">
+  <div class="sales-kpi"><div class="label">Do obsługi</div><div class="value">${m.open}</div><div class="sub">wartość pipeline ${money(m.pipeline)}</div></div>
+  <div class="sales-kpi"><div class="label">Gotowe do wysyłki</div><div class="value">${m.ready}</div><div class="sub">priorytet operacyjny</div></div>
+  <div class="sales-kpi"><div class="label">Należności</div><div class="value">${money(m.dueValue)}</div><div class="sub">${m.dueCount} nieopłaconych</div></div>
+  <div class="sales-kpi"><div class="label">Sprzedaż opłacona • 30 dni</div><div class="value">${money(m.paid30)}</div><div class="sub">przychód wg płatności</div></div>
+ </div>
+ <div class="sales-hero section">
+  <div class="card"><div class="actions" style="justify-content:space-between"><h3 style="margin:0">Co wymaga działania</h3>${btn('+ Szybkie zamówienie','openQuickOrder()','btn primary')}</div>${queue.length?`<div class="sales-actions" style="margin-top:12px">${queue.map(({o})=>`<div class="sales-action-card ${['Gotowe','Nowe'].includes(o.status)?'high':''}"><div class="top"><div><div class="title">${esc(clientName(o.client)||'Klient')} • ${esc(o.product||o.id)}</div><div class="meta">${esc(o.status)} • ${v75Paid(o)?'opłacone':'płatność '+esc(o.payment||'oczekuje')} • ${v75OrderAge(o)} d</div></div><div class="amount">${money(o.total)}</div></div><div class="buttons">${v75OrderMiniActions(o)}</div></div>`).join('')}</div>`:'<div class="empty">Brak zamówień wymagających działania.</div>'}</div>
+  <div class="card"><h3>Zdrowie sprzedaży</h3><div class="sales-metrics"><div class="sales-metric"><small>Śr. zamówienie</small><strong>${money(m.aov)}</strong></div><div class="sales-metric"><small>Klienci powracający</small><strong>${num(m.repeatRate,0)}%</strong></div><div class="sales-metric"><small>Marża z rozliczonych</small><strong>${m.margin===null?'—':num(m.margin,1)+'%'}</strong></div><div class="sales-metric"><small>Audyt</small><strong class="${audit.score>=90?'sales-audit-ok':'sales-audit-warn'}">${audit.score}/100</strong></div></div><hr>${audit.issues.length?`<div class="mini"><strong>Do poprawy:</strong><br>${audit.issues.slice(0,4).map(x=>'• '+esc(x.text)).join('<br>')}</div><div class="actions" style="margin-top:8px">${btn('Synchronizuj księgowanie','v75SyncAllRevenue().then(()=>render())','btn tiny')}</div>`:'<div class="mini sales-audit-ok">Brak wykrytych problemów sprzedażowych.</div>'}</div>
+ </div>
+ <div class="section card"><div class="sales-filterbar"><input placeholder="Szukaj klienta, produktu, zamówienia, tracking..." value="${esc(v75SalesQuery)}" oninput="v75SalesQuery=this.value;render()">${['todo','all','ready','shipping','unpaid','closed'].map(f=>`<button class="filter-pill ${v75SalesFilter===f?'active':''}" onclick="v75SetSalesFilter('${f}')">${({todo:'Do obsługi',all:'Wszystkie',ready:'Gotowe',shipping:'Wysyłka',unpaid:'Nieopłacone',closed:'Zakończone'})[f]}</button>`).join('')} ${btn('Klienci',"setView('clients')",'btn secondary')}${btn('Pełny Kanban',"setView('orders')",'btn secondary')}</div><div class="sales-order-grid section">${orders.length?orders.slice(0,30).map(v75RenderOrderCard).join(''):'<div class="empty">Brak zamówień dla filtra.</div>'}</div></div>`;
+};
+renderOrders=function(){
+ const statuses=['Nowe','Rezerwacja','Przygotowanie','Gotowe','Wysłane','Dostarczone','Zrealizowane'];
+ const controls=`<div class="toolbar">${btn('+ Szybkie zamówienie','openQuickOrder()','btn primary')}${btn(orderMode==='pipeline'?'Tabela':'Kanban',`orderMode='${orderMode==='pipeline'?'table':'pipeline'}';render()`,'btn secondary')}${btn('Centrum sprzedaży',"setView('sales')",'btn secondary')}</div>`;
+ if(orderMode==='table'){
+  return controls+table(['Zamówienie','Klient / produkt','Realizacja','Płatność','Wartość / marża','Rezerwacja','Akcje'],[...db.orders].sort((a,b)=>v75OrderDateMs(b)-v75OrderDateMs(a)).map(o=>{const c=v75OrderCost(o);return `<tr><td><strong>${esc(o.id)}</strong><div class="mini">${datePL(o.date)}</div></td><td>${esc(clientName(o.client))}<div class="mini">${esc(o.product)}</div></td><td>${badge(o.status)}</td><td>${badge(v75Paid(o)?'Opłacona':o.payment||'Oczekuje')}</td><td><strong>${money(o.total)}</strong><div class="mini">${c.known?'marża '+num(c.margin,1)+'%':'koszt nieznany'}</div></td><td><div class="mini">${esc(v75ReservationText(o))}</div></td><td>${v75OrderMiniActions(o)}</td></tr>`}));
+ }
+ return controls+`<div class="pipeline">${statuses.map(st=>`<div class="pipe-col"><h4>${st} (${db.orders.filter(o=>o.status===st).length})</h4>${db.orders.filter(o=>o.status===st).sort((a,b)=>v75OrderDateMs(a)-v75OrderDateMs(b)).map(o=>`<div class="order-card"><strong>${esc(clientName(o.client)||o.id)}</strong><div class="mini">${esc(o.product)} • ${money(o.total)}</div><div class="mini">${v75Paid(o)?'✓ opłacone':'• '+esc(o.payment||'oczekuje')}</div><div style="margin-top:7px">${v75OrderMiniActions(o)}</div></div>`).join('')}</div>`).join('')}</div>`;
+};
+renderClients=function(){
+ const q=v75ClientQuery.trim().toLowerCase(),clients=db.clients.filter(c=>!q||[c.name,c.phone,c.email,c.city,c.source].join(' ').toLowerCase().includes(q)).sort((a,b)=>v75ClientStats(b).revenue-v75ClientStats(a).revenue);
+ return `<div class="toolbar">${btn('+ Klient',"openForm('client')",'btn primary')}${btn('Centrum sprzedaży',"setView('sales')",'btn secondary')}</div><div class="simple-search section"><input placeholder="Szukaj klienta, telefonu, miasta..." value="${esc(v75ClientQuery)}" oninput="v75ClientQuery=this.value;render()"></div><div class="sales-client-grid section">${clients.length?clients.map(c=>{const s=v75ClientStats(c);return `<div class="sales-client"><div class="head"><div><div class="name"><a class="link" onclick="openClientCard('${c.id}')">${esc(c.name)}</a></div><div class="mini">${esc(c.city||'')} ${c.phone?'• '+esc(c.phone):''}</div></div>${badge(s.segment)}</div><div class="stats"><div class="stat"><small>Zamówienia</small><strong>${s.orders}</strong></div><div class="stat"><small>Wartość</small><strong>${money(s.revenue)}</strong></div><div class="stat"><small>Średnie</small><strong>${money(s.aov)}</strong></div></div><div class="mini" style="margin-top:8px">${s.last?'ostatni zakup '+datePL(s.last):'brak zakupów'} • źródło: ${esc(c.source||'—')}</div><div class="actions" style="margin-top:9px">${btn('+ Zamówienie',`openForm('order','',{'client':'${c.id}'})`,'btn tiny primary')}${btn('Karta',`openClientCard('${c.id}')`,'btn tiny secondary')}${btn('Edytuj',`openForm('client','${c.id}')`,'btn tiny')}</div></div>`}).join(''):'<div class="empty">Brak klientów.</div>'}</div>`;
+};
+const v75OpenClientCardBase=openClientCard;
+openClientCard=function(id){
+ const c=getById('clients',id);if(!c)return;const s=v75ClientStats(c),orders=db.orders.filter(o=>o.client===id).sort((a,b)=>v75OrderDateMs(b)-v75OrderDateMs(a));
+ modalTitle.textContent='Klient — '+c.name;modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="actions" style="margin-bottom:12px">${btn('+ Zamówienie',`openForm('order','',{'client':'${id}'})`,'btn primary')}${btn('Edytuj klienta',`openForm('client','${id}')`,'btn secondary')}</div><div class="two"><div class="card"><h3>Profil</h3><div class="profile">${profileBox('Segment',s.segment)}${profileBox('Telefon',c.phone)}${profileBox('E-mail',c.email)}${profileBox('Miejscowość',c.city)}${profileBox('Źródło',c.source)}${profileBox('Preferencje',c.preferences)}</div></div><div class="card"><h3>Relacja</h3><div class="statline"><span>Zamówienia</span><strong>${s.orders}</strong></div><div class="statline"><span>Wartość zakupów</span><strong>${money(s.revenue)}</strong></div><div class="statline"><span>Opłacone</span><strong>${money(s.paid)}</strong></div><div class="statline"><span>Średnie zamówienie</span><strong>${money(s.aov)}</strong></div><div class="statline"><span>Ostatni zakup</span><strong>${s.last?datePL(s.last):'—'}</strong></div></div></div><div class="section card"><h3>Historia zamówień</h3>${orders.length?orders.map(v75RenderOrderCard).join(''):'<div class="empty">Brak zamówień.</div>'}</div>`;
+ modal.classList.add('open');
+};
+const v75QuickAddBase=quickAdd;
+quickAdd=function(){
+ if(currentView==='sales'||currentView==='orders')return openQuickOrder();
+ return v75QuickAddBase();
+};
+
+// Import: po migracji kosztów i stref automatycznie normalizuj sprzedaż.
+const v75ImportBase=importBackup;
+importBackup=async function(){await v75ImportBase();await v75MigrateSales(true);currentView='sales';render();alert('v7.5: sprzedaż została znormalizowana. Przychody są księgowane dopiero po oznaczeniu zamówienia jako opłacone.')};
+
+// Eksport v7.5.
+exportFullBackup=async function(){const media=[];for(const m of db.media)media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null});const data={app:'AquaCulture Manager LAB',version:7,appVersion:V75_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')};
+exportDataBackup=function(){const data={app:'AquaCulture Manager LAB',version:7,appVersion:V75_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')};
+buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),payload={app:'AquaCulture Manager',appVersion:V75_APP_VERSION,schema:7,generatedAt:new Date().toISOString(),settings:db.settings,stores};if(includeMedia){payload.media=[];for(const m of db.media)payload.media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}return payload};
+
+// Wersja / uruchomienie.
+const v75InitBase=init;
+init=async function(){
+ await v75InitBase();await v75MigrateSales();
+ document.title='AquaCulture Manager v7.5 Sales Hub';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.5 • Sales Hub • Storage Zones');
+ titles.sales=['Sprzedaż','Jedno centrum działania: zamówienia, płatności, wysyłka, klienci i marża.'];
+ titles.orders=['Zamówienia','Kanban realizacji z osobnym statusem płatności i rezerwacją magazynową.'];
+ titles.clients=['Klienci','Lekki CRM: historia, wartość, częstotliwość i szybkie zamówienia.'];
+ render();
+};
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v75-sw-reloaded')){sessionStorage.setItem('acm-v75-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.5',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v75-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.5:',err)}})};
+
 
 registerPWA();
 
