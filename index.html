@@ -3959,7 +3959,7 @@ function acV70AuditExtras(){
 const acAuditIssuesV70Base=auditIssues;
 auditIssues = function(){const all=[...acAuditIssuesV70Base(),...acV70AuditExtras()],seen=new Set();return all.filter(x=>{const k=x.level+'|'+x.title+'|'+x.desc;if(seen.has(k))return false;seen.add(k);return true})};
 function acRunV70Tests(){const tests=[],t=(name,ok)=>tests.push({name,ok:!!ok});t('1000 µl = 1 ml',Math.abs(acConvertQty(1000,'µl','ml')-1)<1e-12);t('1000 mg = 1 g',Math.abs(acConvertQty(1000,'mg','g')-1)<1e-12);t('1 L = 1000 ml',acConvertQty(1,'L','ml')===1000);t('Masa nie konwertuje do objętości',acConvertQty(1,'g','ml')===null);t('Koszt 10 PLN przy marży 50% → cena 20 PLN',Math.abs(acPriceForGrossMargin(10,50)-20)<1e-12);t('Marża brutto: koszt 10, cena 20 = 50%',Math.abs(acGrossMargin(10,20)-50)<1e-12);t('Minimalny stan 0 oznacza brak alarmu',!db.inventory.filter(i=>Number(i.min||0)>0&&Number(i.qty||0)<=Number(i.min||0)).some(i=>Number(i.min||0)===0));return tests}
-openAuditCenter = function(){const issues=auditIssues(),score=auditScore(),bad=issues.filter(x=>x.level==='bad').length,tests=[...acRunCalculationSelfTests(),...acRunV70Tests()],passed=tests.filter(x=>x.ok).length;modalTitle.textContent='Audyt systemu v7.0';modalBox.classList.add('wide');modalBody.innerHTML=`<div class="two"><div class="card"><div class="audit-score"><div class="audit-ring" style="--score:${score*3.6}deg"><b>${score}%</b></div><div><h3 style="margin:0">Spójność danych</h3><div class="small">${bad} krytycznych • ${issues.length-bad} ostrzeżeń</div></div></div><div class="small" style="margin-top:12px">Audyt nie koryguje stanów automatycznie.</div></div><div class="card"><h3>Testy obliczeń</h3><div class="audit-metric-grid"><div class="audit-metric"><span class="mini">Testy</span><strong>${passed}/${tests.length}</strong></div><div class="audit-metric"><span class="mini">Magazyn</span><strong>${db.inventory.length}</strong></div><div class="audit-metric"><span class="mini">Procesy</span><strong>${(db.productionRuns||[]).length}</strong></div></div><div class="small" style="margin-top:10px">Jednostki, konwersje, ceny, marża, genealogia, koszt produktu i QC.</div></div></div><div class="section card"><h3>Self-test</h3>${tests.map(x=>`<div class="statline"><span>${esc(x.name)}</span><strong class="${x.ok?'ledger-ok':'ledger-bad'}">${x.ok?'OK':'BŁĄD'}</strong></div>`).join('')}</div><div class="section audit-list">${issues.length?issues.map(x=>`<div class="audit-issue ${x.level}" ${x.action?`onclick="${x.action}" style="cursor:pointer"`:''}><strong>${x.level==='bad'?'⚠ ':''}${esc(x.title)}</strong><span>${esc(x.desc)}</span></div>`).join(''):'<div class="card empty">Nie znaleziono niespójności.</div>'}</div>`;modal.classList.add('open')};
+openAuditCenter = function(){const issues=auditIssues(),score=auditScore(),bad=issues.filter(x=>x.level==='bad').length,tests=[...acRunCalculationSelfTests(),...acRunV70Tests()],passed=tests.filter(x=>x.ok).length;modalTitle.textContent='Audyt systemu v7.5.1';modalBox.classList.add('wide');modalBody.innerHTML=`<div class="two"><div class="card"><div class="audit-score"><div class="audit-ring" style="--score:${score*3.6}deg"><b>${score}%</b></div><div><h3 style="margin:0">Spójność danych</h3><div class="small">${bad} krytycznych • ${issues.length-bad} ostrzeżeń</div></div></div><div class="small" style="margin-top:12px">Audyt nie koryguje stanów automatycznie.</div></div><div class="card"><h3>Testy obliczeń</h3><div class="audit-metric-grid"><div class="audit-metric"><span class="mini">Testy</span><strong>${passed}/${tests.length}</strong></div><div class="audit-metric"><span class="mini">Magazyn</span><strong>${db.inventory.length}</strong></div><div class="audit-metric"><span class="mini">Procesy</span><strong>${(db.productionRuns||[]).length}</strong></div></div><div class="small" style="margin-top:10px">Jednostki, konwersje, ceny, marża, genealogia, koszt produktu i QC.</div></div></div><div class="section card"><h3>Self-test</h3>${tests.map(x=>`<div class="statline"><span>${esc(x.name)}</span><strong class="${x.ok?'ledger-ok':'ledger-bad'}">${x.ok?'OK':'BŁĄD'}</strong></div>`).join('')}</div><div class="section audit-list">${issues.length?issues.map(x=>`<div class="audit-issue ${x.level}" ${x.action?`onclick="${x.action}" style="cursor:pointer"`:''}><strong>${x.level==='bad'?'⚠ ':''}${esc(x.title)}</strong><span>${esc(x.desc)}</span></div>`).join(''):'<div class="card empty">Nie znaleziono niespójności.</div>'}</div>`;modal.classList.add('open')};
 
 const acInitV70Base=init;
 init = async function(){await acInitV70Base();try{await put('meta',{id:'operationsV70',value:{done:true,date:new Date().toISOString(),note:'v7.0 additive: units, costing snapshots for future runs, QC panel, work mode. No automatic stock corrections.'}})}catch(e){console.warn('v7 meta',e)}document.title='AquaCulture Manager v7.0 Operations';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.0 • Operations • AquaFlow');render()};
@@ -4032,7 +4032,7 @@ commitProductionRun = async function(run,changes,job=null){
  const overhead=labor+other+energy,total=material+overhead;
  run.costBreakdown=breakdown;run.materialCost=material;run.energyCost=energy;run.laborCost=labor;run.otherCost=other;run.overheadCost=overhead;run.totalCost=total;run.energySnapshot=energySnapshot;run.costSnapshotVersion='7.1';run.costMethod='FIFO-like transfer cost + equipment electricity snapshot';
  const positives=(changes||[]).filter(ch=>v71N(ch.delta)>0),sameUnit=positives.length&&positives.every(ch=>acCanonicalUnit(ch.item?.unit)===acCanonicalUnit(positives[0].item?.unit));
- if(total>=0&&sameUnit){const totalOut=positives.reduce((a,ch)=>a+v71N(ch.delta),0);if(totalOut>0){const unitCost=total/totalOut;positives.forEach(ch=>{if(ch.item){ch.item.price=unitCost;ch.item.costSource='production';ch.item.costRunId=run.id}})}}
+ if(isProd&&total>=0&&sameUnit){const totalOut=positives.reduce((a,ch)=>a+v71N(ch.delta),0);if(totalOut>0){const unitCost=total/totalOut;positives.forEach(ch=>{if(ch.item){ch.item.price=unitCost;ch.item.costSource='production';ch.item.costRunId=run.id}})}}
  if(job){job.materialCost=material;job.energyCost=energy;job.laborCost=labor;job.otherCost=other;job.overheadCost=overhead;job.totalCost=total;job.energySnapshot=energySnapshot;job.costSnapshotVersion='7.1'}
  await acCommitProductionRunV70(run,changes,job);
 };
@@ -4646,7 +4646,7 @@ registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=
    - przychód dopiero po płatności
    - szybkie akcje i lekki CRM/RFM
    ========================================================== */
-const V75_APP_VERSION='7.5';
+const V75_APP_VERSION='7.5.1';
 let v75SalesFilter='todo';
 let v75SalesQuery='';
 let v75ClientQuery='';
@@ -5000,9 +5000,35 @@ quickAdd=function(){
  return v75QuickAddBase();
 };
 
+
+// ===== v7.5.1 Purchase Cost Hotfix =====
+// Regresja v7.1 powodowała, że zwykłe przyjęcie magazynowe z dodatnim stanem
+// mogło nadpisać poprawną cenę zakupu wartością 0 i oznaczyć pozycję jako "production".
+async function v751RepairPurchaseUnitCosts(){
+ let fixed=0;
+ for(const x0 of (db.inventory||[])){
+  const pp=Number(x0.purchasePrice||0),pq=Number(x0.purchaseQty||0);
+  if(!(pp>0&&pq>0))continue;
+  const expected=pp/pq,current=Number(x0.price||0);
+  const tol=Math.max(1e-9,Math.abs(expected)*0.001);
+  const run=x0.costRunId?getById('productionRuns',x0.costRunId):null;
+  const receiptRun=!!(run&&!acIsProductionCostRun(run)&&(run.movements||[]).some(m=>m.itemId===x0.id&&Number(m.delta||0)>0));
+  const corruptedZero=current<=0;
+  const corruptedReceipt=String(x0.costSource||'')==='production'&&receiptRun&&Math.abs(current-expected)>tol;
+  if(!corruptedZero&&!corruptedReceipt)continue;
+  const x={...x0,price:expected,costSource:'purchase',purchaseUnitCost:expected,updatedAt:new Date().toISOString()};
+  if(receiptRun&&x.costRunId){x.purchaseRunId=x.costRunId;delete x.costRunId}
+  await saveRecord('inventory',x);fixed++;
+ }
+ if(fixed){
+  await put('meta',{id:'purchaseCostFixV751',value:{done:true,date:new Date().toISOString(),fixed,note:'Naprawiono ceny zakupionych pozycji nadpisane przez nieprodukcyjne przyjęcia magazynowe.'}});
+ }
+ return fixed;
+}
+
 // Import: po migracji kosztów i stref automatycznie normalizuj sprzedaż.
 const v75ImportBase=importBackup;
-importBackup=async function(){await v75ImportBase();await v75MigrateSales(true);currentView='sales';render();alert('v7.5: sprzedaż została znormalizowana. Przychody są księgowane dopiero po oznaczeniu zamówienia jako opłacone.')};
+importBackup=async function(){await v75ImportBase();const fixed=await v751RepairPurchaseUnitCosts();await v75MigrateSales(true);currentView='sales';render();alert(`v7.5.1: import zakończony. Naprawiono ${fixed} cen zakupowych. Przychody są księgowane dopiero po oznaczeniu zamówienia jako opłacone.`)};
 
 // Eksport v7.5.
 exportFullBackup=async function(){const media=[];for(const m of db.media)media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null});const data={app:'AquaCulture Manager LAB',version:7,appVersion:V75_APP_VERSION,exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')};
@@ -5012,15 +5038,16 @@ buildSyncPayload=async function(includeMedia=false){const stores=Object.fromEntr
 // Wersja / uruchomienie.
 const v75InitBase=init;
 init=async function(){
- await v75InitBase();await v75MigrateSales();
- document.title='AquaCulture Manager v7.5 Sales Hub';
- document.querySelectorAll('.version').forEach(x=>x.textContent='v7.5 • Sales Hub • Storage Zones');
+ await v75InitBase();const purchaseFixes=await v751RepairPurchaseUnitCosts();await v75MigrateSales();
+ document.title='AquaCulture Manager v7.5.1 Sales Hub';
+ document.querySelectorAll('.version').forEach(x=>x.textContent='v7.5.1 • Sales Hub • Purchase Cost Fix');
  titles.sales=['Sprzedaż','Jedno centrum działania: zamówienia, płatności, wysyłka, klienci i marża.'];
  titles.orders=['Zamówienia','Kanban realizacji z osobnym statusem płatności i rezerwacją magazynową.'];
  titles.clients=['Klienci','Lekki CRM: historia, wartość, częstotliwość i szybkie zamówienia.'];
+ if(purchaseFixes)console.info(`v7.5.1: naprawiono ${purchaseFixes} cen zakupowych.`);
  render();
 };
-registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v75-sw-reloaded')){sessionStorage.setItem('acm-v75-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.5',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v75-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.5:',err)}})};
+registerPWA=function(){if(!('serviceWorker' in navigator))return;let refreshing=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;if(!sessionStorage.getItem('acm-v751-sw-reloaded')){sessionStorage.setItem('acm-v751-sw-reloaded','1');location.reload()}});window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./sw.js?v=7.5.1',{updateViaCache:'none'});await reg.update();if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>sessionStorage.removeItem('acm-v751-sw-reloaded'),5000)}catch(err){console.warn('Service Worker v7.5.1:',err)}})};
 
 
 registerPWA();
