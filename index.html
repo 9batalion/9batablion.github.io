@@ -12,7 +12,7 @@
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="apple-touch-icon" href="./apple-touch-icon.png">
 <link rel="icon" sizes="192x192" href="./icon-192.png">
-<title>AquaCulture Manager v6.3 Production Flow</title>
+<title>AquaCulture Manager v7.0 Operations</title>
 <style>
 :root{
  --bg:#07111f;--panel:#0d1a2b;--panel2:#13243a;--panel3:#18304d;--text:#eef6ff;--muted:#91a4bb;
@@ -336,6 +336,16 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
  .prod-plan-block,.prod-live-block{padding:12px}
 }
 
+
+/* ===== v6.4 Print / QR / Unit Audit ===== */
+.label-select-list{display:grid;gap:8px}.label-select-row{display:grid;grid-template-columns:auto 1fr 92px;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}.label-select-row input[type=checkbox]{width:20px;height:20px}.label-select-row .copies{width:92px}.label-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.label-toolbar select{width:auto;min-width:170px}.price-preview{padding:9px 11px;border:1px solid var(--line);border-radius:10px;background:rgba(107,184,255,.06);font-size:12px;color:#bdd0e5}.scanner-status{margin-top:8px}.scanner-actions{display:flex;gap:8px;flex-wrap:wrap}.scanner-actions input[type=file]{max-width:100%}.audit-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.audit-metric{border:1px solid var(--line);border-radius:12px;padding:10px}.audit-metric strong{display:block;font-size:18px;margin-top:3px}@media(max-width:680px){.label-select-row{grid-template-columns:auto 1fr}.label-select-row .copies{grid-column:2;width:100%}.audit-metric-grid{grid-template-columns:1fr}}
+</style>
+<style>
+
+/* v7.0 Operations */
+.qc-mini-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;margin:11px 0}.qc-mini-grid span{background:#091728;border:1px solid var(--line);border-radius:8px;padding:7px;font-size:9px;color:var(--muted)}.qc-mini-grid b{display:block;color:var(--text);font-size:12px;margin-top:2px}.qc-check{display:flex!important;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:9px;background:#0a1728}.danger-callout{border-left-color:var(--danger);background:#25151d;color:#ffd0d4}.lineage-list{display:flex;flex-direction:column;gap:4px}.lineage-row{--indent:0;display:grid;grid-template-columns:22px 1fr auto;gap:8px;align-items:center;padding:8px 8px 8px calc(8px + var(--indent)*15px);border:1px solid var(--line);border-radius:9px;background:#091728}.lineage-row.current{border-color:var(--accent);background:#0c241f}.lineage-branch{width:10px;height:10px;border-left:2px solid #45657f;border-bottom:2px solid #45657f}.work-hero{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px;border:1px solid #2d5075;background:linear-gradient(135deg,#0d1b2e,#102740);border-radius:16px}.work-hero h3{font-size:23px;margin:3px 0 5px}.work-hero p{margin:0;color:var(--muted);font-size:11px}.work-list{display:flex;flex-direction:column;gap:9px}.work-card{width:100%;display:grid;grid-template-columns:42px 1fr 28px;align-items:center;text-align:left;gap:11px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:14px;padding:13px}.work-card.warn{border-left:4px solid var(--warn)}.work-card.bad{border-left:4px solid var(--danger)}.work-card.ok{border-left:4px solid var(--ok)}.work-no{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--panel2);font-weight:900}.work-body strong{display:block;font-size:14px}.work-body small{display:block;color:var(--muted);margin-top:4px}.work-go{font-size:28px;color:var(--blue);text-align:right}.price-positive{color:var(--ok)}
+@media(max-width:620px){.work-hero{align-items:flex-start;flex-direction:column}.work-card{grid-template-columns:36px 1fr 20px}.qc-mini-grid{grid-template-columns:1fr 1fr}}
+
 </style>
 </head>
 <body>
@@ -343,7 +353,7 @@ main{max-width:1180px;margin:0 auto;padding:18px 18px calc(var(--bottom-nav-h) +
 
 <div class="app">
 <aside>
- <div class="brand"><h1>AquaCulture Manager</h1><p>Dzisiaj • AquaFlow • magazyn • sprzedaż</p><span class="version">v5 • Command Center • AquaFlow</span></div>
+ <div class="brand"><h1>AquaCulture Manager</h1><p>Dzisiaj • AquaFlow • magazyn • sprzedaż</p><span class="version">v6.4 • Print/QR/Unit Audit</span></div>
  <nav id="nav">
   <div class="group-title">Produkcja</div>
   <button class="active" data-view="dashboard">Pulpit</button>
@@ -1553,8 +1563,8 @@ async function requestPersistence(){if(!navigator.storage?.persist)return alert(
 async function saveSettingsFromUI(){const root=document.getElementById('content');db.settings.companyName=root.querySelector('[name=setCompany]').value;db.settings.companySubtitle=root.querySelector('[name=setSubtitle]').value;db.settings.labelFooter=root.querySelector('[name=setFooter]').value;db.settings.operator=root.querySelector('[name=setOperator]').value;db.settings.defaultBottleCost=Number(root.querySelector('[name=setBottle]').value||0);db.settings.defaultCapCost=Number(root.querySelector('[name=setCap]').value||0);db.settings.defaultLabelCost=Number(root.querySelector('[name=setLabel]').value||0);db.settings.measurementAlertDays=Number(root.querySelector('[name=setAlertDays]').value||3);await saveSettings();alert('Ustawienia zapisane.')}
 async function blobToDataURL(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob)})}
 function dataURLToBlob(dataURL){const [meta,b64]=dataURL.split(','),mime=(meta.match(/data:(.*?);/)||[])[1]||'application/octet-stream',bin=atob(b64),arr=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);return new Blob([arr],{type:mime})}
-async function exportFullBackup(){const media=[];for(const m of db.media){media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}const data={app:'AquaCulture Manager LAB',version:7,appVersion:'6.0',exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')}
-function exportDataBackup(){const data={app:'AquaCulture Manager LAB',version:7,appVersion:'6.0',exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')}
+async function exportFullBackup(){const media=[];for(const m of db.media){media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}const data={app:'AquaCulture Manager LAB',version:7,appVersion:'7.0',exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),media};downloadBlob(new Blob([JSON.stringify(data)],{type:'application/json'}),'AquaCulture_LAB_FULL_'+today()+'.json')}
+function exportDataBackup(){const data={app:'AquaCulture Manager LAB',version:7,appVersion:'7.0',exportedAt:new Date().toISOString(),settings:db.settings,stores:Object.fromEntries(DATA_STORES.map(s=>[s,db[s]]))};downloadBlob(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),'AquaCulture_LAB_DATA_'+today()+'.json')}
 async function importBackup(){const file=document.getElementById('backupFile')?.files?.[0];if(!file)return alert('Wybierz plik JSON.');if(!confirm('Import zastąpi obecną bazę. Aktualizacja plików aplikacji na GitHub Pages sama w sobie NIE usuwa IndexedDB. Kontynuować?'))return;try{const data=JSON.parse(await file.text());for(const s of STORES)await clearStore(s);for(const s of DATA_STORES)for(const rec of (data.stores?.[s]||[]))await put(s,rec);if(data.settings)await put('meta',{id:'settings',value:{...defaultSettings,...data.settings}});for(const m of (data.media||[])){await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await loadMemory();render();alert('Kopia przywrócona.')}catch(e){alert('Błąd importu: '+e.message)}}
 async function resetDatabase(){if(!confirm('Usunąć wszystkie rekordy i zdjęcia z IndexedDB?'))return;for(const s of STORES)await clearStore(s);db.settings={...defaultSettings};await saveSettings();await loadMemory();render()}
 function exportCSV(store){const rows=db[store];if(!rows.length)return alert('Brak danych.');const cols=[...new Set(rows.flatMap(x=>Object.keys(x)))].filter(c=>typeof rows.find(r=>r[c]!==undefined)?.[c]!=='object'),q=v=>'"'+String(v??'').replaceAll('"','""')+'"',csv='\ufeff'+[cols.map(q).join(';'),...rows.map(r=>cols.map(c=>q(r[c])).join(';'))].join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),store+'_'+today()+'.csv')}
@@ -2709,7 +2719,7 @@ function renderPurchases(){const sug=purchaseSuggestions(),pos=[...(db.purchaseO
 
 async function getSyncSettings(){const r=await reqP(idb.transaction('meta','readonly').objectStore('meta').get('syncSettings'));return r?.value||{endpoint:'',token:'',revision:0,lastSyncAt:''}}
 async function saveSyncSettings(v){await put('meta',{id:'syncSettings',value:v})}
-async function buildSyncPayload(includeMedia=false){const stores=Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),payload={app:'AquaCulture Manager',appVersion:'6.0',schema:7,generatedAt:new Date().toISOString(),settings:db.settings,stores};if(includeMedia){payload.media=[];for(const m of db.media)payload.media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}return payload}
+async function buildSyncPayload(includeMedia=false){const stores=Object.fromEntries(DATA_STORES.map(s=>[s,db[s]])),payload={app:'AquaCulture Manager',appVersion:'7.0',schema:7,generatedAt:new Date().toISOString(),settings:db.settings,stores};if(includeMedia){payload.media=[];for(const m of db.media)payload.media.push({...m,blob:await blobToDataURL(m.blob),thumbBlob:m.thumbBlob?await blobToDataURL(m.thumbBlob):null})}return payload}
 async function syncPush(){const s=await getSyncSettings();if(!s.endpoint||!s.token)return alert('Najpierw zapisz endpoint i klucz synchronizacji.');try{const payload=await buildSyncPayload(false),res=await fetch(s.endpoint.replace(/\/$/,'')+'/state',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':'Bearer '+s.token},body:JSON.stringify({baseRevision:Number(s.revision||0),payload})});const data=await res.json();if(res.status===409)return alert(`Konflikt synchronizacji. Serwer ma rewizję ${data.revision}. Najpierw pobierz stan z serwera albo świadomie rozwiąż konflikt.`);if(!res.ok)throw new Error(data.error||res.statusText);await saveSyncSettings({...s,revision:data.revision,lastSyncAt:new Date().toISOString()});alert(`Wysłano. Rewizja serwera: ${data.revision}`);render()}catch(e){alert('Błąd synchronizacji: '+e.message)}}
 async function syncPull(){const s=await getSyncSettings();if(!s.endpoint||!s.token)return alert('Najpierw zapisz endpoint i klucz.');try{const res=await fetch(s.endpoint.replace(/\/$/,'')+'/state',{headers:{'Authorization':'Bearer '+s.token}}),data=await res.json();if(!res.ok)throw new Error(data.error||res.statusText);if(!data.payload)return alert('Serwer nie ma jeszcze danych.');if(!confirm(`Pobrać rewizję ${data.revision} i zastąpić lokalne dane strukturalne? Najpierw zostanie automatycznie pobrana lokalna kopia bezpieczeństwa. Zdjęcia lokalne pozostaną, jeśli serwer ich nie zawiera.`))return;const backup=await buildSyncPayload(true);downloadBlob(new Blob([JSON.stringify(backup)],{type:'application/json'}),`AquaCulture_PRZED_SYNC_${today()}.json`);for(const store of DATA_STORES){await clearStore(store);for(const rec of (data.payload.stores?.[store]||[]))await put(store,rec)}if(data.payload.settings){db.settings={...defaultSettings,...data.payload.settings};await saveSettings()}if(Array.isArray(data.payload.media)){await clearStore('media');for(const m of data.payload.media)await put('media',{...m,blob:typeof m.blob==='string'?dataURLToBlob(m.blob):m.blob,thumbBlob:typeof m.thumbBlob==='string'?dataURLToBlob(m.thumbBlob):m.thumbBlob})}await saveSyncSettings({...s,revision:data.revision,lastSyncAt:new Date().toISOString()});await loadMemory();render();alert('Synchronizacja pobrana.')}catch(e){alert('Błąd synchronizacji: '+e.message)}}
 async function saveSyncForm(){const s=await getSyncSettings(),endpoint=document.getElementById('syncEndpoint').value.trim(),token=document.getElementById('syncToken').value.trim();await saveSyncSettings({...s,endpoint,token});alert('Ustawienia synchronizacji zapisane lokalnie na tym urządzeniu.');render()}
@@ -2719,7 +2729,7 @@ function renderProduction(){const jobs=(db.productionJobs||[]).filter(j=>j.statu
 
 function tankTilesHTML(){const list=liveStock().sort((a,b)=>String(a.status||'').localeCompare(String(b.status||''))||String(a.lot||'').localeCompare(String(b.lot||'')));if(!list.length)return '<div class="empty">Brak kultur.</div>';return `<div class="tank-grid">${list.map(x=>{const j=tankJob(x.id),p=readinessPct(x),cls=['Problem','Kwarantanna'].includes(x.status)?'problem':p>=100?'ready':'';return `<div class="tank-card ${cls}" style="--progress:${num(p,0)}%"><div class="mini">${esc(x.vessel||'Kultura')}</div><h4>${esc(x.lot||x.name)}</h4><div class="litres">${x.unit==='ml'?num(Number(x.qty||0)/1000,2)+' L':stockQtyText(x)}</div><div class="mini">${esc(x.organism||'')} • ${esc(x.status||'')}</div>${j?`<div class="mini" style="margin-top:5px">${esc(deadlineText(j.plannedReadyDate,j.status))}</div>`:''}<div class="actions">${btn('Panel',`openTankPanel('${x.id}')`,'btn tiny primary')}${btn('QR',`openQuickStock('${x.id}')`,'btn tiny')}</div></div>`}).join('')}</div>`}
 
-function renderDashboard(){const todayItems=commandTodayItems(),score=auditScore(),recs=demandRecommendations(),shortages=recs.filter(r=>r.def>0),purchases=purchaseSuggestions().slice(0,3),inc=(db.incidents||[]).filter(i=>i.status!=='Zamknięty');return `<div class="command-hero"><div><div class="mini">AQUACULTURE COMMAND CENTER v6</div><h3>Dzisiaj</h3><p>${todayItems.length?`Masz ${todayItems.length} rzeczy wymagających uwagi.`:'Brak pilnych działań.'} ${inc.length?`Aktywne incydenty: ${inc.length}.`:''}</p><div class="actions">${btn('Skanuj QR','openQuickQR()','btn primary')}${btn('Chcę wyprodukować…',"setView('smartplan')")}${btn('Kalendarz',"setView('calendar')")}</div></div><div class="health-dial ${score<60?'bad':score<85?'warn':''}"><strong>${score}</strong><span>audyt / 100</span></div></div><div class="command-grid section"><div class="card"><h3>Do zrobienia</h3>${todayItems.length?`<div class="today-list">${todayItems.map(x=>`<div class="today-item ${x.level}" onclick="${x.action}"><div class="today-icon">${x.icon}</div><div class="today-main"><strong>${esc(x.title)}</strong><span>${esc(x.meta)}</span></div><div class="today-time">${esc(x.when)}</div></div>`).join('')}</div>`:'<div class="empty">Brak pilnych działań.</div>'}</div><div class="card"><h3>Sprzedaż → produkcja</h3>${shortages.length?shortages.map(r=>`<div class="alert"><strong>${esc(r.org)}: brakuje ${num(r.def/1000,2)} L</strong><span class="small">popyt ${num(r.demand/1000,2)} L • gotowe + WIP ${num((r.ready+r.wip)/1000,2)} L</span><div style="margin-top:5px">${btn('Zaplanuj',`startDemandPlan('${r.org}',${r.def})`,'btn tiny primary')}</div></div>`).join(''):'<div class="empty">Otwarte zamówienia są pokryte albo brak danych objętościowych.</div>'}<hr><h3>Zakupy</h3>${purchases.length?purchases.map(s=>`<div class="statline"><span>${esc(s.x.name)}</span><strong>+${num(s.need,2)} ${esc(s.x.unit)}</strong></div>`).join(''):'<div class="mini">Brak pilnych zakupów.</div>'}</div></div><div class="section card"><h3>Mapa produkcji</h3>${tankTilesHTML()}</div>`}
+function renderDashboard(){const todayItems=commandTodayItems(),score=auditScore(),recs=demandRecommendations(),shortages=recs.filter(r=>r.def>0),purchases=purchaseSuggestions().slice(0,3),inc=(db.incidents||[]).filter(i=>i.status!=='Zamknięty');return `<div class="command-hero"><div><div class="mini">AQUACULTURE COMMAND CENTER v7.0</div><h3>Dzisiaj</h3><p>${todayItems.length?`Masz ${todayItems.length} rzeczy wymagających uwagi.`:'Brak pilnych działań.'} ${inc.length?`Aktywne incydenty: ${inc.length}.`:''}</p><div class="actions">${btn('Skanuj QR','openQuickQR()','btn primary')}${btn('Chcę wyprodukować…',"setView('smartplan')")}${btn('Kalendarz',"setView('calendar')")}</div></div><div class="health-dial ${score<60?'bad':score<85?'warn':''}"><strong>${score}</strong><span>audyt / 100</span></div></div><div class="command-grid section"><div class="card"><h3>Do zrobienia</h3>${todayItems.length?`<div class="today-list">${todayItems.map(x=>`<div class="today-item ${x.level}" onclick="${x.action}"><div class="today-icon">${x.icon}</div><div class="today-main"><strong>${esc(x.title)}</strong><span>${esc(x.meta)}</span></div><div class="today-time">${esc(x.when)}</div></div>`).join('')}</div>`:'<div class="empty">Brak pilnych działań.</div>'}</div><div class="card"><h3>Sprzedaż → produkcja</h3>${shortages.length?shortages.map(r=>`<div class="alert"><strong>${esc(r.org)}: brakuje ${num(r.def/1000,2)} L</strong><span class="small">popyt ${num(r.demand/1000,2)} L • gotowe + WIP ${num((r.ready+r.wip)/1000,2)} L</span><div style="margin-top:5px">${btn('Zaplanuj',`startDemandPlan('${r.org}',${r.def})`,'btn tiny primary')}</div></div>`).join(''):'<div class="empty">Otwarte zamówienia są pokryte albo brak danych objętościowych.</div>'}<hr><h3>Zakupy</h3>${purchases.length?purchases.map(s=>`<div class="statline"><span>${esc(s.x.name)}</span><strong>+${num(s.need,2)} ${esc(s.x.unit)}</strong></div>`).join(''):'<div class="mini">Brak pilnych zakupów.</div>'}</div></div><div class="section card"><h3>Mapa produkcji</h3>${tankTilesHTML()}</div>`}
 
 function renderMore(){const tiles=[['Chcę wyprodukować','Materiały, termin i braki.','smartplan'],['Kalendarz','Starty, kontrole i rozlewy.','calendar'],['Szablony produkcji','Powtarzalne procesy.','templates'],['Wydajność','Czas, koszt i wyniki.','analytics'],['Zakupy','Prognozy i propozycje zamówień.','purchases'],['Incydenty','Skażenia i kwarantanny.','incidents'],['Kontrola jakości','Prosta ocena + parametry.','quality'],['Synchronizacja','Opcjonalnie komputer ↔ iPhone.','sync'],['Audyt systemu','Niespójności i terminy.','audit'],['Prognoza zapasów','Na ile wystarczą zapasy.','forecast'],['Receptury','Pożywki i materiały.','recipes'],['Finanse','Koszty i przychody.','finance'],['Raporty','Raporty i PDF.','reports'],['Kopie i dane','Backup i ustawienia.','backup'],['Dezynfekcja','Mycie i dezynfekcja.','sanitation'],['Etykiety','QR i wydruki.','prints']];return `<div class="more-grid">${tiles.map(t=>`<button class="more-tile" onclick="${t[2]==='audit'?'openAuditCenter()':t[2]==='forecast'?'openForecastCenter()':`setView('${t[2]}')`}"><strong>${t[0]}</strong><span>${t[1]}</span></button>`).join('')}</div>`}
 function renderQuality(){const items=liveStock().sort((a,b)=>String(a.lot||'').localeCompare(String(b.lot||'')));return `<div class="toolbar">${btn('+ Kontrola jakości',`openQuickQuality('${items[0]?.id||''}')`,'btn primary')}${btn('Pełna tabela pomiarów',"setView('measurements')")}</div><div class="inventory-card-grid">${items.map(x=>{const m=latestQuality(x.id);return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.lot||x.name)}</h4><div class="mini">${esc(x.organism||'')}</div></div>${badge(m?.rating||'Brak kontroli')}</div><div class="qty" style="font-size:16px">${m?datePL(m.date):'Brak kontroli'}</div><div class="mini">${esc(m?.notes||'')}</div><div class="actions">${btn('Kontrola',`openQuickQuality('${x.id}')`,'btn tiny primary')}${btn('Panel',`openTankPanel('${x.id}')`,'btn tiny')}</div></div>`}).join('')}</div>`}
@@ -3446,6 +3456,430 @@ function registerPWA(){
   });
  }
 }
+
+/* ==========================================================
+   v6.4 — PRINT / QR / UNIT & COST AUDIT HOTFIX
+   Additive overrides only: no automatic stock quantity changes.
+   ========================================================== */
+
+function acCanonicalUnit(u){
+ const s=String(u||'').trim().toLowerCase().replaceAll(' ','');
+ if(['ml','millilitr','millilitry','millilitrów'].includes(s))return 'ml';
+ if(['l','litr','litry','litrów'].includes(s))return 'L';
+ if(['g','gram','gramy','gramów'].includes(s))return 'g';
+ if(['kg','kilogram','kilogramy','kilogramów'].includes(s))return 'kg';
+ if(['szt','szt.','sztuka','sztuki'].includes(s))return 'szt.';
+ return String(u||'').trim();
+}
+function acConvertQty(q,from,to){
+ const a=acCanonicalUnit(from),b=acCanonicalUnit(to),n=Number(q||0);
+ if(a===b)return n;
+ if(a==='ml'&&b==='L')return n/1000;
+ if(a==='L'&&b==='ml')return n*1000;
+ if(a==='g'&&b==='kg')return n/1000;
+ if(a==='kg'&&b==='g')return n*1000;
+ return null;
+}
+function acPurchaseUnitPrice(totalPrice,packageQty){
+ const p=Number(totalPrice||0),q=Number(packageQty||0);
+ return p>=0&&q>0?p/q:null;
+}
+function acExpectedUnit(item){
+ const k=inferStockKind(item),c=String(item?.category||'').toLowerCase(),n=String(item?.name||'').toLowerCase();
+ if(k==='Kultura żywa'||k==='Pożywka / medium'||c.includes('woda ro')||n==='woda ro'||n.includes('f/2')||n.includes('f2'))return 'ml';
+ if(c.includes('sól')||n.includes('sól mors'))return 'g';
+ if(k==='Opakowanie'||k==='Produkt gotowy')return 'szt.';
+ return '';
+}
+function acCostUnitAuditIssues(){
+ const out=[];
+ for(const x of db.inventory||[]){
+  const q=Number(x.qty||0),p=Number(x.price||0),u=acCanonicalUnit(x.unit);
+  if(!x.unit)out.push({level:'bad',title:'Brak jednostki magazynowej',desc:x.name||x.id,action:`openStockCard('${x.id}')`});
+  if(!Number.isFinite(p)||p<0)out.push({level:'bad',title:'Nieprawidłowa cena jednostkowa',desc:`${x.name}: ${x.price}`,action:`openStockCard('${x.id}')`});
+  if(q>0&&p===0&&inferStockKind(x)!=='Kultura żywa')out.push({level:'warn',title:'Pozycja bez wyceny',desc:`${x.name}: ${stockQtyText(x)} • cena 0 PLN/${x.unit||'?'}`,action:`openStockCard('${x.id}')`});
+  const expected=acExpectedUnit(x);
+  if(expected&&u&&u!==expected)out.push({level:'warn',title:'Nietypowa jednostka',desc:`${x.name}: ${x.unit}; oczekiwana jednostka ewidencyjna: ${expected}`,action:`openStockCard('${x.id}')`});
+  if(Number(x.purchasePrice||0)>0&&Number(x.purchaseQty||0)>0){
+   const calc=acPurchaseUnitPrice(x.purchasePrice,x.purchaseQty);
+   if(calc!==null&&Math.abs(calc-p)>Math.max(1e-6,calc*0.001))out.push({level:'warn',title:'Cena jednostkowa nie zgadza się z zakupem',desc:`${x.name}: zapis ${money(p)}/${x.unit}, z zakupu ${money(calc)}/${x.unit}`,action:`openStockCard('${x.id}')`});
+  }
+ }
+ for(const r of db.recipes||[]){
+  if(!(r.ingredients||[]).length)out.push({level:'warn',title:'Receptura bez składników',desc:r.name||r.id,action:`openMediumRecipeBuilder('${r.id}')`});
+  for(const ing of r.ingredients||[]){
+   const item=getById('inventory',ing.itemId),qty=Number(ing.qty||0);
+   if(!item)out.push({level:'bad',title:'Receptura wskazuje brakującą pozycję',desc:`${r.name}: ${ing.itemId}`,action:`openMediumRecipeBuilder('${r.id}')`});
+   if(!Number.isFinite(qty)||qty<=0)out.push({level:'bad',title:'Nieprawidłowa ilość w recepturze',desc:`${r.name}: ${item?.name||ing.itemId} = ${ing.qty}`,action:`openMediumRecipeBuilder('${r.id}')`});
+   if(!['na 1 L','na partię','na opakowanie'].includes(ing.basis||'na 1 L'))out.push({level:'warn',title:'Nieznany przelicznik receptury',desc:`${r.name}: ${ing.basis}`,action:`openMediumRecipeBuilder('${r.id}')`});
+  }
+ }
+ return out;
+}
+function acRunCalculationSelfTests(){
+ const tests=[];
+ const t=(name,ok,detail='')=>tests.push({name,ok:!!ok,detail});
+ t('1000 ml = 1 L',acConvertQty(1000,'ml','L')===1);
+ t('1 kg = 1000 g',acConvertQty(1,'kg','g')===1000);
+ t('Cena 40 PLN / 250 ml = 0,16 PLN/ml',Math.abs(acPurchaseUnitPrice(40,250)-0.16)<1e-12);
+ t('Cena 25 PLN / 1000 g = 0,025 PLN/g',Math.abs(acPurchaseUnitPrice(25,1000)-0.025)<1e-12);
+ t('Siatka małych etykiet A4 = 21 szt.',acLabelLayout('small').perPage===21);
+ return tests;
+}
+
+const acAuditIssuesBaseV64 = auditIssues;
+auditIssues = function(){
+ const base=acAuditIssuesBaseV64();
+ return base.concat(acCostUnitAuditIssues());
+};
+openAuditCenter = function(){
+ const issues=auditIssues(),score=auditScore(),bad=issues.filter(x=>x.level==='bad').length,tests=acRunCalculationSelfTests(),passed=tests.filter(x=>x.ok).length;
+ modalTitle.textContent='Audyt systemu • ceny / jednostki / receptury';modalBox.classList.add('wide');
+ modalBody.innerHTML=`<div class="two"><div class="card"><div class="audit-score"><div class="audit-ring" style="--score:${score*3.6}deg"><b>${score}%</b></div><div><h3 style="margin:0">Spójność danych</h3><div class="small">${bad} krytycznych • ${issues.length-bad} ostrzeżeń</div></div></div><div class="small" style="margin-top:12px">Audyt tylko odczytuje dane. Nie wykonuje automatycznych korekt stanów.</div></div><div class="card"><h3>Testy obliczeń</h3><div class="audit-metric-grid"><div class="audit-metric"><span class="mini">Testy</span><strong>${passed}/${tests.length}</strong></div><div class="audit-metric"><span class="mini">Pozycje magazynu</span><strong>${db.inventory.length}</strong></div><div class="audit-metric"><span class="mini">Receptury</span><strong>${db.recipes.length}</strong></div></div><div class="small" style="margin-top:10px">Kontrola: ml↔L, g↔kg, cena zakupu→cena jednostkowa, układ etykiet.</div></div></div>
+ <div class="section card"><h3>Wyniki testów obliczeń</h3>${tests.map(x=>`<div class="statline"><span>${esc(x.name)}</span><strong class="${x.ok?'ledger-ok':'ledger-bad'}">${x.ok?'OK':'BŁĄD'}</strong></div>`).join('')}</div>
+ <div class="section audit-list">${issues.length?issues.map(x=>`<div class="audit-issue ${x.level}" ${x.action?`onclick="${x.action}" style="cursor:pointer"`:''}><strong>${x.level==='bad'?'⚠ ':''}${esc(x.title)}</strong><span>${esc(x.desc)}</span></div>`).join(''):'<div class="card empty">Nie znaleziono niespójności.</div>'}</div>`;
+ modal.classList.add('open');
+};
+
+function acLabelLayout(size='small'){
+ if(size==='standard')return {w:90,h:50,cols:2,rows:5,perPage:10,qr:18,font:8.2};
+ return {w:63,h:38,cols:3,rows:7,perPage:21,qr:15.5,font:7.2};
+}
+function acLabelRecord(type,id,copies=1){
+ if(type==='BATCH'){
+  const h=getById('harvests',id);if(!h)return null;const c=getById('cultures',h.culture),stockSrc=getById('inventory',h.stockSource);
+  return {type,id:h.id,title:h.product||'Produkt',subtitle:`Partia ${h.id}`,qr:qrPayload('BATCH',h.id),lines:[['Produkcja',datePL(h.date)||'—'],['Objętość',h.packageSizeMl?`${h.packageSizeMl} ml`:`${h.amount||''} ${h.unit||''}`],['Linia',stockSrc?.strain||stockSrc?.organism||c?.strain||c?.organism||'—'],['Status',h.quality||h.status||'—']],copies};
+ }
+ if(type==='STOCK'){
+  const x=getById('inventory',id);if(!x)return null;
+  return {type,id:x.id,title:x.organism||x.name||'Kultura',subtitle:x.lot||x.id,qr:qrPayload('STOCK',x.id),lines:[['Naczynie',x.vessel||x.location||'—'],['Stan',stockQtyText(x)],['Szczep',x.strain||'—'],['Status',x.status||'—']],copies};
+ }
+ if(type==='SAMPLE'){
+  const m=getById('measurements',id);if(!m)return null;
+  return {type,id:m.id,title:'Próbka',subtitle:m.sampleCode||m.id,qr:qrPayload('SAMPLE',m.sampleCode||m.id),lines:[['Parametr',m.param||'—'],['Wynik',`${m.value||'—'} ${m.unit||''}`.trim()],['Kultura',m.culture||m.stockItem||'—'],['Data',datePL(m.date)||'—']],copies};
+ }
+ return null;
+}
+function acCompactLabelHTML(rec,size='small'){
+ const qr=makeQR(rec.qr),typeName=rec.type==='BATCH'?'PRODUKT':rec.type==='STOCK'?'KULTURA':'PRÓBKA';
+ return `<div class="ac-label"><div class="ac-label-main"><div class="ac-company">${esc(db.settings.companyName||'AquaCulture')} <span>${typeName}</span></div><div class="ac-title">${esc(rec.title)}</div><div class="ac-sub">${esc(rec.subtitle)}</div>${rec.lines.slice(0,4).map(([k,v])=>`<div class="ac-line"><b>${esc(k)}</b><span>${esc(v)}</span></div>`).join('')}</div><div class="ac-qr">${qr}<small>${esc(rec.id)}</small></div></div>`;
+}
+function acPrintLabelRecords(records,size='small',title='Etykiety'){
+ const flat=[];for(const r of records){for(let i=0;i<Math.max(1,Math.min(120,Number(r.copies||1)));i++)flat.push({...r,copies:1})}
+ if(!flat.length)return alert('Zaznacz co najmniej jedną pozycję.');
+ const l=acLabelLayout(size),body=`<div class="ac-sheet">${flat.map(r=>acCompactLabelHTML(r,size)).join('')}</div>`;
+ const css=`@page{size:A4;margin:7mm}.ac-sheet{display:grid;grid-template-columns:repeat(${l.cols},${l.w}mm);grid-auto-rows:${l.h}mm;gap:2mm;align-content:start}.ac-label{box-sizing:border-box;width:${l.w}mm;height:${l.h}mm;border:1px solid #2b493f;border-radius:2.5mm;padding:2.4mm;break-inside:avoid;display:grid;grid-template-columns:minmax(0,1fr) ${l.qr+1.5}mm;gap:1.8mm;overflow:hidden}.ac-company{font-size:${l.font-1}px;font-weight:800;color:#173f34;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ac-company span{font-size:${l.font-2}px;color:#687a74;margin-left:2px}.ac-title{font-size:${l.font+2}px;font-weight:900;line-height:1.05;margin-top:.7mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ac-sub{font-size:${l.font-1}px;font-weight:700;margin:.5mm 0 1mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ac-line{display:flex;justify-content:space-between;gap:1.5mm;border-top:.2mm solid #d9e0dd;padding:.5mm 0;font-size:${l.font-1}px;line-height:1.05}.ac-line b{font-weight:700}.ac-line span{text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ac-qr{text-align:center;align-self:center;font-size:5.5px;overflow:hidden}.ac-qr .qrsvg{width:${l.qr}mm;height:${l.qr}mm;display:block;margin:auto}.ac-qr small{display:block;margin-top:.5mm;word-break:break-all;max-height:5mm;overflow:hidden}@media print{button{display:none!important}}`;
+ popupDoc(title,body,css);
+}
+function acCollectSelectedLabels(){
+ const rows=[...document.querySelectorAll('[data-label-pick]:checked')],out=[];
+ for(const cb of rows){const type=cb.dataset.type,id=cb.dataset.id,copies=Number(document.querySelector(`[data-label-copies="${CSS.escape(type+'|'+id)}"]`)?.value||1),rec=acLabelRecord(type,id,copies);if(rec)out.push(rec)}
+ return out;
+}
+function acToggleAllLabels(checked){document.querySelectorAll('[data-label-pick]').forEach(x=>x.checked=checked)}
+function acGenerateSelectedLabels(){const size=document.getElementById('labelSheetSize')?.value||'small';acPrintLabelRecords(acCollectSelectedLabels(),size,'Etykiety zbiorcze AquaCulture')}
+function acLabelPickerRow(type,id,title,meta,copies=1){
+ const key=type+'|'+id;
+ return `<label class="label-select-row"><input type="checkbox" data-label-pick data-type="${esc(type)}" data-id="${esc(id)}"><span><strong>${esc(title)}</strong><div class="mini">${esc(meta)}</div></span><input class="copies" type="number" min="1" max="120" value="${Math.max(1,Number(copies||1))}" data-label-copies="${esc(key)}" aria-label="Liczba kopii"></label>`;
+}
+renderPrints = function(){
+ const batchRows=[...db.harvests].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(h=>acLabelPickerRow('BATCH',h.id,`${h.id} — ${h.product}`,`${datePL(h.date)} • ${h.unitsProduced||1} opak.`,Math.max(1,Number(h.unitsProduced||1)))).join('');
+ const stockRows=liveStock().map(x=>acLabelPickerRow('STOCK',x.id,`${x.lot||x.id} — ${x.organism||x.name}`,`${x.vessel||'bez naczynia'} • ${stockQtyText(x)}`,1)).join('');
+ const sampleRows=[...db.measurements].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,100).map(m=>acLabelPickerRow('SAMPLE',m.id,`${m.sampleCode||m.id} — ${m.param}`,`${m.value||'—'} ${m.unit||''} • ${datePL(m.date)}`,1)).join('');
+ return `<div class="card"><div class="actions" style="justify-content:space-between;align-items:flex-start"><div><h3 style="margin:0">Zbiorczy arkusz etykiet A4</h3><div class="small" style="margin-top:4px">Zaznacz kilka produktów, kultur lub próbek i wygeneruj jeden arkusz. Domyślnie 63 × 38 mm — do 21 etykiet na A4.</div></div></div><div class="label-toolbar section"><select id="labelSheetSize"><option value="small">Mała 63 × 38 mm • 21/A4</option><option value="standard">Standard 90 × 50 mm • 10/A4</option></select>${btn('Zaznacz wszystko','acToggleAllLabels(true)','btn secondary')}${btn('Wyczyść','acToggleAllLabels(false)','btn secondary')}${btn('Generuj zaznaczone — A4','acGenerateSelectedLabels()','btn primary')}</div></div>
+ <div class="section card"><h3>Produkty / partie</h3><div class="label-select-list">${batchRows||'<div class="empty">Brak partii produktu.</div>'}</div></div>
+ <div class="section card"><h3>Kultury / naczynia</h3><div class="label-select-list">${stockRows||'<div class="empty">Brak kultur w magazynie.</div>'}</div></div>
+ <div class="section card"><h3>Próbki</h3><div class="label-select-list">${sampleRows||'<div class="empty">Brak próbek.</div>'}</div></div>
+ <div class="section equal2"><div class="card"><h3>Skanowanie QR</h3><p class="small">Skaner aparatu używa natywnego BarcodeDetector, a na Safari/iPhone automatycznie przechodzi na dekoder jsQR. Możesz też zrobić zdjęcie kodu.</p><div class="actions">${btn('Otwórz skaner','openQuickQR()','btn primary')}</div></div><div class="card"><h3>Ręczne otwarcie kodu</h3><input id="qrLookup" placeholder="ACM|STOCK|MAG-..." onkeydown="if(event.key==='Enter')resolveQR()"><div class="actions" style="margin-top:10px">${btn('Otwórz rekord','resolveQR()','btn primary')}</div></div></div>`;
+};
+printBatchLabels = function(id){const h=getById('harvests',id);if(!h)return;const r=acLabelRecord('BATCH',id,Math.max(1,Number(h.unitsProduced||1)));acPrintLabelRecords([r],'small','Etykiety '+h.id)};
+printCultureID = function(id){const r=getById('inventory',id)?acLabelRecord('STOCK',id,1):(getById('cultures',id)?{type:'CULTURE',id,title:getById('cultures',id).organism||'Kultura',subtitle:getById('cultures',id).id,qr:qrPayload('CULTURE',id),lines:[['Naczynie',getById('cultures',id).vessel||'—'],['Objętość',`${getById('cultures',id).volume||'—'} L`],['Zasolenie',`${getById('cultures',id).salinity||'—'} ppt`],['Status',getById('cultures',id).status||'—']],copies:1}:null);if(r)acPrintLabelRecords([r],'standard','ID kultury '+id)};
+printSampleLabel = function(id){const r=acLabelRecord('SAMPLE',id,1);if(r)acPrintLabelRecords([r],'small','Próbka '+r.id)};
+
+let acJsQRPromise=null, acQRCanvas=null;
+function acEnsureJsQR(){
+ if(typeof window.jsQR==='function')return Promise.resolve(window.jsQR);
+ if(acJsQRPromise)return acJsQRPromise;
+ acJsQRPromise=new Promise((resolve,reject)=>{
+  const load=(src,fallback)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=()=>typeof window.jsQR==='function'?resolve(window.jsQR):(fallback?fallback():reject(new Error('Dekoder QR nie uruchomił się.')));s.onerror=()=>fallback?fallback():reject(new Error('Nie udało się pobrać dekodera QR. Sprawdź połączenie z internetem.'));document.head.appendChild(s)};
+  load('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js',()=>load('https://unpkg.com/jsqr@1.4.0/dist/jsQR.js'));
+ });
+ return acJsQRPromise;
+}
+function acQRStatus(msg,bad=false){const el=document.getElementById('qrScannerStatus');if(el){el.className='callout scanner-status'+(bad?' bad':'');el.innerHTML=msg}}
+function acDecodeVideoFrameJsQR(video){
+ if(typeof window.jsQR!=='function'||video.readyState<2||!video.videoWidth)return null;
+ const maxW=720,scale=Math.min(1,maxW/video.videoWidth),w=Math.max(2,Math.round(video.videoWidth*scale)),h=Math.max(2,Math.round(video.videoHeight*scale));
+ acQRCanvas=acQRCanvas||document.createElement('canvas');acQRCanvas.width=w;acQRCanvas.height=h;const ctx=acQRCanvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(video,0,0,w,h);const img=ctx.getImageData(0,0,w,h);const code=window.jsQR(img.data,w,h,{inversionAttempts:'attemptBoth'});return code?.data||null;
+}
+async function acScanQRImageFile(file){
+ if(!file)return;try{await acEnsureJsQR();const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{try{const max=1800,scale=Math.min(1,max/img.width,max/img.height),w=Math.max(2,Math.round(img.width*scale)),h=Math.max(2,Math.round(img.height*scale)),c=document.createElement('canvas'),ctx=c.getContext('2d',{willReadFrequently:true});c.width=w;c.height=h;ctx.drawImage(img,0,0,w,h);const d=ctx.getImageData(0,0,w,h),code=window.jsQR(d.data,w,h,{inversionAttempts:'attemptBoth'});URL.revokeObjectURL(url);if(code?.data){document.getElementById('quickQRText').value=code.data;if(!resolveQRValue(code.data))acQRStatus('Kod odczytany, ale nie pasuje do rekordu w tej bazie.',true)}else acQRStatus('Na zdjęciu nie znaleziono kodu QR. Spróbuj zbliżyć kod i zadbać o ostrość.',true)}catch(err){acQRStatus(esc(err.message),true)}};img.onerror=()=>{URL.revokeObjectURL(url);acQRStatus('Nie udało się odczytać zdjęcia.',true)};img.src=url}catch(err){acQRStatus(esc(err.message),true)}
+}
+stopQRScanner = function(){if(qrScanTimer){clearTimeout(qrScanTimer);qrScanTimer=null}if(qrScanStream){qrScanStream.getTracks().forEach(t=>t.stop());qrScanStream=null}};
+openQuickQR = async function(){
+ stopQRScanner();modalTitle.textContent='Szybki QR';modalBox.classList.remove('wide');
+ modalBody.innerHTML=`<div id="scannerSupport"><div class="scanner-box"><video id="qrVideo" playsinline muted autoplay></video><div class="scan-frame"></div></div><div id="qrScannerStatus" class="callout scanner-status">Uruchamianie aparatu…</div></div><div class="section"><div class="field"><label>Lub wpisz / wklej kod</label><input id="quickQRText" placeholder="ACM|STOCK|MAG-..."></div><div class="scanner-actions" style="margin-top:9px"><label class="btn secondary" style="cursor:pointer">Zrób zdjęcie QR<input type="file" accept="image/*" capture="environment" style="display:none" onchange="acScanQRImageFile(this.files[0])"></label>${btn('Otwórz kod',"const v=document.getElementById('quickQRText').value;if(!resolveQRValue(v))alert('Nie znaleziono rekordu.')",'btn primary')}${btn('Zamknij','stopQRScanner();closeModal()','btn secondary')}</div></div>`;
+ modal.classList.add('open');
+ try{
+  if(!window.isSecureContext)throw new Error('Aparat WWW wymaga bezpiecznego połączenia HTTPS.');
+  if(!navigator.mediaDevices?.getUserMedia)throw new Error('Ta przeglądarka nie udostępnia aparatu stronie WWW.');
+  qrScanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+  const video=document.getElementById('qrVideo');if(!video){stopQRScanner();return}video.srcObject=qrScanStream;await video.play();
+  let detector=null,useJs=false;
+  if('BarcodeDetector' in window){try{const fm=await BarcodeDetector.getSupportedFormats();if(fm.includes('qr_code'))detector=new BarcodeDetector({formats:['qr_code']})}catch(e){}}
+  if(!detector){await acEnsureJsQR();useJs=true}
+  acQRStatus(useJs?'Aparat aktywny • tryb zgodny z Safari/iPhone (jsQR).':'Aparat aktywny • natywny skaner QR.');
+  const loop=async()=>{if(!qrScanStream||!document.getElementById('qrVideo'))return;let v=null;try{if(detector){const codes=await detector.detect(video);v=codes?.[0]?.rawValue||null}else v=acDecodeVideoFrameJsQR(video);if(v){const inp=document.getElementById('quickQRText');if(inp)inp.value=v;stopQRScanner();if(resolveQRValue(v))return;acQRStatus('Kod odczytany, ale nie znaleziono odpowiadającego rekordu.',true);return}}catch(e){}qrScanTimer=setTimeout(loop,useJs?220:320)};loop();
+ }catch(e){stopQRScanner();const msg=e?.name==='NotAllowedError'?'Brak zgody na aparat. W ustawieniach Safari/iPhone zezwól tej stronie na Kamerę.':e.message;document.getElementById('scannerSupport').innerHTML=`<div class="callout"><strong>Skaner aparatu nie wystartował.</strong><br><span class="small">${esc(msg)} Możesz użyć przycisku „Zrób zdjęcie QR” albo wkleić kod ręcznie.</span></div>`}
+};
+
+function acUpdatePricePreview(form){
+ if(!form)return;const total=Number(form.elements.purchasePrice?.value||0),pack=Number(form.elements.purchaseQty?.value||0),unit=form.elements.unit?.value||'',calc=acPurchaseUnitPrice(total,pack),out=document.getElementById('warehousePricePreview');
+ if(calc!==null&&total>0&&pack>0){if(form.elements.price)form.elements.price.value=calc.toFixed(calc<0.01?6:4);if(out)out.innerHTML=`${money(total)} / ${num(pack,3)} ${esc(unit)} = <strong>${money(calc)} / ${esc(unit)}</strong>`}else if(out){const p=Number(form.elements.price?.value||0);out.innerHTML=`Cena ewidencyjna: <strong>${money(p)} / ${esc(unit||'jednostkę')}</strong>. Możesz wpisać cenę zakupu i wielkość opakowania, aby policzyć ją automatycznie.`}
+}
+const acOpenWarehouseItemFormBaseV64 = openWarehouseItemForm;
+openWarehouseItemForm = function(id='',presetKind='Surowiec'){
+ const old=id?getById('inventory',id):null;
+ const x=old?{...old}:{id:uid('MAG'),name:'',kind:presetKind||'Surowiec',category:'',qty:0,unit:warehouseDefaultUnit(presetKind)||'ml',min:0,price:0,status:warehouseDefaultStatus(presetKind)};
+ const kind=inferStockKind(x)||presetKind||'Surowiec',kinds=['Kultura żywa','Pożywka / medium','Surowiec','Opakowanie','Produkt gotowy','Inne'],cats=warehouseCategoriesForKind(kind),currentCat=cats.includes(x.category)?x.category:cats[0];
+ modalTitle.textContent=id?'Edytuj dane pozycji magazynowej':'Nowa pozycja magazynowa';modalBox.classList.add('wide');
+ const kindField=old?`<div class="field"><label>Typ</label><select name="kind"><option value="${esc(kind)}">${esc(kind)}</option></select><div class="help">Typ jest zablokowany dla istniejącej pozycji.</div></div>`:`<div class="field"><label>Typ</label><select name="kind">${kinds.map(k=>`<option value="${esc(k)}" ${k===kind?'selected':''}>${esc(k)}</option>`).join('')}</select></div>`;
+ modalBody.innerHTML=`<form id="warehouseForm" data-editing="${old?'1':'0'}"><div class="form-grid">${f('name','Nazwa','text',x.name)}${kindField}<div class="field"><label>Kategoria</label><select name="category">${cats.map(c=>`<option value="${esc(c)}" ${c===currentCat?'selected':''}>${esc(c)}</option>`).join('')}</select><div class="help" id="warehouseCategoryHelp"></div></div>${f('unit','Jednostka ewidencyjna','text',x.unit||warehouseDefaultUnit(kind)||'ml')}${f('min','Stan minimalny','number',x.min)}${f('purchasePrice','Cena zakupu opakowania [PLN]','number',x.purchasePrice||'')}${f('purchaseQty','Ilość w kupionym opakowaniu','number',x.purchaseQty||'')}${f('price','Cena za 1 jednostkę [PLN]','number',x.price)}<div id="warehousePricePreview" class="field wide price-preview"></div>${f('lot','Partia / oznaczenie','text',x.lot)}${f('bestBefore','Termin użycia / ważności','date',x.bestBefore||'')}<div id="warehouseCultureFields" style="display:contents">${f('organism','Organizm','select',x.organism||'Nannochloropsis',['Nannochloropsis','Tigriopus / widłonogi','Artemia','Kiełże morskie','Inne'])}${f('strain','Szczep / źródło kultury','text',x.strain||'')}${f('concentration','Stężenie / obsada','text',x.concentration||'')}</div>${f('vessel','Naczynie / lokalizacja','text',x.vessel||x.location)}${f('supplier','Dostawca / źródło','text',x.supplier)}${f('reorderLeadDays','Czas dostawy [dni]','number',x.reorderLeadDays||0)}${f('status','Status','text',x.status||warehouseDefaultStatus(kind))}${f('notes','Uwagi','textarea',x.notes)}<div id="warehouseMediumHelp" class="field wide callout" style="display:none">Pożywkę najlepiej tworzyć przez <strong>Produkcja → Przygotuj pożywkę</strong>, bo wtedy RO, sól i F/2 są rozchodowane automatycznie.</div>${id?`<div class="field"><label>Stan — tylko odczyt</label><input value="${num(Number(x.qty||0),3)} ${esc(x.unit||'')}" readonly><div class="help">Stan zmieniaj ruchem magazynowym, produkcją albo inwentaryzacją.</div></div>`:f('initialQty','Stan początkowy','number',0)}</div><div class="actions" style="margin-top:14px"><button class="btn primary">Zapisz</button></div></form>`;
+ const form=document.getElementById('warehouseForm');if(!old)form.elements.kind.addEventListener('change',()=>{refreshWarehouseFormByKind(true);acUpdatePricePreview(form)});refreshWarehouseFormByKind(false);['purchasePrice','purchaseQty','price','unit'].forEach(n=>form.elements[n]?.addEventListener('input',()=>acUpdatePricePreview(form)));acUpdatePricePreview(form);
+ form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),newKind=old?kind:(fd.get('kind')||'Surowiec');x.name=fd.get('name')||'';x.kind=newKind;x.category=fd.get('category')||warehouseCategoriesForKind(newKind)[0];x.unit=old?old.unit:(warehouseDefaultUnit(newKind)||fd.get('unit')||'szt.');x.lot=fd.get('lot')||'';x.bestBefore=fd.get('bestBefore')||'';x.vessel=fd.get('vessel')||'';x.supplier=fd.get('supplier')||'';x.status=fd.get('status')||warehouseDefaultStatus(newKind);x.notes=fd.get('notes')||'';x.min=Number(fd.get('min')||0);x.purchasePrice=Number(fd.get('purchasePrice')||0);x.purchaseQty=Number(fd.get('purchaseQty')||0);x.price=Number(fd.get('price')||0);const calc=acPurchaseUnitPrice(x.purchasePrice,x.purchaseQty);if(calc!==null&&x.purchasePrice>0&&x.purchaseQty>0)x.price=calc;x.reorderLeadDays=Number(fd.get('reorderLeadDays')||0);if(newKind==='Kultura żywa'){x.organism=fd.get('organism')||'Nannochloropsis';x.strain=fd.get('strain')||'';x.concentration=fd.get('concentration')||'';x.category='Kultura biologiczna';x.unit='ml'}else if(newKind==='Pożywka / medium'){x.category='Pożywka przygotowana';x.unit='ml'}else if(newKind==='Produkt gotowy'){x.category='Produkt gotowy';x.unit='szt.'}else if(newKind==='Opakowanie')x.unit='szt.';if(old){x.qty=old.qty;x.unit=old.unit;await saveRecord('inventory',x)}else{x.qty=0;const initial=Number(fd.get('initialQty')||0);if(initial>0){const run={id:nextProductionRunId(),type:newKind==='Kultura żywa'?'Przyjęcie kultury startowej':'Przyjęcie magazynowe',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${x.name}: +${num(initial,3)} ${x.unit}`};try{await commitProductionRun(run,[{item:x,delta:initial,isNew:true,moveType:'Przyjęcie',reason:newKind==='Kultura żywa'?'Przyjęcie kultury żywej do magazynu':'Stan początkowy / przyjęcie magazynowe'}])}catch(err){return alert(err.message)}}else await saveRecord('inventory',x)}closeModal();render()};modal.classList.add('open');
+};
+
+openBaseMaterial = function(role){
+ const existing=baseMaterial(role);if(existing)return openStockMove(existing.id);const defs={ro:{name:'Woda RO',category:'Woda RO',unit:'ml'},salt:{name:'Sól morska',category:'Sól',unit:'g'},f2:{name:'F/2',category:'Nawóz / pożywka',unit:'ml'}},d=defs[role];if(!d)return;
+ modalTitle.textContent=`Dodaj: ${d.name}`;modalBox.classList.remove('wide');modalBody.innerHTML=`<form id="baseMaterialForm"><div class="form-grid">${f('name','Nazwa','text',d.name)}${f('qty','Stan początkowy','number',0)}${f('unit','Jednostka ewidencyjna','text',d.unit)}${f('purchasePrice','Cena zakupu [PLN]','number','')}${f('purchaseQty','Ilość w opakowaniu','number','')}${f('price','Cena za 1 jednostkę [PLN]','number',0)}<div id="warehousePricePreview" class="field wide price-preview"></div>${f('lot','Partia dostawcy','text','')}${f('supplier','Dostawca / źródło','text','')}${f('min','Stan minimalny','number',0)}${f('notes','Uwagi','textarea','')}</div><div class="actions" style="margin-top:12px"><button class="btn primary">Dodaj do magazynu</button></div></form>`;
+ const form=document.getElementById('baseMaterialForm');['purchasePrice','purchaseQty','price','unit'].forEach(n=>form.elements[n]?.addEventListener('input',()=>acUpdatePricePreview(form)));acUpdatePricePreview(form);form.onsubmit=async e=>{e.preventDefault();const fd=new FormData(form),qty=Number(fd.get('qty')||0),purchasePrice=Number(fd.get('purchasePrice')||0),purchaseQty=Number(fd.get('purchaseQty')||0),calc=acPurchaseUnitPrice(purchasePrice,purchaseQty);const item={id:uid('MAG'),name:fd.get('name')||d.name,kind:'Surowiec',category:d.category,qty:0,unit:fd.get('unit')||d.unit,min:Number(fd.get('min')||0),purchasePrice,purchaseQty,price:calc!==null&&purchasePrice>0&&purchaseQty>0?calc:Number(fd.get('price')||0),lot:fd.get('lot')||'',supplier:fd.get('supplier')||'',status:'OK',notes:fd.get('notes')||''};if(qty>0){const run={id:nextProductionRunId(),type:'Przyjęcie surowca',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`${item.name}: +${num(qty,3)} ${item.unit}`};try{await commitProductionRun(run,[{item,delta:qty,isNew:true,moveType:'Przyjęcie',reason:'Przyjęcie surowca bazowego'}])}catch(err){return alert(err.message)}}else await saveRecord('inventory',item);closeModal();render()};modal.classList.add('open');
+};
+
+function acApplyMediumPreset(code){
+ const cfg=code==='NANNO35'?{salt:35,f2:1,label:'Nannochloropsis 35 ppt'}:{salt:30,f2:1,label:'Nannochloropsis 30 ppt'};const ro=baseMaterial('ro'),salt=baseMaterial('salt'),f2=baseMaterial('f2');if(!ro||!salt||!f2)return alert('Aby użyć presetu, dodaj do magazynu: Woda RO, Sól morska i F/2.');acFlowRecipeBlocks=[makeFlowBlock(ro.id,1000,'na 1 L','Woda RO — do objętości końcowej'),makeFlowBlock(salt.id,cfg.salt,'na 1 L','Sól'),makeFlowBlock(f2.id,cfg.f2,'na 1 L','F/2 / nawóz')];renderRecipeFlowCanvas('recipeFlowCanvas');const name=document.querySelector('#mediumRecipeFlowForm [name=name]');if(name&&!name.value.trim())name.value=`Pożywka F/2 — ${cfg.label}`;
+}
+defaultMediumBlocksFromBase = function(){const blocks=[],ro=baseMaterial('ro'),salt=baseMaterial('salt'),f2=baseMaterial('f2');if(ro)blocks.push(makeFlowBlock(ro.id,1000,'na 1 L','Woda RO — do objętości końcowej'));if(salt)blocks.push(makeFlowBlock(salt.id,30,'na 1 L','Sól'));if(f2)blocks.push(makeFlowBlock(f2.id,1,'na 1 L','F/2 / nawóz'));return blocks};
+const acOpenMediumRecipeBuilderBaseV64 = openMediumRecipeBuilder;
+openMediumRecipeBuilder = function(id=''){acOpenMediumRecipeBuilderBaseV64(id);const tb=document.querySelector('#mediumRecipeFlowForm .flow-builder-toolbar');if(tb){tb.insertAdjacentHTML('afterbegin',`<button type="button" class="palette-chip" onclick="acApplyMediumPreset('NANNO30')">Preset Nanno 30 ppt</button><button type="button" class="palette-chip" onclick="acApplyMediumPreset('NANNO35')">Preset Nanno 35 ppt</button>`)}const call=document.querySelector('#mediumRecipeFlowForm .callout');if(call)call.insertAdjacentHTML('beforeend',`<div class="small" style="margin-top:7px"><strong>Presety są robocze i edytowalne.</strong> Dawka F/2 zależy od konkretnego koncentratu; zasolenie po rozpuszczeniu soli potwierdź pomiarem i w razie potrzeby skoryguj.</div>`)};
+
+applyRecipe = async function(h){
+ const r=getById('recipes',h.recipeId);if(!r||h.recipeApplied)return;const litres=h.unit==='L'?Number(h.amount||0):h.unit==='ml'?Number(h.amount||0)/1000:0,units=Number(h.unitsProduced||0),changes=productionRecipeChanges(h.recipeId,litres,units);if(!changes.length){h.recipeApplied=true;await saveRecord('harvests',h);return}const run={id:nextProductionRunId(),type:'Rozchód receptury partii',dateTime:nowLocal(),operator:db.settings.operator||'',summary:`Receptura ${r.name} → partia ${h.id}`,notes:`Automatyczny rozchód dla ${h.id}`};try{await commitProductionRun(run,changes);h.recipeApplied=true;await saveRecord('harvests',h)}catch(err){alert(`Nie rozchodowano receptury: ${err.message}`);throw err}
+};
+
+
+/* ==========================================================
+   v7.0 — OPERATIONS UPGRADE
+   Jednostki • koszt produkcji • QC gate • genealogia • tryb pracy
+   Additive migration: no automatic stock quantity corrections.
+   ========================================================== */
+
+const AC_APP_VERSION='7.0';
+
+const AC_UNITS={
+ 'µl':{group:'volume',factor:0.001,label:'µl'},
+ 'ml':{group:'volume',factor:1,label:'ml'},
+ 'L':{group:'volume',factor:1000,label:'L'},
+ 'mg':{group:'mass',factor:0.001,label:'mg'},
+ 'g':{group:'mass',factor:1,label:'g'},
+ 'kg':{group:'mass',factor:1000,label:'kg'},
+ 'szt.':{group:'count',factor:1,label:'szt.'},
+ 'cells/ml':{group:'concentration',factor:1,label:'cells/ml'},
+ 'os./ml':{group:'density',factor:1,label:'os./ml'},
+ 'ppt':{group:'salinity',factor:1,label:'ppt'},
+ 'PSU':{group:'salinity',factor:1,label:'PSU'},
+ '°C':{group:'temperature',factor:1,label:'°C'},
+ 'pH':{group:'ph',factor:1,label:'pH'}
+};
+
+acCanonicalUnit = function(u){
+ const raw=String(u||'').trim(),s=raw.toLowerCase().replaceAll(' ','').replace('μ','µ');
+ if(['ul','µl','mikrolitr','mikrolitry','mikrolitrów'].includes(s))return 'µl';
+ if(['ml','millilitr','millilitry','millilitrów'].includes(s))return 'ml';
+ if(['l','litr','litry','litrów'].includes(s))return 'L';
+ if(['mg','miligram','miligramy','miligramów'].includes(s))return 'mg';
+ if(['g','gram','gramy','gramów'].includes(s))return 'g';
+ if(['kg','kilogram','kilogramy','kilogramów'].includes(s))return 'kg';
+ if(['szt','szt.','sztuka','sztuki'].includes(s))return 'szt.';
+ if(['cells/ml','cell/ml','kom/ml','komórki/ml','komorek/ml','komórek/ml'].includes(s))return 'cells/ml';
+ if(['os/ml','os./ml','osobniki/ml','osobnikow/ml','osobników/ml'].includes(s))return 'os./ml';
+ if(['ppt','‰'].includes(s))return 'ppt';
+ if(['psu'].includes(s))return 'PSU';
+ if(['c','°c','degc'].includes(s))return '°C';
+ if(['ph'].includes(s))return 'pH';
+ return raw;
+};
+acConvertQty = function(q,from,to){
+ const a=acCanonicalUnit(from),b=acCanonicalUnit(to),n=Number(q);
+ if(!Number.isFinite(n))return null;
+ if(a===b)return n;
+ const A=AC_UNITS[a],B=AC_UNITS[b];
+ if(!A||!B||A.group!==B.group)return null;
+ if(['salinity'].includes(A.group))return n; // ppt ≈ PSU jako praktyczna prezentacja; bez przeliczania chemicznego.
+ if(!Number.isFinite(A.factor)||!Number.isFinite(B.factor))return null;
+ return n*A.factor/B.factor;
+};
+function acUnitGroup(u){return AC_UNITS[acCanonicalUnit(u)]?.group||''}
+function acUnitKnown(u){return !!AC_UNITS[acCanonicalUnit(u)]}
+function acUnitOptions(){return Object.keys(AC_UNITS).map(u=>`<option value="${esc(u)}">`).join('')}
+function acGrossMargin(cost,price){const c=Number(cost||0),p=Number(price||0);return p>0?(p-c)/p*100:null}
+function acMarkup(cost,price){const c=Number(cost||0),p=Number(price||0);return c>0?(p-c)/c*100:null}
+function acPriceForGrossMargin(cost,marginPct){const c=Number(cost||0),m=Number(marginPct||0)/100;return c>=0&&m>=0&&m<1?c/(1-m):null}
+
+const acCommandTodayItemsV70Base=commandTodayItems;
+commandTodayItems = function(){
+ const out=[];
+ for(const j of (db.productionJobs||[]).filter(x=>x.status==='W toku')){
+  const lot=getById('inventory',j.outputItemId)?.lot||j.id;
+  if(j.nextCheckDate){const d=daysUntil(j.nextCheckDate);if(d<=1)out.push({level:d<0?'bad':'warn',icon:'✓',title:`Kontrola ${lot}`,meta:`Proces ${j.id} • ${j.organism||''}`,when:deadlineText(j.nextCheckDate,j.status),action:`openProductionJob('${j.id}')`});}
+  if(j.plannedReadyDate){const d=daysUntil(j.plannedReadyDate);if(d<=2)out.push({level:d<0?'bad':d===0?'ok':'warn',icon:'◷',title:`Gotowość ${lot}`,meta:'Planowany termin kultury',when:deadlineText(j.plannedReadyDate,j.status),action:`openProductionJob('${j.id}')`});}
+  if(j.plannedBottleDate){const d=daysUntil(j.plannedBottleDate);if(d<=1)out.push({level:d<0?'bad':'warn',icon:'▤',title:`Rozlew ${lot}`,meta:'Docelowy termin rozlewu',when:deadlineText(j.plannedBottleDate,j.status),action:`openProductionJob('${j.id}')`});}
+ }
+ // Stan minimalny = 0 oznacza „alert wyłączony”.
+ for(const x of db.inventory.filter(i=>Number(i.min||0)>0&&Number(i.qty||0)<=Number(i.min||0))){
+  out.push({level:Number(x.qty||0)<=0?'bad':'warn',icon:'▦',title:`Niski stan: ${x.name}`,meta:`${stockQtyText(x)} • minimum ${num(Number(x.min||0),2)} ${x.unit}`,when:'magazyn',action:`openStockCard('${x.id}')`});
+ }
+ const maxAge=Math.max(1,Number(db.settings.measurementAlertDays||3));
+ for(const x of liveStock()){
+  if(['Problem','Kwarantanna','Odrzucona'].includes(x.status))continue;
+  const m=acLatestQC(x.id),age=m?ageDays(m.date):null;
+  if(!m||age>maxAge)out.push({level:'warn',icon:'◎',title:`QC: ${x.lot||x.name}`,meta:m?`Ostatnia pełna kontrola ${age} dni temu`:'Brak pełnej kontroli jakości',when:'jakość',action:`openQuickQuality('${x.id}')`});
+ }
+ for(const o of db.orders.filter(x=>['Nowe','Rezerwacja','Przygotowanie','Gotowe'].includes(x.status)).slice(0,8)){
+  if(o.status==='Gotowe')out.push({level:'ok',icon:'↗',title:`Gotowe zamówienie: ${clientName(o.client)||o.id}`,meta:o.product||o.id,when:'wysyłka',action:`openForm('order','${o.id}')`});
+ }
+ return out.slice(0,14);
+};
+
+function acIsProductionCostRun(run){
+ const t=String(run?.type||'').toLowerCase();
+ if(/inwentaryz|przyjęcie magazyn|ruch magazyn|saldo|korekta/.test(t))return false;
+ return /produkc|namnaż|hodowl|pożywk|medium|rozlew|pakowan|rozdziel|receptur|zbiór/.test(t);
+}
+function acRunCost(run){
+ if(!run)return {material:0,overhead:0,total:0,estimated:true,breakdown:[]};
+ const breakdown=Array.isArray(run.costBreakdown)&&run.costBreakdown.length?run.costBreakdown:(run.movements||[]).filter(m=>Number(m.delta||0)<0).map(m=>{
+  const x=getById('inventory',m.itemId),unitPrice=Number(x?.price||0),qty=Math.abs(Number(m.delta||0));
+  return {itemId:m.itemId,name:m.name||x?.name||m.itemId,qty,unit:m.unit||x?.unit||'',unitPrice,cost:qty*unitPrice};
+ });
+ const material=Number.isFinite(Number(run.materialCost))?Number(run.materialCost):breakdown.reduce((a,b)=>a+Number(b.cost||0),0);
+ let overhead=Number.isFinite(Number(run.overheadCost))?Number(run.overheadCost):0;
+ if(!run.costSnapshotVersion&&acIsProductionCostRun(run))overhead=Number(db.settings.energyCostPerProductionRun||0)+Number(db.settings.laborCostPerProductionRun||0)+Number(db.settings.otherCostPerProductionRun||0);
+ return {material,overhead,total:material+overhead,estimated:!run.costSnapshotVersion,breakdown};
+}
+function acOutputCostPerUnit(x){
+ if(!x)return 0;
+ if(Number(x.price||0)>0)return Number(x.price||0);
+ const r=(db.productionRuns||[]).find(run=>(run.movements||[]).some(m=>m.itemId===x.id&&Number(m.delta||0)>0));
+ if(!r)return 0;const mv=(r.movements||[]).find(m=>m.itemId===x.id&&Number(m.delta||0)>0),q=Number(mv?.delta||0);return q>0?acRunCost(r).total/q:0;
+}
+function acMonthPrefix(){return today().slice(0,7)}
+function acMonthProductionCost(){return (db.productionRuns||[]).filter(r=>String(r.dateTime||r.createdAt||'').startsWith(acMonthPrefix())&&acIsProductionCostRun(r)).reduce((a,r)=>a+acRunCost(r).total,0)}
+
+const acCommitProductionRunV70=commitProductionRun;
+commitProductionRun = async function(run,changes,job=null){
+ const negatives=(changes||[]).filter(ch=>Number(ch.delta||0)<0);
+ const breakdown=negatives.map(ch=>{const q=Math.abs(Number(ch.delta||0)),p=Number(ch.item?.price||0);return {itemId:ch.item?.id||'',name:ch.item?.name||'',qty:q,unit:ch.item?.unit||'',unitPrice:p,cost:q*p};});
+ const material=breakdown.reduce((a,b)=>a+b.cost,0),isProd=acIsProductionCostRun(run),overhead=isProd?(Number(db.settings.energyCostPerProductionRun||0)+Number(db.settings.laborCostPerProductionRun||0)+Number(db.settings.otherCostPerProductionRun||0)):0,total=material+overhead;
+ run.costBreakdown=breakdown;run.materialCost=material;run.overheadCost=overhead;run.totalCost=total;run.costSnapshotVersion='7.0';
+ const positives=(changes||[]).filter(ch=>Number(ch.delta||0)>0),sameUnit=positives.length&&positives.every(ch=>acCanonicalUnit(ch.item?.unit)===acCanonicalUnit(positives[0].item?.unit));
+ if(total>0&&sameUnit){const totalOut=positives.reduce((a,ch)=>a+Number(ch.delta||0),0);if(totalOut>0){const unitCost=total/totalOut;positives.forEach(ch=>{if(ch.item)ch.item.price=unitCost})}}
+ if(job){job.materialCost=material;job.overheadCost=overhead;job.totalCost=total;job.costSnapshotVersion='7.0'}
+ await acCommitProductionRunV70(run,changes,job);
+};
+
+function acCostingSettings(){return {energy:Number(db.settings.energyCostPerProductionRun||0),labor:Number(db.settings.laborCostPerProductionRun||0),other:Number(db.settings.otherCostPerProductionRun||0),targetMargin:Number(db.settings.targetGrossMargin||50)}}
+async function saveCostingSettings(){
+ const f=document.getElementById('costSettingsForm');if(!f)return;const fd=new FormData(f);db.settings.energyCostPerProductionRun=Math.max(0,Number(fd.get('energy')||0));db.settings.laborCostPerProductionRun=Math.max(0,Number(fd.get('labor')||0));db.settings.otherCostPerProductionRun=Math.max(0,Number(fd.get('other')||0));db.settings.targetGrossMargin=Math.max(0,Math.min(95,Number(fd.get('margin')||0)));await saveSettings();render();
+}
+function acMarginProductOptions(){return db.inventory.filter(x=>['Produkt gotowy','Kultura żywa'].includes(inferStockKind(x))&&Number(x.qty||0)>0).sort((a,b)=>String(a.name).localeCompare(String(b.name))).map(x=>`<option value="${x.id}">${esc(x.name)} • ${esc(x.lot||x.id)} • koszt ${money(acOutputCostPerUnit(x))}/${esc(x.unit)}</option>`).join('')}
+function acRefreshMarginCalculator(){
+ const f=document.getElementById('marginCalcForm'),box=document.getElementById('marginCalcResult');if(!f||!box)return;const x=getById('inventory',f.elements.item.value),cost=x?acOutputCostPerUnit(x):0,margin=Math.max(0,Math.min(95,Number(f.elements.margin.value||0))),target=acPriceForGrossMargin(cost,margin),sale=Number(f.elements.sale.value||0),gm=acGrossMargin(cost,sale),mk=acMarkup(cost,sale);
+ box.innerHTML=`<div class="statline"><span>Koszt ewidencyjny 1 ${esc(x?.unit||'jedn.')}</span><strong>${money(cost)}</strong></div><div class="statline"><span>Cena dla marży brutto ${num(margin,1)}%</span><strong>${money(target)}</strong></div><div class="statline"><span>Przy wpisanej cenie sprzedaży</span><strong>${sale>0?`${gm===null?'—':num(gm,1)+'% marży'} • ${mk===null?'—':num(mk,1)+'% narzutu'}`:'—'}</strong></div><div class="mini" style="margin-top:8px">Marża brutto = (cena − koszt) / cena. Narzut = (cena − koszt) / koszt.</div>`;
+}
+function renderCosting(){
+ const s=acCostingSettings(),runs=[...(db.productionRuns||[])].filter(acIsProductionCostRun).sort((a,b)=>String(b.dateTime||b.createdAt||'').localeCompare(String(a.dateTime||a.createdAt||''))),live=liveStock().filter(x=>x.unit==='ml'),products=db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&Number(x.qty||0)>0),avgL=live.filter(x=>acOutputCostPerUnit(x)>0).length?live.filter(x=>acOutputCostPerUnit(x)>0).reduce((a,x)=>a+acOutputCostPerUnit(x)*1000,0)/live.filter(x=>acOutputCostPerUnit(x)>0).length:0,avgProd=products.filter(x=>acOutputCostPerUnit(x)>0).length?products.filter(x=>acOutputCostPerUnit(x)>0).reduce((a,x)=>a+acOutputCostPerUnit(x),0)/products.filter(x=>acOutputCostPerUnit(x)>0).length:0;
+ return `<div class="simple-kpis"><div class="simple-kpi"><div class="t">Koszt produkcji • miesiąc</div><div class="n">${money(acMonthProductionCost())}</div></div><div class="simple-kpi"><div class="t">Śr. koszt 1 L kultury</div><div class="n">${money(avgL)}</div></div><div class="simple-kpi"><div class="t">Śr. koszt produktu</div><div class="n">${money(avgProd)}</div></div><div class="simple-kpi"><div class="t">Narzut procesu / operacja</div><div class="n">${money(s.energy+s.labor+s.other)}</div></div></div>
+ <div class="two section"><div class="card"><h3>Kalkulator ceny i marży</h3><form id="marginCalcForm"><div class="form-grid"><div class="field wide"><label>Partia / produkt</label><select name="item" oninput="acRefreshMarginCalculator()">${acMarginProductOptions()}</select></div><div class="field"><label>Docelowa marża brutto [%]</label><input name="margin" type="number" step="0.1" value="${s.targetMargin}" oninput="acRefreshMarginCalculator()"></div><div class="field"><label>Testowana cena sprzedaży [PLN]</label><input name="sale" type="number" step="0.01" value="" oninput="acRefreshMarginCalculator()"></div></div></form><div id="marginCalcResult" class="section"></div></div><div class="card"><h3>Koszty operacyjne na proces</h3><form id="costSettingsForm"><div class="form-grid"><div class="field"><label>Energia [PLN]</label><input name="energy" type="number" step="0.01" value="${s.energy}"></div><div class="field"><label>Praca [PLN]</label><input name="labor" type="number" step="0.01" value="${s.labor}"></div><div class="field"><label>Inne [PLN]</label><input name="other" type="number" step="0.01" value="${s.other}"></div><div class="field"><label>Domyślna marża [%]</label><input name="margin" type="number" step="0.1" value="${s.targetMargin}"></div></div><div class="actions" style="margin-top:10px"><button type="button" class="btn primary" onclick="saveCostingSettings()">Zapisz ustawienia kosztów</button></div></form><div class="mini" style="margin-top:10px">Nowe operacje produkcyjne zapisują snapshot cen składników. Starsze operacje są wyceniane orientacyjnie według aktualnych cen magazynowych.</div></div></div>
+ <div class="section card"><h3>Ostatnie operacje produkcyjne</h3>${table(['Data','Operacja','Materiały','Koszty operacyjne','Razem','Tryb'],runs.slice(0,30).map(r=>{const c=acRunCost(r);return `<tr><td>${datePL(r.dateTime||r.createdAt)}</td><td><strong>${esc(r.type||'')}</strong><div class="mini">${esc(r.id)}</div></td><td>${money(c.material)}</td><td>${money(c.overhead)}</td><td><strong>${money(c.total)}</strong></td><td>${c.estimated?'<span class="badge warn">szacunek</span>':'<span class="badge ok">snapshot</span>'}</td></tr>`}))}</div><script>setTimeout(acRefreshMarginCalculator,0)<\/script>`;
+}
+
+function acLatestQC(id){return stockMeasurements(id).find(m=>m.qcPanelVersion)||stockMeasurements(id)[0]||null}
+function acQCAge(id){const m=acLatestQC(id);return m?ageDays(m.date):null}
+function acQCGood(m){return !!m&&['OK','Zatwierdzona'].includes(m.rating)}
+async function acApproveCulture(id){
+ const x=getById('inventory',id),m=acLatestQC(id);if(!x)return;if(!acQCGood(m))return alert('Najpierw zapisz kontrolę jakości z oceną OK.');const xx={...x,status:'Gotowa',qcApprovedAt:new Date().toISOString(),qcApprovedMeasurementId:m.id,updatedAt:new Date().toISOString()};await saveRecord('inventory',xx);const j=tankJob(id);if(j&&j.status!=='Gotowa')await updateProductionJobStatus(j.id,'Gotowa');await saveRecord('productionRuns',{id:nextProductionRunId(),type:'Zatwierdzenie QC',dateTime:nowLocal(),operator:db.settings.operator||'',status:'Zaksięgowana',movements:[],summary:`${x.lot||x.name}: zatwierdzono do zbioru`,qcMeasurementId:m.id,createdAt:new Date().toISOString()});closeModal();render();
+}
+openQuickQuality = function(id){
+ stopQRScanner();const x=getById('inventory',id);if(!x)return;const last=acLatestQC(id);modalTitle.textContent=`QC — ${x.lot||x.name}`;modalBox.classList.add('wide');
+ modalBody.innerHTML=`<form id="quickQualityForm"><div class="callout"><strong>Kontrola partii.</strong> Parametry fizykochemiczne, obserwacja wizualna i mikroskopowa są zapisywane w jednym rekordzie QC. Ocena „Kwarantanna” lub „Odrzucona” blokuje partię jakościowo.</div><div class="form-grid" style="margin-top:12px">${f('date','Data','datetime-local',nowLocal())}${f('rating','Decyzja QC','select','OK',['OK','Do obserwacji','Kwarantanna','Odrzucona'])}${f('salinity','Zasolenie','number',last?.salinity||'')}${f('temperature','Temperatura [°C]','number',last?.temperature||'')}${f('ph','pH','number',last?.ph||'')}${f('density','Gęstość / obsada','number',last?.density||'')}<div class="field"><label>Jednostka gęstości</label><select name="densityUnit"><option>cells/ml</option><option>os./ml</option></select></div>${f('color','Barwa / wygląd','select',last?.color||'Prawidłowa',['Prawidłowa','Jaśniejsza niż zwykle','Ciemniejsza niż zwykle','Nietypowa / zmieniona'])}${f('odor','Zapach','select',last?.odor||'Neutralny / typowy',['Neutralny / typowy','Nietypowy','Nie oceniano'])}${f('sediment','Osad / agregaty','select',last?.sediment||'Brak istotnego',['Brak istotnego','Niewielki','Wyraźny','Nie oceniano'])}${f('microscopy','Mikroskop / obserwacja','textarea','')}${f('notes','Uwagi','textarea','')}<div class="field wide"><label>Zdjęcie / mikroskop</label><input id="qqPhoto" type="file" accept="image/*" capture="environment"></div><div class="field wide"><label class="qc-check"><input type="checkbox" name="approve" value="1" style="width:auto"> Po ocenie OK od razu oznacz kulturę jako <strong>Gotowa do zbioru</strong></label></div></div><div class="actions" style="margin-top:12px"><button class="btn primary">Zapisz QC</button>${acQCGood(last)&&x.status!=='Gotowa'?btn('Zatwierdź na podstawie ostatniego QC',`acApproveCulture('${id}')`,'btn secondary'):''}</div></form>`;
+ quickQualityForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(e.target),rating=fd.get('rating')||'OK',m={id:uid('QC'),date:fd.get('date')||nowLocal(),stockItem:id,culture:'',param:'Panel QC',value:fd.get('density')||'',unit:fd.get('densityUnit')||'',method:'QC v7',sampleCode:nextSampleCode(today()),rating,notes:fd.get('notes')||'',salinity:fd.get('salinity')||'',salinityUnit:'ppt',temperature:fd.get('temperature')||'',temperatureUnit:'°C',ph:fd.get('ph')||'',density:fd.get('density')||'',densityUnit:fd.get('densityUnit')||'',color:fd.get('color')||'',odor:fd.get('odor')||'',sediment:fd.get('sediment')||'',microscopy:fd.get('microscopy')||'',qcPanelVersion:'7.0'};await saveRecord('measurements',m);const file=document.getElementById('qqPhoto').files?.[0];if(file)await storeImage(file,m.id,id);if(['Kwarantanna','Odrzucona'].includes(rating)){const xx={...x,status:rating,updatedAt:new Date().toISOString()};await saveRecord('inventory',xx);const j=tankJob(id);if(j&&j.status!=='Problem')await updateProductionJobStatus(j.id,'Problem')}else if(fd.get('approve')==='1'&&rating==='OK'){const xx={...x,status:'Gotowa',qcApprovedAt:new Date().toISOString(),qcApprovedMeasurementId:m.id,updatedAt:new Date().toISOString()};await saveRecord('inventory',xx);const j=tankJob(id);if(j&&j.status!=='Gotowa')await updateProductionJobStatus(j.id,'Gotowa')}await saveRecord('productionRuns',{id:nextProductionRunId(),type:'Kontrola jakości',dateTime:m.date,operator:db.settings.operator||'',status:'Zaksięgowana',movements:[],summary:`${x.lot||x.name}: QC → ${rating}`,qcMeasurementId:m.id,createdAt:new Date().toISOString()});closeModal();render()};modal.classList.add('open');
+};
+renderQuality = function(){
+ const items=liveStock().sort((a,b)=>String(a.lot||'').localeCompare(String(b.lot||'')));
+ return `<div class="toolbar">${items[0]?btn('+ Kontrola jakości',`openQuickQuality('${items[0].id}')`,'btn primary'):''}${btn('Pełna tabela pomiarów',"setView('measurements')")}</div><div class="inventory-card-grid">${items.length?items.map(x=>{const m=acLatestQC(x.id),age=acQCAge(x.id),cls=['Kwarantanna','Odrzucona','Problem'].includes(x.status)?'bad':acQCGood(m)?'ok':'warn';return `<div class="inventory-card"><div class="head"><div><h4>${esc(x.lot||x.name)}</h4><div class="mini">${esc(x.organism||'')} • ${esc(x.status||'')}</div></div><span class="badge ${cls}">${esc(m?.rating||'Brak QC')}</span></div><div class="qc-mini-grid"><span>ppt <b>${esc(m?.salinity||'—')}</b></span><span>°C <b>${esc(m?.temperature||'—')}</b></span><span>pH <b>${esc(m?.ph||'—')}</b></span><span>${esc(m?.densityUnit||'gęstość')} <b>${esc(m?.density||'—')}</b></span></div><div class="mini">${m?`${datePL(m.date)} • ${age} d temu`:'Brak pełnej kontroli'}</div><div class="actions">${btn('QC',`openQuickQuality('${x.id}')`,'btn tiny primary')}${btn('Panel',`openTankPanel('${x.id}')`,'btn tiny')}${acQCGood(m)&&x.status!=='Gotowa'?btn('Zatwierdź',`acApproveCulture('${x.id}')`,'btn tiny secondary'):''}</div></div>`}).join(''):'<div class="card empty">Brak kultur.</div>'}</div>`;
+};
+
+function acDescendants(id,maxDepth=12){
+ const out=[],seen=new Set([id]);let level=[id];for(let d=1;d<=maxDepth;d++){const next=[];for(const pid of level){for(const x of db.inventory.filter(y=>y.parentItemId===pid)){if(seen.has(x.id))continue;seen.add(x.id);out.push({item:x,depth:d});next.push(x.id)}}if(!next.length)break;level=next}return out;
+}
+function acAffectedProducts(id){const ids=new Set([id,...acDescendants(id).map(x=>x.item.id)]);return db.inventory.filter(x=>inferStockKind(x)==='Produkt gotowy'&&ids.has(x.sourceItemId))}
+function acLineageRows(id){
+ const cur=getById('inventory',id);if(!cur)return '';const ancestors=lineageAncestors(cur).map((x,i)=>({item:x,depth:i,role:'źródło'})),desc=acDescendants(id).map(x=>({...x,role:'potomna'}));return [...ancestors,{item:cur,depth:ancestors.length,role:'aktualna'},...desc.map(x=>({item:x.item,depth:ancestors.length+x.depth,role:x.role}))].map(r=>`<div class="lineage-row ${r.role==='aktualna'?'current':''}" style="--indent:${Math.min(8,r.depth)}"><span class="lineage-branch"></span><div><strong>${esc(r.item.lot||r.item.name)}</strong><div class="mini">${esc(r.role)} • ${esc(r.item.organism||'')} • ${stockQtyText(r.item)} • ${esc(r.item.status||'')}</div></div><button class="btn tiny" onclick="openStockCard('${r.item.id}')">Karta</button></div>`).join('');
+}
+openLineage = function(id){
+ const x=getById('inventory',id);if(!x)return;const desc=acDescendants(id),products=acAffectedProducts(id),risk=['Problem','Kwarantanna','Odrzucona'].includes(x.status);modalTitle.textContent=`Genealogia — ${x.lot||x.name}`;modalBox.classList.add('wide');modalBody.innerHTML=`${risk?`<div class="callout danger-callout"><strong>Partia ma blokadę jakościową.</strong> W łańcuchu potomnym znaleziono ${desc.length} kultur i ${products.length} pozycji produktu gotowego. Zweryfikuj je przed sprzedażą.</div>`:''}<div class="two section"><div class="card"><h3>Drzewo pochodzenia</h3><div class="lineage-list">${acLineageRows(id)}</div></div><div class="card"><h3>Wpływ partii</h3><div class="statline"><span>Kultury potomne</span><strong>${desc.length}</strong></div><div class="statline"><span>Produkty gotowe</span><strong>${products.length}</strong></div><div class="statline"><span>Status źródła</span><strong>${esc(x.status||'—')}</strong></div><hr>${products.length?products.map(p=>`<div class="alert"><strong>${esc(p.lot||p.name)}</strong><span class="small">${esc(p.name)} • ${stockQtyText(p)}</span></div>`).join(''):'<div class="empty">Brak produktów z tego łańcucha.</div>'}</div></div><div class="section card"><h3>Ślad operacji</h3>${(db.productionRuns||[]).filter(r=>(r.movements||[]).some(m=>m.itemId===id)).sort((a,b)=>String(b.dateTime||'').localeCompare(String(a.dateTime||''))).slice(0,20).map(r=>`<div class="statline"><span>${datePL(r.dateTime||r.createdAt)} • ${esc(r.type)}</span><strong>${esc(r.id)}</strong></div>`).join('')||'<div class="empty">Brak operacji.</div>'}</div>`;modal.classList.add('open');
+};
+const acOpenTankPanelV70=openTankPanel;
+openTankPanel = function(id){acOpenTankPanelV70(id);const bar=document.querySelector('#modalBody .device-actions');if(bar&&!bar.querySelector('[data-v70-lineage]'))bar.insertAdjacentHTML('beforeend',`<button data-v70-lineage class="btn secondary" onclick="openLineage('${id}')">Genealogia</button>`)};
+
+const acOpenBottlingV70=openBottling;
+openBottling = function(){
+ acOpenBottlingV70();const f=document.getElementById('bottleForm');if(!f)return;const preview=document.getElementById('bottlePreview');if(preview)preview.insertAdjacentHTML('beforebegin','<div id="qcGateNotice" class="callout" style="margin-top:12px"></div>');const refreshGate=()=>{const x=getById('inventory',f.elements.source.value),m=x?acLatestQC(x.id):null,box=document.getElementById('qcGateNotice');if(!box)return;if(!x)box.innerHTML='Wybierz kulturę źródłową.';else if(['Problem','Kwarantanna','Odrzucona'].includes(x.status))box.innerHTML='<strong>QC BLOCK:</strong> ta kultura ma blokadę jakościową i nie może być rozlana.';else if(x.status==='Gotowa'&&acQCGood(m))box.innerHTML='<strong>QC OK:</strong> kultura zatwierdzona do rozlewu.';else box.innerHTML='<strong>QC WARNING:</strong> kultura nie ma pełnego zatwierdzenia QC. Przy próbie rozlewu system poprosi o potwierdzenie.'};f.elements.source?.addEventListener('input',refreshGate);refreshGate();f.addEventListener('submit',e=>{const x=getById('inventory',f.elements.source.value),m=x?acLatestQC(x.id):null;if(!x)return;if(['Problem','Kwarantanna','Odrzucona'].includes(x.status)){e.preventDefault();e.stopImmediatePropagation();alert('Rozlew zablokowany: partia ma status jakościowy '+x.status+'.');return}if(!(x.status==='Gotowa'&&acQCGood(m))&&!confirm('Ta kultura nie ma pełnego zatwierdzenia QC. Kontynuować rozlew mimo ostrzeżenia?')){e.preventDefault();e.stopImmediatePropagation()}},true);
+};
+
+function acWorkItems(){
+ const a=commandTodayItems();for(const x of liveStock().filter(y=>y.status==='Gotowa'))if(!a.some(i=>i.title.includes(x.lot||x.name)))a.push({level:'ok',icon:'✓',title:`Gotowa: ${x.lot||x.name}`,meta:`${stockQtyText(x)} • można zebrać / rozlać`,when:'produkcja',action:`openTankPanel('${x.id}')`});return a.slice(0,20);
+}
+function renderWorkMode(){const items=acWorkItems();return `<div class="work-hero"><div><div class="mini">TRYB PRACY</div><h3>${items.length?`${items.length} kolejnych czynności`:'Brak pilnych czynności'}</h3><p>Duże akcje do obsługi telefonu przy stanowisku. Zeskanuj QR, wykonaj czynność i przejdź dalej.</p></div>${btn('Skanuj QR','openQuickQR()','btn primary')}</div><div class="work-list section">${items.length?items.map((x,i)=>`<button class="work-card ${x.level}" onclick="${x.action}"><span class="work-no">${i+1}</span><span class="work-body"><strong>${esc(x.title)}</strong><small>${esc(x.meta)} • ${esc(x.when)}</small></span><span class="work-go">›</span></button>`).join(''):'<div class="card empty">System nie wykrywa pilnych działań.</div>'}</div>`}
+
+renderDashboard = function(){
+ const todayItems=commandTodayItems(),score=auditScore(),active=(db.productionJobs||[]).filter(j=>j.status==='W toku'),live=liveStock(),ready=live.filter(x=>x.status==='Gotowa'),liveMl=live.filter(x=>x.unit==='ml').reduce((a,x)=>a+Number(x.qty||0),0),readyMl=ready.filter(x=>x.unit==='ml').reduce((a,x)=>a+Number(x.qty||0),0),orders=db.orders.filter(o=>!['Anulowane','Zrealizowane','Dostarczone'].includes(o.status)),monthRev=db.finance.filter(x=>x.type==='Przychód'&&String(x.date||'').startsWith(acMonthPrefix())).reduce((a,x)=>a+Number(x.amount||0),0),monthCost=acMonthProductionCost();
+ return `<div class="command-hero"><div><div class="mini">AQUACULTURE COMMAND CENTER v7.0</div><h3>Dzisiaj</h3><p>${todayItems.length?`Masz ${todayItems.length} rzeczy wymagających uwagi.`:'Brak pilnych działań.'}</p><div class="actions">${btn('Tryb pracy',"setView('workmode')",'btn primary')}${btn('Skanuj QR','openQuickQR()')}${btn('Koszty',"setView('costing')")}${btn('Kalendarz',"setView('calendar')")}</div></div><div class="health-dial ${score<60?'bad':score<85?'warn':''}"><strong>${score}</strong><span>audyt / 100</span></div></div>
+ <div class="simple-kpis section"><div class="simple-kpi"><div class="t">Kultury aktywne</div><div class="n">${active.length}</div><div class="mini">${num(liveMl/1000,2)} L w ewidencji</div></div><div class="simple-kpi"><div class="t">Gotowe do zbioru</div><div class="n">${num(readyMl/1000,2)} L</div><div class="mini">${ready.length} partii</div></div><div class="simple-kpi"><div class="t">Otwarte zamówienia</div><div class="n">${orders.length}</div></div><div class="simple-kpi"><div class="t">Produkcja • miesiąc</div><div class="n">${money(monthCost)}</div><div class="mini">Przychody ewid.: ${money(monthRev)}</div></div></div>
+ <div class="command-grid section"><div class="card"><h3>Do zrobienia</h3>${todayItems.length?`<div class="today-list">${todayItems.slice(0,8).map(x=>`<div class="today-item ${x.level}" onclick="${x.action}"><div class="today-icon">${x.icon}</div><div class="today-main"><strong>${esc(x.title)}</strong><span>${esc(x.meta)}</span></div><div class="today-time">${esc(x.when)}</div></div>`).join('')}</div>`:'<div class="empty">Brak pilnych działań.</div>'}</div><div class="card"><h3>Operacje</h3><div class="command-shortcuts"><button class="command-shortcut" onclick="openProductionFlowBuilder()"><strong>＋ Produkcja</strong><span>Nowy proces AquaFlow</span></button><button class="command-shortcut" onclick="setView('quality')"><strong>QC</strong><span>Kontrola i zatwierdzenie</span></button><button class="command-shortcut" onclick="setView('costing')"><strong>Koszty</strong><span>Koszt/litr, marża, cena</span></button><button class="command-shortcut" onclick="setView('prints')"><strong>Etykiety</strong><span>Zbiorczy arkusz A4 + QR</span></button></div></div></div><div class="section card"><h3>Mapa produkcji</h3>${tankTilesHTML()}</div>`;
+};
+
+const acRenderMoreV70Base=renderMore;
+renderMore = function(){const tiles=[['Tryb pracy','Kolejne czynności na telefonie.','workmode'],['Koszty produkcji','Koszt/litr, koszt partii, marża.','costing'],['Chcę wyprodukować','Materiały, termin i braki.','smartplan'],['Kalendarz','Starty, kontrole i rozlewy.','calendar'],['Szablony produkcji','Powtarzalne procesy.','templates'],['Wydajność','Czas, koszt i wyniki.','analytics'],['Zakupy','Prognozy i propozycje zamówień.','purchases'],['Incydenty','Skażenia i kwarantanny.','incidents'],['Kontrola jakości','Panel QC i zatwierdzanie partii.','quality'],['Synchronizacja','Opcjonalnie komputer ↔ iPhone.','sync'],['Audyt systemu','Jednostki, ceny, partie i terminy.','audit'],['Prognoza zapasów','Na ile wystarczą zapasy.','forecast'],['Receptury','Pożywki i materiały.','recipes'],['Finanse','Koszty i przychody.','finance'],['Raporty','Raporty i PDF.','reports'],['Kopie i dane','Backup i ustawienia.','backup'],['Dezynfekcja','Mycie i dezynfekcja.','sanitation'],['Etykiety','QR i wydruki.','prints']];return `<div class="more-grid">${tiles.map(t=>`<button class="more-tile" onclick="${t[2]==='audit'?'openAuditCenter()':t[2]==='forecast'?'openForecastCenter()':`setView('${t[2]}')`}"><strong>${t[0]}</strong><span>${t[1]}</span></button>`).join('')}</div>`};
+
+titles.dashboard=['Command Center','Produkcja, jakość, koszty i zadania na jednym ekranie.'];
+titles.quality=['Kontrola jakości','QC partii: zasolenie, temperatura, pH, gęstość, mikroskop i decyzja.'];
+titles.costing=['Koszty produkcji','Koszt materiałów, koszt jednostkowy, marża i cena docelowa.'];
+titles.workmode=['Tryb pracy','Duże akcje do pracy przy zbiornikach i z telefonem.'];
+
+render = function(){const title=titles[currentView]||['AquaCulture',''];document.getElementById('viewTitle').textContent=title[0];document.getElementById('viewSub').textContent=title[1];const views={dashboard:renderDashboard,inventory:renderInventory,production:renderProduction,sales:renderSales,more:renderMore,calendar:renderCalendar,templates:renderTemplates,analytics:renderAnalytics,purchases:renderPurchases,sync:renderSync,quality:renderQuality,incidents:renderIncidents,smartplan:renderSmartPlan,costing:renderCosting,workmode:renderWorkMode,cultures:renderCultures,events:renderEvents,measurements:renderMeasurements,sanitation:renderSanitation,harvests:renderHarvests,recipes:renderRecipes,planner:renderPlanner,clients:renderClients,orders:renderOrders,finance:renderFinance,prints:renderPrints,reports:renderReports,tasks:renderTasks,backup:renderBackup};document.getElementById('content').innerHTML=(views[currentView]||renderDashboard)();syncSimpleNav();if(currentView==='smartplan')setTimeout(refreshSmartPlan,0);if(currentView==='costing')setTimeout(acRefreshMarginCalculator,0)};
+
+const acQuickAddV70Base=quickAdd;
+quickAdd = function(){if(currentView==='workmode'||currentView==='dashboard')return openQuickQR();if(currentView==='costing')return setView('production');return acQuickAddV70Base()};
+
+const acOpenWarehouseItemFormV70=openWarehouseItemForm;
+openWarehouseItemForm = function(id=''){
+ acOpenWarehouseItemFormV70(id);const form=document.getElementById('warehouseForm');if(!form)return;const unit=form.elements.unit,min=form.elements.min;if(unit){unit.setAttribute('list','acUnitListV70');if(!document.getElementById('acUnitListV70'))form.insertAdjacentHTML('beforeend',`<datalist id="acUnitListV70">${acUnitOptions()}</datalist>`);const help=document.createElement('div');help.className='help';help.textContent='Jednostki systemowe: µl, ml, L, mg, g, kg, szt., cells/ml, os./ml, ppt, PSU, °C, pH.';unit.parentElement?.appendChild(help)}if(min){if(Number(min.value||0)===0)min.value='';min.placeholder='puste = bez alertu';const h=document.createElement('div');h.className='help';h.textContent='Pozostaw puste lub 0, aby wyłączyć alarm niskiego stanu.';min.parentElement?.appendChild(h)}form.addEventListener('submit',()=>{if(unit&&!id)unit.value=acCanonicalUnit(unit.value)},true);
+};
+
+function acV70AuditExtras(){
+ const out=[];for(const x of db.inventory||[]){if(x.unit&&!acUnitKnown(x.unit))out.push({level:'warn',title:'Jednostka spoza słownika',desc:`${x.name}: ${x.unit}`,action:`openStockCard('${x.id}')`});if(x.parentItemId&&!getById('inventory',x.parentItemId))out.push({level:'bad',title:'Przerwany łańcuch genealogii',desc:`${x.lot||x.name}: brak źródła ${x.parentItemId}`,action:`openLineage('${x.id}')`});if(inferStockKind(x)==='Produkt gotowy'&&Number(x.qty||0)>0&&acOutputCostPerUnit(x)<=0)out.push({level:'warn',title:'Produkt bez kosztu jednostkowego',desc:`${x.name} • ${x.lot||x.id}`,action:`openStockCard('${x.id}')`});if(inferStockKind(x)==='Kultura żywa'&&x.status==='Gotowa'){const m=acLatestQC(x.id);if(!acQCGood(m))out.push({level:'warn',title:'Gotowa kultura bez zatwierdzonego QC',desc:x.lot||x.name,action:`openQuickQuality('${x.id}')`})}}
+ return out;
+}
+const acAuditIssuesV70Base=auditIssues;
+auditIssues = function(){const all=[...acAuditIssuesV70Base(),...acV70AuditExtras()],seen=new Set();return all.filter(x=>{const k=x.level+'|'+x.title+'|'+x.desc;if(seen.has(k))return false;seen.add(k);return true})};
+function acRunV70Tests(){const tests=[],t=(name,ok)=>tests.push({name,ok:!!ok});t('1000 µl = 1 ml',Math.abs(acConvertQty(1000,'µl','ml')-1)<1e-12);t('1000 mg = 1 g',Math.abs(acConvertQty(1000,'mg','g')-1)<1e-12);t('1 L = 1000 ml',acConvertQty(1,'L','ml')===1000);t('Masa nie konwertuje do objętości',acConvertQty(1,'g','ml')===null);t('Koszt 10 PLN przy marży 50% → cena 20 PLN',Math.abs(acPriceForGrossMargin(10,50)-20)<1e-12);t('Marża brutto: koszt 10, cena 20 = 50%',Math.abs(acGrossMargin(10,20)-50)<1e-12);t('Minimalny stan 0 oznacza brak alarmu',!db.inventory.filter(i=>Number(i.min||0)>0&&Number(i.qty||0)<=Number(i.min||0)).some(i=>Number(i.min||0)===0));return tests}
+openAuditCenter = function(){const issues=auditIssues(),score=auditScore(),bad=issues.filter(x=>x.level==='bad').length,tests=[...acRunCalculationSelfTests(),...acRunV70Tests()],passed=tests.filter(x=>x.ok).length;modalTitle.textContent='Audyt systemu v7.0';modalBox.classList.add('wide');modalBody.innerHTML=`<div class="two"><div class="card"><div class="audit-score"><div class="audit-ring" style="--score:${score*3.6}deg"><b>${score}%</b></div><div><h3 style="margin:0">Spójność danych</h3><div class="small">${bad} krytycznych • ${issues.length-bad} ostrzeżeń</div></div></div><div class="small" style="margin-top:12px">Audyt nie koryguje stanów automatycznie.</div></div><div class="card"><h3>Testy obliczeń</h3><div class="audit-metric-grid"><div class="audit-metric"><span class="mini">Testy</span><strong>${passed}/${tests.length}</strong></div><div class="audit-metric"><span class="mini">Magazyn</span><strong>${db.inventory.length}</strong></div><div class="audit-metric"><span class="mini">Procesy</span><strong>${(db.productionRuns||[]).length}</strong></div></div><div class="small" style="margin-top:10px">Jednostki, konwersje, ceny, marża, genealogia, koszt produktu i QC.</div></div></div><div class="section card"><h3>Self-test</h3>${tests.map(x=>`<div class="statline"><span>${esc(x.name)}</span><strong class="${x.ok?'ledger-ok':'ledger-bad'}">${x.ok?'OK':'BŁĄD'}</strong></div>`).join('')}</div><div class="section audit-list">${issues.length?issues.map(x=>`<div class="audit-issue ${x.level}" ${x.action?`onclick="${x.action}" style="cursor:pointer"`:''}><strong>${x.level==='bad'?'⚠ ':''}${esc(x.title)}</strong><span>${esc(x.desc)}</span></div>`).join(''):'<div class="card empty">Nie znaleziono niespójności.</div>'}</div>`;modal.classList.add('open')};
+
+const acInitV70Base=init;
+init = async function(){await acInitV70Base();try{await put('meta',{id:'operationsV70',value:{done:true,date:new Date().toISOString(),note:'v7.0 additive: units, costing snapshots for future runs, QC panel, work mode. No automatic stock corrections.'}})}catch(e){console.warn('v7 meta',e)}document.title='AquaCulture Manager v7.0 Operations';document.querySelectorAll('.version').forEach(x=>x.textContent='v7.0 • Operations • AquaFlow');render()};
+
+
 registerPWA();
 
 init();
